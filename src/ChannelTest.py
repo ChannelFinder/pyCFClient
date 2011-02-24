@@ -18,26 +18,31 @@ class Test(unittest.TestCase):
         pass
     
     def testChannelCreation(self):
-        channel = Channel('ChannelName','ChannelOwner')
+        channel = Channel('ChannelName', 'ChannelOwner')
         self.assertEqual(channel.Name, 'ChannelName')
         pass
     
     def testAddProperty(self):
-        properties = {'prop1':('value1','owner1'),'prop2':('value2','owner2')}
-        channel = Channel('ChannelName','ChannelOwner',properties=properties)
+        properties = {'prop1':('value1', 'owner1'), 'prop2':('value2', 'owner2')}
+        channel = Channel('ChannelName', 'ChannelOwner', properties=properties)
         self.assertEqual(properties, channel.Properties)
         pass
     
     def testAddTag(self):
-        tags = {'tag1':'owner1','tag2':'owner2'}
-        channel = Channel('ChannelName','ChannelOwner',tags=tags)
+        tags = {'tag1':'owner1', 'tag2':'owner2'}
+        channel = Channel('ChannelName', 'ChannelOwner', tags=tags)
         self.assertEqual(tags, channel.Tags)
         pass
+    
+    def testImmutability(self):
+        channel = Channel('ChannelName', 'ChannelOwner')
+        self.assertRaises(AttributeError, channel.Properties, [])
+        self.assertRaises(AttributeError, channel.Tags, [])
    
 class ErrorTest(unittest.TestCase):   
     
     def setUp(self):
-        self.testChannel = Channel('ChannelName','ChannelOwner')     
+        self.testChannel = Channel('ChannelName', 'ChannelOwner')     
         pass
 
     def tearDown(self):
@@ -55,11 +60,11 @@ class ErrorTest(unittest.TestCase):
             pass
         
     def testAddInvalidPropertyType(self):        
-        self.assertRaises(Exception, self.testChannel.Properties.__setitem__, 'name','string')
+        self.assertRaises(Exception, self.testChannel.Properties.__setitem__, 'name', 'string')
         pass
     
     def testaddInvalidTagType(self):        
-        self.assertRaises(Exception, self.testChannel.Tags.__setitem__, 'name',1234)
+        self.assertRaises(Exception, self.testChannel.Tags.__setitem__, 'name', 1234)
         pass
     
     def testDuplicateProperties(self):
