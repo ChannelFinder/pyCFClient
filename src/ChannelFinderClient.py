@@ -92,6 +92,22 @@ class ChannelFinderClient(object):
         tag = tag name of the tag to be removed from all channels
         property = property name of property to be removed from all channels
         '''
+        if not self.connection:
+            raise Exception, 'Connection not created'
+        if not len(kwds) == 1:
+            raise Exception, 'incorrect usage: Delete a single Channel/tag/property'
+        if 'channel' in kwds:
+            url = self.__channelsResource + '/' + kwds['channel']
+            print url
+            r = self.connection.request_delete(url, headers=self.__jsonheader)
+            print r
+            if not int(r[u'headers']['status']) <= 206:
+                raise Exception, 'HTTP Error status: ' + r[u'headers']['status']
+            pass
+        elif 'tag' in kwds:
+            pass
+        else:
+            pass        
         pass
     
     @classmethod

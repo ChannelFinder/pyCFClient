@@ -94,7 +94,9 @@ class OperationTest(unittest.TestCase):
         result = self.client.find(name='pyChannelName')
         self.assertTrue(len(result) == 1, 'incorrect number of channels returned')
         self.assertTrue(result[0].Name == 'pyChannelName', 'incorrect channel returned')
-        self.client.remove(channel=testChannel)        
+        self.client.remove(channel=testChannel.Name) 
+        result = self.client.find(name='pyChannelName')
+        self.assertTrue(result == None, 'incorrect number of channels returned')  
         pass
     
     def addRemoveChannelsTest(self):
