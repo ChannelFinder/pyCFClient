@@ -3,10 +3,12 @@ Created on Feb 15, 2011
 
 @author: shroffk
 '''
-from restful_lib import Connection
+from lib.restful_lib import Connection
 try: from json import JSONDecoder, JSONEncoder
 except ImportError: from simplejson import JSONDecoder, JSONEncoder
 from Channel import Channel, Property, Tag
+
+import time
 
 class ChannelFinderClient(object):
     '''
@@ -45,23 +47,52 @@ class ChannelFinderClient(object):
         method to allow various types of add operations to add one or many channels, tags or properties
         channel = single Channel obj
         channels = list of Channel obj
+        tag = single Tag obj
         '''
+        if len(kwds) != 1:
+            raise Exception, 'Incorrect usage:'
         if not self.connection:
             raise Exception, 'Connection not created'
-        if 'channel' in kwds and not 'channels' in kwds:
+        if 'channel' in kwds :
             ch = kwds['channel']
-            print JSONEncoder().encode(self.encodeChannel(ch))
-            print self.__channelsResource + '/' + ch.Name
+#            print JSONEncoder().encode(self.encodeChannel(ch))
+#            print self.__channelsResource + '/' + ch.Name
 #            b = '{"channels": {"channel": {"@name": "pyChannelName", "@owner": "pyChannelOwner"}}}'
 #            response = self.connection.request_put(self.__channelsResource + '/' + ch.Name, body=JSONEncoder().encode(self.encodeChannels([ch])), headers=self.__jsonheader)
-            response = self.connection.request_put(self.__channelsResource + '/' + ch.Name, body=JSONEncoder().encode(self.encodeChannel(ch)), headers=self.__jsonheader)
-            print response
-            if not int(response[u'headers']['status']) <= 206:
-                raise Exception, 'HTTP Error status: ' + response[u'headers']['status']
+            response = self.connection.request_put(self.__channelsResource + '/' + ch.Name, \
+                                                   body=JSONEncoder().encode(self.encodeChannel(ch)), \
+                                                   headers=self.__jsonheader)
+#            print response
+            self.__checkResponseState(response)
             pass
+        elif 'channels' in kwds :
+            print JSONEncoder().encode(self.encodeChannels(kwds['channels']))
+            response = self.connection.request_post(self.__channelsResource, \
+                                                   body=JSONEncoder().encode(self.encodeChannels(kwds['channels'])), \
+                                                   headers=self.__jsonheader)
+            self.__checkResponseState(response)
+            pass
+        elif 'tag' in kwds:
+            print self.__tagsResource + '/' + kwds['tag'].Name
+            print JSONEncoder().encode(self.encodeTag(kwds['tag']))
+            response = self.connection.request_put(self.__tagsResource + '/' + kwds['tag'].Name, \
+                                                   body=JSONEncoder().encode(self.encodeTag(kwds['tag'])), \
+                                                   headers=self.__jsonheader)
+            print response
+            self.__checkResponseState(response)
         else:
-            raise Exception, 'incorrect Usage: cannot use both channel and channels'   
+            raise Exception, 'Incorrect Usage: unknow key'   
         pass
+    
+    def __checkResponseState(self, r):
+        '''
+        simply checks the return status of the http response
+        '''
+        if r[u'headers']['status'] == '404':
+            return None        
+        elif not int(r[u'headers']['status']) <= 206:
+                raise Exception, 'HTTP Error status: ' + r[u'headers']['status'] + r[u'body']
+        return r
     
     def find(self, **kwds):
         '''
@@ -85,24 +116,35 @@ class ChannelFinderClient(object):
         r = self.connection.request_get(url, headers=self.__jsonheader)
         return self.decodeChannels(JSONDecoder().decode(r[u'body']))
         
+    def findTag(self, tagName):
+        '''
+        Searches for the _exact_ tagName and returns a single Tag object if found
+        '''
+        url = self.__tagsResource + '/' + tagName;
+        r = self.connection.request_get(url, headers=self.__jsonheader)
+        JSONDecoder().decode(r[u'body'])
+        print r
+        self.__checkResponseState(r)
+        return self.decodeTag(JSONDecoder().decode(r[u'body']))
+    
     def remove(self, **kwds):
         '''
         Method to delete a channel, property, tag
         channel = name of channel to be removed
         tag = tag name of the tag to be removed from all channels
         property = property name of property to be removed from all channels
-        '''
+        '''      
         if not self.connection:
             raise Exception, 'Connection not created'
         if not len(kwds) == 1:
             raise Exception, 'incorrect usage: Delete a single Channel/tag/property'
         if 'channel' in kwds:
             url = self.__channelsResource + '/' + kwds['channel']
-            print url
-            r = self.connection.request_delete(url, headers=self.__jsonheader)
-            print r
-            if not int(r[u'headers']['status']) <= 206:
-                raise Exception, 'HTTP Error status: ' + r[u'headers']['status']
+            response = self.connection.request_delete(url, headers=self.__jsonheader)
+            if response[u'headers']['status'] == '505':
+                response = self.connection.request_delete(url, headers=self.__jsonheader)      
+            if not int(response[u'headers']['status']) <= 206:
+                raise Exception, 'HTTP Error status: ' + response[u'headers']['status'] + response[u'body']
             pass
         elif 'tag' in kwds:
             pass
@@ -149,10 +191,14 @@ class ChannelFinderClient(object):
         if body[u'properties'] and body[u'properties']['property']:
             properties = []
             for validProperty in [ property for property in body[u'properties']['property'] if '@name' in property and '@owner' in property]:
-                    properties.append(Property(validProperty['@name'], validProperty['@owner'], validProperty['@value']))
+                    properties.append(self.decodeProperty(validProperty))
             return properties
         else:
             return None
+        
+    @classmethod
+    def decodeProperty(cls, propertyBody):
+        return Property(propertyBody['@name'], propertyBody['@owner'], propertyBody['@value'])
     
     @classmethod
     def decodeTags(self, body):
@@ -160,10 +206,14 @@ class ChannelFinderClient(object):
         if body[u'tags'] and body[u'tags']['tag']:
             tags = []
             for validTag in [ tag for tag in body[u'tags']['tag'] if '@name' in tag and '@owner' in tag]:
-                tags.append(Tag(validTag['@name'], validTag['@owner']))
+                tags.append(self.decodeTag(validTag))
             return tags
         else:
             return None    
+    
+    @classmethod
+    def decodeTag(cls, tagBody):
+        return Tag(tagBody['@name'], tagBody['@owner'])
     
     @classmethod    
     def encodeChannels(self, channels):
@@ -188,10 +238,20 @@ class ChannelFinderClient(object):
         if channel.Properties:
             d['properties'] = {'property':[]}
             for validProperty in [ property for property in channel.Properties if issubclass(property.__class__, Property)]:
-                d['properties']['property'].append({'@name':str(validProperty.Name), '@value':validProperty.Value, '@owner':validProperty.Owner})
+                d['properties']['property'].append(cls.encodeProperty(validProperty))
         if channel.Tags:
             d['tags'] = {'tag':[]}
             for validTag in [ tag for tag in channel.Tags if issubclass(tag.__class__, Tag)]:
-                d['tags']['tag'].append({'@name':validTag.Name, '@owner':validTag.Owner})
+                d['tags']['tag'].append(cls.encodeTag(validTag))
         return d
+    
+    @classmethod
+    def encodeProperty(cls, property):
+        d = {'@name':str(property.Name), '@value':property.Value, '@owner':property.Owner}
+        return d
+     
+    @classmethod
+    def encodeTag(cls, tag):
+        return {'@name':tag.Name, '@owner':tag.Owner}   
+
         

@@ -38,7 +38,7 @@ class JSONparserTest(unittest.TestCase):
     singleChannels = {u'channels': {u'channel': {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:2', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'2'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'38'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}}}
     channel = {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:0', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'0'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'19'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}
     noChannel = {u'channels': None}
-#------------------------------------------------------------------------------ 
+
     def testSingleChannelsParsing(self):
         reply = ChannelFinderClient.decodeChannels(self.singleChannels)
         self.assertTrue(len(reply) == 1, 'Parse Error');
@@ -54,8 +54,7 @@ class JSONparserTest(unittest.TestCase):
     def testNoChannelParsing(self):
         reply = ChannelFinderClient.decodeChannels(self.noChannel)
         self.assertTrue(not reply, 'failed parsing an emplty channels list')
-    
-#------------------------------------------------------------------------------ 
+
     def testChannel(self):
         reply = ChannelFinderClient.decodeChannel(self.channel)
         self.assertTrue(reply.Name == self.channel[u'@name'])
@@ -63,11 +62,14 @@ class JSONparserTest(unittest.TestCase):
         self.assertTrue(len(reply.Properties) == len(self.channel[u'properties'][u'property']))
         self.assertTrue(len(reply.Tags) == len(self.channel[u'tags'][u'tag']))
         
-#------------------------------------------------------------------------------ 
     def testEncodeChannel(self):
-        encodedChannel = ChannelFinderClient.encodeChannels([Channel('Test_first:a<000>:0:0', 'shroffk', \
-                           [Property('Test_PropA', 'shroffk', '0'), Property('Test_PropB', 'shroffk', '19'), Property('Test_PropC', 'shroffk', 'ALL')], \
-                           [Tag('Test_TagA', 'shroffk'), Tag('Test_TagB', 'shroffk')])])
+        encodedChannel = ChannelFinderClient.encodeChannels(\
+                                                            [Channel('Test_first:a<000>:0:0', 'shroffk', \
+                                                                     [Property('Test_PropA', 'shroffk', '0'), \
+                                                                      Property('Test_PropB', 'shroffk', '19'), \
+                                                                      Property('Test_PropC', 'shroffk', 'ALL')], \
+                                                                      [Tag('Test_TagA', 'shroffk'), \
+                                                                       Tag('Test_TagB', 'shroffk')])])
 
         self.assertTrue(encodedChannel[u'channels'][u'channel'] == self.channel)
         
@@ -99,9 +101,38 @@ class OperationTest(unittest.TestCase):
         self.assertTrue(result == None, 'incorrect number of channels returned')  
         pass
     
-    def addRemoveChannelsTest(self):
+    def testAddRemoveChannels(self):
+        testChannels = [Channel('pyChannel1', 'pyOwner'), \
+                        Channel('pyChannel2', 'pyOwner'), \
+                        Channel('pyChannel3', 'pyOwner')]
+        self.client.add(channels=testChannels)
+        r = self.client.find(name='pyChannel*')
+        self.assertTrue(len(r) == 3, 'ERROR: # of channels returned expected ' + str(len(r)) + ' expected 3')
+        # remove each individually
+        for ch in testChannels:
+#            print ch.Name
+            self.client.remove(channel=str(ch.Name))
         pass
     
+    def testAddRemoveTag(self):
+        testTag = Tag('pyTag', 'pyOwner')
+        self.client.add(tag=testTag)
+        self.assertTrue(self.client.findTag(tagName=testTag.Name).Name == testTag.Name, 'testTag not added')
+        self.client.remove(tag=testTag)
+        pass
+    
+    def testAddRemoveTags(self):
+        pass
+    
+    def testAddRemoveProperty(self):
+        pass
+    
+    def testAddRemoveProperties(self):
+        pass
+
+#===========================================================================
+# Query Tests
+#===========================================================================
 
 class QueryTest(unittest.TestCase):
     
@@ -118,9 +149,13 @@ class QueryTest(unittest.TestCase):
         pass
     
     
-
+#===============================================================================
+#  ERROR tests
+#===============================================================================
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testConnection']
+#    suite = unittest.TestLoader().loadTestsFromTestCase(OperationTest)
+#    unittest.TextTestRunner(verbosity=2).run(suite)
     
     unittest.main()
