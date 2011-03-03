@@ -58,6 +58,9 @@ class Property(object):
         self.Name = name
         self.Owner = owner
         self.Value = value
+    
+    def __cmp__(self, *arg, **kwargs):
+        return cmp((self.Name, self.Value)(arg[0].Name, arg[0].Value))
         
 class Tag(object):
     '''
@@ -67,3 +70,6 @@ class Tag(object):
     def __init__(self, name, owner):
         self.Name = name
         self.Owner = owner
+    
+    def __cmp__(self, *arg, **kwargs):
+        return cmp(self.Name, arg[0].Name)
