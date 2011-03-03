@@ -48,6 +48,7 @@ class ChannelFinderClient(object):
         channel = single Channel obj
         channels = list of Channel obj
         tag = single Tag obj
+        tags = list of Tag obj
         '''
         if len(kwds) != 1:
             raise Exception, 'Incorrect usage:'
@@ -73,12 +74,18 @@ class ChannelFinderClient(object):
             self.__checkResponseState(response)
             pass
         elif 'tag' in kwds:
-            print self.__tagsResource + '/' + kwds['tag'].Name
-            print JSONEncoder().encode(self.encodeTag(kwds['tag']))
+#            print self.__tagsResource + '/' + kwds['tag'].Name
+#            print JSONEncoder().encode(self.encodeTag(kwds['tag']))
             response = self.connection.request_put(self.__tagsResource + '/' + kwds['tag'].Name, \
                                                    body=JSONEncoder().encode(self.encodeTag(kwds['tag'])), \
                                                    headers=self.__jsonheader)
-            print response
+#            print response
+            self.__checkResponseState(response)
+        elif 'tags' in kwds:
+            print JSONEncoder().encode({'tags':{'tag':self.encodeTags(kwds['tags'])}})
+            response = self.connection.request_post(self.__tagsResource, \
+                                                    body=JSONEncoder().encode({'tags':{'tag':self.encodeTags(kwds['tags'])}}), \
+                                                    headers=self.__jsonheader)
             self.__checkResponseState(response)
         else:
             raise Exception, 'Incorrect Usage: unknow key'   
@@ -87,6 +94,7 @@ class ChannelFinderClient(object):
     def __checkResponseState(self, r):
         '''
         simply checks the return status of the http response
+        if the return status us 404 it returns None
         '''
         if r[u'headers']['status'] == '404':
             return None        
@@ -105,6 +113,8 @@ class ChannelFinderClient(object):
         * for multiple char
         ? for single char
         
+        To query for the existance of a tag or property use findTag and findProperty.
+                
         TODO figure out how python/json will handle the multivalue maps
         to specify multiple patterns simple pass a ????        
         '''
@@ -112,7 +122,7 @@ class ChannelFinderClient(object):
             raise Exception, 'Connection not created'
         if not len(kwds) > 0:
             raise Exception, 'Incorrect usage: atleast one parameter must be specified'
-        url = self.__channelsResource + self.createQueryURL(kwds)  
+        url = self.__channelsResource + self.createQueryURL(kwds)
         r = self.connection.request_get(url, headers=self.__jsonheader)
         return self.decodeChannels(JSONDecoder().decode(r[u'body']))
         
@@ -122,10 +132,26 @@ class ChannelFinderClient(object):
         '''
         url = self.__tagsResource + '/' + tagName;
         r = self.connection.request_get(url, headers=self.__jsonheader)
-        JSONDecoder().decode(r[u'body'])
-        print r
-        self.__checkResponseState(r)
-        return self.decodeTag(JSONDecoder().decode(r[u'body']))
+#        JSONDecoder().decode(r[u'body'])
+#        print r
+        if self.__checkResponseState(r):
+            return self.decodeTag(JSONDecoder().decode(r[u'body']))
+        else:
+            return None
+    
+    def getAllTags(self):
+        '''
+        return a list of all the Tags present - even the ones not associated w/t any channel
+        '''
+        url = self.__tagsResource
+        r = self.connection.request_get(url, headers=self.__jsonheader)
+        #------------------------------------------------------------------------------ 
+        # this is a hack to solve the 505 problem
+        #------------------------------------------------------------------------------ 
+        if r[u'headers']['status'] == '505':
+            r = self.connection.request_get(url, headers=self.__jsonheader)
+        if self.__checkResponseState(r):
+            return self.decodeTags(JSONDecoder().decode(r[u'body']))
     
     def remove(self, **kwds):
         '''
@@ -141,12 +167,17 @@ class ChannelFinderClient(object):
         if 'channel' in kwds:
             url = self.__channelsResource + '/' + kwds['channel']
             response = self.connection.request_delete(url, headers=self.__jsonheader)
+            #------------------------------------------------------------------------------ 
+            # this is a hack to solve the 505 problem
+            #------------------------------------------------------------------------------ 
             if response[u'headers']['status'] == '505':
                 response = self.connection.request_delete(url, headers=self.__jsonheader)      
-            if not int(response[u'headers']['status']) <= 206:
-                raise Exception, 'HTTP Error status: ' + response[u'headers']['status'] + response[u'body']
+            self.__checkResponseState(response)
             pass
         elif 'tag' in kwds:
+            url = self.__tagsResource + '/' + kwds['tag']
+            response = self.connection.request_delete(url, headers=self.__jsonheader);
+            self.__checkResponseState(response)
             pass
         else:
             pass        
@@ -240,16 +271,25 @@ class ChannelFinderClient(object):
             for validProperty in [ property for property in channel.Properties if issubclass(property.__class__, Property)]:
                 d['properties']['property'].append(cls.encodeProperty(validProperty))
         if channel.Tags:
-            d['tags'] = {'tag':[]}
-            for validTag in [ tag for tag in channel.Tags if issubclass(tag.__class__, Tag)]:
-                d['tags']['tag'].append(cls.encodeTag(validTag))
+            d['tags'] = {'tag':cls.encodeTags(channel.Tags)}
         return d
+    
+    @classmethod
+    def encodeProperties(cls, properties):
+        pass
     
     @classmethod
     def encodeProperty(cls, property):
         d = {'@name':str(property.Name), '@value':property.Value, '@owner':property.Owner}
         return d
-     
+    
+    @classmethod
+    def encodeTags(cls, tags):
+        d = []
+        for validTag in [ tag for tag in tags if issubclass(tag.__class__, Tag)]:
+            d.append(cls.encodeTag(validTag))
+        return d
+        
     @classmethod
     def encodeTag(cls, tag):
         return {'@name':tag.Name, '@owner':tag.Owner}   

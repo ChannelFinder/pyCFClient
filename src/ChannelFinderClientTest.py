@@ -70,7 +70,7 @@ class JSONparserTest(unittest.TestCase):
                                                                       Property('Test_PropC', 'shroffk', 'ALL')], \
                                                                       [Tag('Test_TagA', 'shroffk'), \
                                                                        Tag('Test_TagB', 'shroffk')])])
-
+#        print encodedChannel[u'channels'][u'channel']
         self.assertTrue(encodedChannel[u'channels'][u'channel'] == self.channel)
         
     def testEncodeChannels(self):
@@ -118,11 +118,45 @@ class OperationTest(unittest.TestCase):
         testTag = Tag('pyTag', 'pyOwner')
         self.client.add(tag=testTag)
         self.assertTrue(self.client.findTag(tagName=testTag.Name).Name == testTag.Name, 'testTag not added')
-        self.client.remove(tag=testTag)
+        self.client.remove(tag=testTag.Name)
+        self.assertIsNone(self.client.findTag(tagName=testTag.Name), 'tag not removed correctly')
         pass
     
     def testAddRemoveTags(self):
+        testTags = []
+        testTags.append(Tag('pyTag1', 'pyOwner'))
+        testTags.append(Tag('pyTag2', 'pyOwner'))
+        testTags.append(Tag('pyTag3', 'pyOwner'))
+        self.client.add(tags=testTags)
+        # Check if all the tags were correctly Added
+        for tag in testTags:
+            self.assertTrue(self.client.findTag(tagName=tag.Name), 'Error: tag ' + tag.Name + ' was not added')
+        # remove the Tags
+        for tag in testTags:
+            self.client.remove(tag=tag.Name)
+        # Check all the tags were correctly removed
+        for tag in testTags:
+            self.assertIsNone(self.client.findTag(tagName='pyTag1'), 'Error: tag ' + tag.Name + ' was not removed')
         pass
+    
+    def testGetAllTags(self):
+        initial = len(self.client.getAllTags())
+        testTags = []
+        testTags.append(Tag('pyTag1', 'pyOwner'))
+        testTags.append(Tag('pyTag2', 'pyOwner'))
+        testTags.append(Tag('pyTag3', 'pyOwner'))
+        self.client.add(tags=testTags)
+        allTags = self.client.getAllTags();
+        # this test introduces a race condition
+        self.assertTrue(len(allTags) == (initial + 3), 'unexpected number of tags')
+        for tag in testTags:
+            self.assertTrue(tag in allTags, 'tag ' + tag.Name + ' missing')
+        # remove the Tags
+        for tag in testTags:
+            self.client.remove(tag=tag.Name)
+        # Check all the tags were correctly removed
+        for tag in testTags:
+            self.assertIsNone(self.client.findTag(tagName='pyTag1'), 'Error: tag ' + tag.Name + ' was not removed')
     
     def testAddRemoveProperty(self):
         pass
