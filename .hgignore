@@ -1,3 +1,14 @@
 syntax: glob
 
 *pyc
+
+syntax: regexp
+^src/\.cache$
+syntax: regexp
+^src/Dictionary\.py$
+syntax: regexp
+^src/Junk\.py$
+syntax: regexp
+^rawData$
+syntax: regexp
+^raw_result$
