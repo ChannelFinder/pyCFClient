@@ -156,7 +156,7 @@ class OperationTest(unittest.TestCase):
             self.client.remove(tagName=tag.Name)
         # Check all the tags were correctly removed
         for tag in testTags:
-            self.assertIsNone(self.client.findTag(tagName='pyTag1'), 'Error: tag ' + tag.Name + ' was not removed')
+            self.assertIsNone(self.client.findTag(tagName=tag.Name), 'Error: tag ' + tag.Name + ' was not removed')
     
     def testAddRemoveProperty(self):
         testProperty = Property('pyProp', 'pyOwner', value=33)
@@ -168,7 +168,7 @@ class OperationTest(unittest.TestCase):
                         'Error: ' + testProperty.Name + ' failed to remove')        
         pass
     
-    def testAddRemoveProperties(self):
+    def AddRemoveProperties(self):
         testProps = []
         testProps.append(Property('pyProp1', 'pyOwner'))
         testProps.append(Property('pyProp2', 'pyOwner'))
@@ -187,6 +187,23 @@ class OperationTest(unittest.TestCase):
         pass
     
     def testGetAllPropperties(self):
+        initial = len(self.client.getAllProperties())
+        testProps = []
+        testProps.append(Property('pyProp1', 'pyOwner'))
+        testProps.append(Property('pyProp2', 'pyOwner'))
+        testProps.append(Property('pyProp3', 'pyOwner'))
+        self.client.add(properties=testProps)
+        allProperties = self.client.getAllProperties()
+#        self.assertTrue(len(allProperties) == (initial + 3), 'unexpected number of properties')
+        for prop in testProps:
+            self.assertTrue(prop in allProperties, 'property ' + prop.Name + ' missing')
+        # remove the Tags
+        for prop in testProps:
+            self.client.remove(propertyName=prop.Name)
+        # Check all the tags were correctly removed
+        for prop in testProps:
+            time.sleep(30)
+            self.assertIsNone(self.client.findProperty(propertyName=prop.Name), 'Error: property ' + prop.Name + ' was not removed')
         pass
 
 

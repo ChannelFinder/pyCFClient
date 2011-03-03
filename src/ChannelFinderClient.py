@@ -177,6 +177,20 @@ class ChannelFinderClient(object):
         if self.__checkResponseState(r):
             return self.decodeTags(JSONDecoder().decode(r[u'body']))
     
+    def getAllProperties(self):
+        '''
+        return a list of all the Properties present - even the ones not associated w/t any channel
+        '''
+        url = self.__propertiesResource
+        r = self.connection.request_get(url, headers=self.__jsonheader)
+        #------------------------------------------------------------------------------ 
+        # this is a hack to solve the 505 problem
+        #------------------------------------------------------------------------------ 
+        if r[u'headers']['status'] == '505':
+            r = self.connection.request_get(url, headers=self.__jsonheader)
+        if self.__checkResponseState(r):
+            return self.decodeProperties(JSONDecoder().decode(r[u'body']))
+        
     def remove(self, **kwds):
         '''
         Method to delete a channel, property, tag
