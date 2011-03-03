@@ -7,7 +7,7 @@ import unittest
 from unittest.test.test_result import __init__
 from ChannelFinderClient import ChannelFinderClient
 from Channel import Channel, Property, Tag
-
+import time
 #===============================================================================
 # 
 #===============================================================================
@@ -96,7 +96,7 @@ class OperationTest(unittest.TestCase):
         result = self.client.find(name='pyChannelName')
         self.assertTrue(len(result) == 1, 'incorrect number of channels returned')
         self.assertTrue(result[0].Name == 'pyChannelName', 'incorrect channel returned')
-        self.client.remove(channel=testChannel.Name) 
+        self.client.remove(channelName=testChannel.Name) 
         result = self.client.find(name='pyChannelName')
         self.assertTrue(result == None, 'incorrect number of channels returned')  
         pass
@@ -111,14 +111,14 @@ class OperationTest(unittest.TestCase):
         # remove each individually
         for ch in testChannels:
 #            print ch.Name
-            self.client.remove(channel=str(ch.Name))
+            self.client.remove(channelName=str(ch.Name))
         pass
     
     def testAddRemoveTag(self):
         testTag = Tag('pyTag', 'pyOwner')
         self.client.add(tag=testTag)
         self.assertTrue(self.client.findTag(tagName=testTag.Name).Name == testTag.Name, 'testTag not added')
-        self.client.remove(tag=testTag.Name)
+        self.client.remove(tagName=testTag.Name)
         self.assertIsNone(self.client.findTag(tagName=testTag.Name), 'tag not removed correctly')
         pass
     
@@ -133,7 +133,7 @@ class OperationTest(unittest.TestCase):
             self.assertTrue(self.client.findTag(tagName=tag.Name), 'Error: tag ' + tag.Name + ' was not added')
         # remove the Tags
         for tag in testTags:
-            self.client.remove(tag=tag.Name)
+            self.client.remove(tagName=tag.Name)
         # Check all the tags were correctly removed
         for tag in testTags:
             self.assertIsNone(self.client.findTag(tagName='pyTag1'), 'Error: tag ' + tag.Name + ' was not removed')
@@ -153,16 +153,42 @@ class OperationTest(unittest.TestCase):
             self.assertTrue(tag in allTags, 'tag ' + tag.Name + ' missing')
         # remove the Tags
         for tag in testTags:
-            self.client.remove(tag=tag.Name)
+            self.client.remove(tagName=tag.Name)
         # Check all the tags were correctly removed
         for tag in testTags:
             self.assertIsNone(self.client.findTag(tagName='pyTag1'), 'Error: tag ' + tag.Name + ' was not removed')
     
     def testAddRemoveProperty(self):
+        testProperty = Property('pyProp', 'pyOwner', value=33)
+        self.client.add(property=testProperty)
+        self.assertTrue(self.client.findProperty(propertyName=testProperty.Name), \
+                        'Error: ' + testProperty.Name + ' failed to be added')
+        self.client.remove(propertyName=testProperty.Name)
+        self.assertIsNone(self.client.findProperty(propertyName=testProperty.Name), \
+                        'Error: ' + testProperty.Name + ' failed to remove')        
         pass
     
     def testAddRemoveProperties(self):
+        testProps = []
+        testProps.append(Property('pyProp1', 'pyOwner'))
+        testProps.append(Property('pyProp2', 'pyOwner'))
+        testProps.append(Property('pyProp3', 'pyOwner'))
+        self.client.add(properties=testProps)
+        for prop in testProps:
+            time.sleep(30)
+            self.assertTrue(self.client.findProperty(propertyName=prop.Name), \
+                            'Error: property ' + prop.Name + ' was not added.')
+        for prop in testProps:
+            self.client.remove(propertyName=prop.Name)
+        for prop in testProps:
+            time.sleep(30)
+            self.assertIsNone(self.client.findProperty(propertyName=prop.Name), \
+                            'Error: property ' + prop.Name + ' was not removed.')
         pass
+    
+    def testGetAllPropperties(self):
+        pass
+
 
 #===========================================================================
 # Query Tests
