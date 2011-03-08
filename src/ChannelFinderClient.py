@@ -79,7 +79,6 @@ class ChannelFinderClient(object):
         will add the specified Tag to the channels with the names specified in channelNames
         
         '''
-        self.__reconnect()
         if not self.connection:
             raise Exception, 'Connection not created'
         if len(kwds) == 1:
@@ -145,7 +144,7 @@ class ChannelFinderClient(object):
                                                     body=JSONEncoder().encode(self.encodeTag(kwds['tag'], withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
-        if 'tag' in kwds and 'channelNames' in kwds:
+        elif 'tag' in kwds and 'channelNames' in kwds:
             channels = []
             for eachChannel in kwds['channelNames']:
                 channels.append(Channel(eachChannel, self.__userName, tags=[kwds['tag']]))
@@ -248,7 +247,6 @@ class ChannelFinderClient(object):
         tagName = tag name of the tag to be removed from all channels
         propertyName = property name of property to be removed from all channels
         '''
-        self.__reconnect()
         if not self.connection:
             raise Exception, 'Connection not created'
         if len(kwds) == 1:
@@ -282,6 +280,14 @@ class ChannelFinderClient(object):
             response = self.connection.request_delete(self.__tagsResource + '/' + kwds['tag'].Name + '/' + kwds['channelName'], \
                                                      headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
+        elif 'tag' in kwds and 'channelNames' in kwds:
+            # find channels with the tag
+            channelsWithTag = self.find(tagName=kwds['tag'].Name)
+            # remove channels from which tag is to be removed
+            channelNames = [channel.Name for channel in channelsWithTag if channel.Name not in  kwds['channelNames']]
+            self.add(tag=kwds['tag'], channelNames=channelNames)            
+        else:
+            raise Exception, ' unkown keys'
     
     @classmethod
     def createQueryURL(cls, parameters):

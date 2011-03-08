@@ -224,6 +224,7 @@ class AddOperationTest(unittest.TestCase):
     def testAddRemoveTag2Channel(self):
         # add tag to channel
         testTag = Tag('pyAddTag', 'boss')
+        print 'adding tag to channel'
         self.client.add(tag=testTag, channelName=self.testChannels[0].Name)
         self.assertTrue(testTag in self.client.find(name='pyTestChannel1')[0].Tags, \
                         'Error: Tag-pyAddTag not added to the channel-pyTestChannel1')
@@ -232,18 +233,17 @@ class AddOperationTest(unittest.TestCase):
                           'Error: Failed to remove the tag-pyAddTag from channel-pyTestChannel1')
         pass
     
-    def AddRemoveTag2Channels(self):
+    def testAddRemoveTag2Channels(self):
         testTag = Tag('pyAddTag', 'pyOwner')
         # the list comprehension is used to construct a list of all the channel names
         channelNames = [channel.Name for channel in self.testChannels]
         self.client.add(tag=testTag, channelNames=channelNames)
-        channels = self.client.find(tagName=testTag.Name)
+        responseChannelNames = [channel.Name for channel in self.client.find(tagName=testTag.Name)]
+        for ch in channelNames :
+            self.assertTrue(ch in responseChannelNames, 'Error: tag-pyAddTag not added to channel ' + ch)
+        responseChannelNames = [channel.Name for channel in self.client.find(tagName=testTag.Name)]
         for ch in self.testChannels :
-            self.assertTrue(ch in channels, 'Error: tag-pyAddTag not added to channel ' + ch.Name)
-        self.client.remove(tag=testTag, channelNames=channelNames)
-        channels = self.client.find(tagName=testTag.Name)
-        for ch in self.testChannels :
-            self.assertFalse(ch in channels, 'Error: tag-pyAddTag not added to channel ' + ch.Name)
+            self.assertFalse(ch in responseChannelNames, 'Error: tag-pyAddTag not added to channel ' + ch.Name)
         pass
        
     def AddRemoveProperty2Channel(self):
