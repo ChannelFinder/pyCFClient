@@ -13,7 +13,6 @@ from Channel import Channel, Property, Tag
 try: 
     from collections import OrderedDict
 except :
-    print ''
     from lib.myCollections import OrderedDict
 
     
@@ -105,7 +104,7 @@ class ChannelFinderClient(object):
             self.__checkResponseState(response)
             pass
         elif 'channels' in kwds :
-            print JSONEncoder().encode(self.encodeChannels(kwds['channels']))
+#            print JSONEncoder().encode(self.encodeChannels(kwds['channels']))
             response = self.connection.request_post(self.__channelsResource, \
                                                    body=JSONEncoder().encode(self.encodeChannels(kwds['channels'])), \
                                                    headers=copy(self.__jsonheader))
@@ -161,6 +160,18 @@ class ChannelFinderClient(object):
             response = self.connection.request_put(self.__propertiesResource + '/' + kwds['property'].Name, \
                                                    body=JSONEncoder().encode(self.encodeProperty(kwds['property'], withChannels=channels)), \
                                                    headers=copy(self.__jsonheader))
+            self.__checkResponseState(response)
+        elif 'property' in kwds and 'channelNames' in kwds:
+            channels = []
+            for eachChannel in kwds['channelNames']:
+                channels.append(Channel(eachChannel, self.__userName, properties=[kwds['property']]))
+            try:
+                response = self.connection.request_put(self.__propertiesResource + '/' + kwds['property'].Name, \
+                                                       body=JSONEncoder().encode(self.encodeProperty(kwds['property'], withChannels=channels)), \
+                                                       headers=copy(self.__jsonheader))
+            except Exception:
+                print Exception
+            self.__checkResponseState(response)
         else:
             raise Exception, 'Incorrect Usage: unknown keys'
     
@@ -179,8 +190,8 @@ class ChannelFinderClient(object):
         '''
         Method allows you to query for a channel/s based on name, properties, tags
         name = channelNamePattern
-        propertyName = propertyValuePattern
-        tagName = tagNamePattern
+        tagName = tagNamePattern                
+        property = [(propertyName,propertyValuePattern)]
         
         returns a _list_ of matching Channels
         special pattern matching char 
@@ -200,7 +211,28 @@ class ChannelFinderClient(object):
         r = self.connection.request_get(url, headers=copy(self.__jsonheader))
         if self.__checkResponseState(r):
             return self.decodeChannels(JSONDecoder().decode(r[u'body']))
-        
+    
+    @classmethod
+    def createQueryURL(cls, parameters):
+        url = []
+        for parameterKey in parameters.keys():            
+            if parameterKey == 'name':
+                url.append('~name=' + str(parameters['name']))
+            elif parameterKey == 'tagName':
+                url.append('~tag=' + str(parameters['tagName']))
+            elif parameterKey == 'property':
+                if isinstance(parameters['property'], list):
+                    for prop in parameters['property']:                        
+                        if len(prop) == 1:
+                            url.append(str(prop[0] + '=*'))
+                        else:
+                            url.append(str(prop[0] + '=' + prop[1]))
+                else:
+                    raise Exception, 'Incorrect usage: property=[("propName","propValPattern"),("propName","propValPatter")]'                    
+            else:
+                raise Exception, 'Incorrect usage: unknow key ' + parameterKey
+        return '?' + '&'.join(url)
+            
     def findTag(self, tagName):
         '''
         Searches for the _exact_ tagName and returns a single Tag object if found
@@ -297,23 +329,14 @@ class ChannelFinderClient(object):
         elif 'property' in kwds and 'channelName' in kwds:
             response = self.connection.request_delete(self.__propertiesResource + '/' + kwds['property'].Name + '/' + kwds['channelName'], \
                                                       headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)         
+            self.__checkResponseState(response)
+        elif 'property' in kwds and 'channelNames' in kwds:
+            channelsWithProp = self.find(property=[(kwds['property'].Name, '*')])
+            channelNames = [channel.Name for channel in channelsWithProp if channel.Name not in kwds['channelNames']]
+            self.add(property=kwds['property'], channelNames=channelNames)        
         else:
             raise Exception, ' unkown keys'
-    
-    @classmethod
-    def createQueryURL(cls, parameters):
-        url = []
-        for parameterKey in parameters.keys():            
-            if parameterKey == 'name':
-                url.append('~name=' + str(parameters['name']))
-            elif parameterKey == 'tagName':
-                url.append('~tag=' + str(parameters['tagName']))
-            else:
-                url.append(parameterKey + '=' + str(parameters[parameterKey]))
-        return '?' + '&'.join(url)
-        
-    
+   
     @classmethod
     def decodeChannels(cls, body):
         '''

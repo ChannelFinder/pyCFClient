@@ -224,7 +224,6 @@ class AddOperationTest(unittest.TestCase):
     def testAddRemoveTag2Channel(self):
         # add tag to channel
         testTag = Tag('pyAddTag', 'boss')
-        print 'adding tag to channel'
         self.client.add(tag=testTag, channelName=self.testChannels[0].Name)
         self.assertTrue(testTag in self.client.find(name='pyTestChannel1')[0].Tags, \
                         'Error: Tag-pyAddTag not added to the channel-pyTestChannel1')
@@ -235,6 +234,7 @@ class AddOperationTest(unittest.TestCase):
         pass
     
     # TODO add a check for removing the tag from a subset of channels which have that tag
+    
     def testAddRemoveTag2Channels(self):
         testTag = Tag('pyAddTag', 'pyOwner')
         # the list comprehension is used to construct a list of all the channel names
@@ -266,7 +266,19 @@ class AddOperationTest(unittest.TestCase):
                         'Error: Property-pyAddProp not removed from the channel-' + chName)
         pass
     
-    def AddRemoveProperty2Channels(self):
+    def testAddRemoveProperty2Channels(self):
+        testProperty = Property('pyAddProp', 'pyOwner', '55')
+        channelNames = [channel.Name for channel in self.testChannels]
+        self.client.add(property=testProperty, channelNames=channelNames)
+        responseChannelNames = [channel.Name for channel in self.client.find(property=[(testProperty.Name, '*')])]
+        for ch in channelNames:
+            self.assertTrue(ch in responseChannelNames, 'Error: failed to add the property to the channels')
+        self.client.remove(property=testProperty, channelNames=channelNames)
+        response = self.client.find(property=[(testProperty.Name, '*')])
+        if response:
+            responseChannelNames = [channel.Name for channel in response]
+            for ch in channelNames :
+                self.assertFalse(ch in responseChannelNames, 'Error: tag-pyAddTag not removed from channel ' + ch)
         pass
     
 #===============================================================================
