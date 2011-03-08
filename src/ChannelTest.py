@@ -5,7 +5,7 @@ Created on Feb 11, 2011
 '''
 import unittest
 
-from Channel import Channel
+from Channel import Channel, Tag
 
 class Test(unittest.TestCase):
 
@@ -72,6 +72,13 @@ class ErrorTest(unittest.TestCase):
     
     def testnoDuplicateTags(self):
         pass
+    
+class TagTest(unittest.TestCase):
+    
+    def testCmpOperation(self):
+        tagList = [Tag('tagA', 'tagOwner'), Tag('tagB', 'tagOwner'), Tag('tagC', 'tagOwner')]
+        self.assertTrue(Tag('tagA', 'tagOwner') in tagList, 'failed to find tag in list')
+        self.assertTrue(Tag('tagA', 'tagOwner2') in tagList, 'failed to find tag in list')
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

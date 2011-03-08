@@ -20,14 +20,14 @@ class Channel(object):
         '''
         self.__Name = name;
         self.__Owner = owner;
-        self.__Properties = properties
-        self.__Tags = tags
+        self.Properties = properties
+        self.Tags = tags
     
     ## All the attributes are private and read only in an attempt to make the channel object immutable
     Name = property(lambda self:self.__Name)
     Owner = property(lambda self:self.__Owner)
-    Properties = property(lambda self:self.__Properties)
-    Tags = property(lambda self:self.__Tags)
+#    Properties = property(lambda self:self.Properties)
+#    Tags = property(lambda self:self.Tags)
         
     ## TODO don't recreate the dictionary with every get, 
     def getProperties(self):

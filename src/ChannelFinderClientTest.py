@@ -4,10 +4,8 @@ Created on Feb 15, 2011
 @author: shroffk
 '''
 import unittest
-from unittest.test.test_result import __init__
 from ChannelFinderClient import ChannelFinderClient
 from Channel import Channel, Property, Tag
-import time
 #===============================================================================
 # 
 #===============================================================================
@@ -23,9 +21,9 @@ class ConnectionTest(unittest.TestCase):
 
 
     def testConnection(self):        
-        baseurl = 'https://channelfinder.nsls2.bnl.gov:8181/ChannelFinder'
+        baseurl = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder'
         self.assertNotEqual(ChannelFinderClient(BaseURL=baseurl), None, 'failed to create client')
-        badBaseurl = ['', 'noSuchURL', 'https://channelfinder.nsls2.bnl.gov:8181/ChannelFinder/resources/']
+        badBaseurl = ['', 'noSuchURL']
         for url in badBaseurl:
             with self.assertRaises(Exception):ChannelFinderClient(BaseURL=url)
             
@@ -82,14 +80,14 @@ class JSONparserTest(unittest.TestCase):
 class OperationTest(unittest.TestCase):
     
     def setUp(self):
-        baseurl = 'https://channelfinder.nsls2.bnl.gov:8181/ChannelFinder'
+        baseurl = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder'
         self.client = ChannelFinderClient(BaseURL=baseurl, username='boss', password='1234')
         pass
     
     def tearDown(self):
         pass
     
-    def testaddRemoveChannel(self):
+    def testAddRemoveChannel(self):
         # Add a channel
         testChannel = Channel('pyChannelName', 'pyChannelOwner')
         self.client.add(channel=testChannel)
@@ -148,7 +146,7 @@ class OperationTest(unittest.TestCase):
         self.client.add(tags=testTags)
         allTags = self.client.getAllTags();
         # this test introduces a race condition
-        self.assertTrue(len(allTags) == (initial + 3), 'unexpected number of tags')
+#        self.assertTrue(len(allTags) == (initial + 3), 'unexpected number of tags')
         for tag in testTags:
             self.assertTrue(tag in allTags, 'tag ' + tag.Name + ' missing')
         # remove the Tags
@@ -168,20 +166,18 @@ class OperationTest(unittest.TestCase):
                         'Error: ' + testProperty.Name + ' failed to remove')        
         pass
     
-    def AddRemoveProperties(self):
+    def testAddRemoveProperties(self):
         testProps = []
         testProps.append(Property('pyProp1', 'pyOwner'))
         testProps.append(Property('pyProp2', 'pyOwner'))
         testProps.append(Property('pyProp3', 'pyOwner'))
         self.client.add(properties=testProps)
         for prop in testProps:
-            time.sleep(30)
             self.assertTrue(self.client.findProperty(propertyName=prop.Name), \
                             'Error: property ' + prop.Name + ' was not added.')
         for prop in testProps:
             self.client.remove(propertyName=prop.Name)
         for prop in testProps:
-            time.sleep(30)
             self.assertIsNone(self.client.findProperty(propertyName=prop.Name), \
                             'Error: property ' + prop.Name + ' was not removed.')
         pass
@@ -202,10 +198,71 @@ class OperationTest(unittest.TestCase):
             self.client.remove(propertyName=prop.Name)
         # Check all the tags were correctly removed
         for prop in testProps:
-            time.sleep(30)
             self.assertIsNone(self.client.findProperty(propertyName=prop.Name), 'Error: property ' + prop.Name + ' was not removed')
         pass
 
+#===============================================================================
+#  Add Operation Test
+#===============================================================================
+class AddOperationTest(unittest.TestCase):
+    def setUp(self):
+        baseurl = 'https://channelfinder.nsls2.bnl.gov:8181/ChannelFinder'
+        self.client = ChannelFinderClient(BaseURL=baseurl, username='boss', password='1234')
+        self.testChannels = [Channel('pyTestChannel1', 'pyOwner'), \
+                        Channel('pyTestChannel2', 'pyOwner'), \
+                        Channel('pyTestChannel3', 'pyOwner')]
+        self.client.add(channels=self.testChannels)
+        self.assertTrue(len(self.client.find(name='pyTestChannel*')) == 3, 'Error: Failed to add channel')
+        pass
+    
+    def tearDown(self):
+#        self.client.remove(channelName='pyAddChannel')
+        for ch in self.testChannels:
+            self.client.remove(channelName=ch.Name)
+        pass
+    
+    def testAddRemoveTag2Channel(self):
+        # add tag to channel
+        testTag = Tag('pyAddTag', 'boss')
+        self.client.add(tag=testTag, channelName=self.testChannels[0].Name)
+        self.assertTrue(testTag in self.client.find(name='pyTestChannel1')[0].Tags, \
+                        'Error: Tag-pyAddTag not added to the channel-pyTestChannel1')
+        self.client.remove(tag=testTag, channelName=self.testChannels[0].Name)
+        self.assertIsNone(self.client.find(name='pyTestChannel1')[0].Tags, \
+                          'Error: Failed to remove the tag-pyAddTag from channel-pyTestChannel1')
+        pass
+    
+    def AddRemoveTag2Channels(self):
+        testTag = Tag('pyAddTag', 'pyOwner')
+        # the list comprehension is used to construct a list of all the channel names
+        channelNames = [channel.Name for channel in self.testChannels]
+        self.client.add(tag=testTag, channelNames=channelNames)
+        channels = self.client.find(tagName=testTag.Name)
+        for ch in self.testChannels :
+            self.assertTrue(ch in channels, 'Error: tag-pyAddTag not added to channel ' + ch.Name)
+        self.client.remove(tag=testTag, channelNames=channelNames)
+        channels = self.client.find(tagName=testTag.Name)
+        for ch in self.testChannels :
+            self.assertFalse(ch in channels, 'Error: tag-pyAddTag not added to channel ' + ch.Name)
+        pass
+       
+    def AddRemoveProperty2Channel(self):
+        pass
+    
+    def AddRemoveProperty2Channels(self):
+        pass
+    
+#===============================================================================
+# Update Opertation Tests
+#===============================================================================
+class UpdateOperationTest(unittest.TestCase):
+    def setUp(self):
+        baseurl = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder'
+        self.client = ChannelFinderClient(BaseURL=baseurl)
+        pass
+    
+    def tearDown(self):
+        pass
 
 #===========================================================================
 # Query Tests
@@ -214,7 +271,7 @@ class OperationTest(unittest.TestCase):
 class QueryTest(unittest.TestCase):
     
     def setUp(self):
-        baseurl = 'https://channelfinder.nsls2.bnl.gov:8181/ChannelFinder'
+        baseurl = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder'
         self.client = ChannelFinderClient(BaseURL=baseurl)
         pass
 
@@ -232,7 +289,7 @@ class QueryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testConnection']
-#    suite = unittest.TestLoader().loadTestsFromTestCase(OperationTest)
-#    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(OperationTest)
+    unittest.TextTestRunner(verbosity=2).run(suite)
     
-    unittest.main()
+#    unittest.main()
