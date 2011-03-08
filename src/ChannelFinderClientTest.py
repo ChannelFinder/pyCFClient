@@ -229,10 +229,12 @@ class AddOperationTest(unittest.TestCase):
         self.assertTrue(testTag in self.client.find(name='pyTestChannel1')[0].Tags, \
                         'Error: Tag-pyAddTag not added to the channel-pyTestChannel1')
         self.client.remove(tag=testTag, channelName=self.testChannels[0].Name)
-        self.assertIsNone(self.client.find(name='pyTestChannel1')[0].Tags, \
+        self.assertTrue(self.client.find(name='pyTestChannel1')[0].Tags == None or \
+                         testTag not in self.client.find(name='pyTestChannel1')[0].Tags, \
                           'Error: Failed to remove the tag-pyAddTag from channel-pyTestChannel1')
         pass
     
+    # TODO add a check for removing the tag from a subset of channels which have that tag
     def testAddRemoveTag2Channels(self):
         testTag = Tag('pyAddTag', 'pyOwner')
         # the list comprehension is used to construct a list of all the channel names
@@ -241,12 +243,27 @@ class AddOperationTest(unittest.TestCase):
         responseChannelNames = [channel.Name for channel in self.client.find(tagName=testTag.Name)]
         for ch in channelNames :
             self.assertTrue(ch in responseChannelNames, 'Error: tag-pyAddTag not added to channel ' + ch)
-        responseChannelNames = [channel.Name for channel in self.client.find(tagName=testTag.Name)]
-        for ch in self.testChannels :
-            self.assertFalse(ch in responseChannelNames, 'Error: tag-pyAddTag not added to channel ' + ch.Name)
+        self.client.remove(tag=testTag, channelNames=channelNames)
+        response = self.client.find(tagName=testTag.Name)
+        if response:
+            responseChannelNames = [channel.Name for channel in response]
+            for ch in channelNames :
+                self.assertFalse(ch in responseChannelNames, 'Error: tag-pyAddTag not removed from channel ' + ch)
         pass
        
-    def AddRemoveProperty2Channel(self):
+    def testAddRemoveProperty2Channel(self):
+        testProperty = Property('pyAddProp', 'pyOwner')
+        chName = self.testChannels[0].Name
+        self.client.add(property=testProperty, channelName=chName)
+        ch = self.client.find(name=chName)[0]
+        responsePropertyNames = [property.Name for property in  self.client.find(name=chName)[0].Properties]
+        self.assertTrue(testProperty.Name in responsePropertyNames, \
+                        'Error: Property-pyAddProp not added to the channel-' + chName)
+        self.client.remove(property=testProperty, channelName=chName)
+        self.assertTrue(self.client.find(name=chName)[0].Properties == None or \
+                         testProperty.Name in \
+                         [property.Name for property in  self.client.find(name=chName)[0].Properties], \
+                        'Error: Property-pyAddProp not removed from the channel-' + chName)
         pass
     
     def AddRemoveProperty2Channels(self):

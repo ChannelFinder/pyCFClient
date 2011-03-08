@@ -73,10 +73,14 @@ class ChannelFinderClient(object):
         property = single Property obj
         properties = list of Property obj
         
+        *** IMP NOTE: Following operation are destructive ***
         tag = Tag obj + channelName = channelName 
-        will add the specified Tag to the channel with the name = channelName
+        will create and add the specified Tag to the channel with the name = channelName
         tag = Tag ogj + channelNames = list of channelName 
-        will add the specified Tag to the channels with the names specified in channelNames
+        will create and add the specified Tag to the channels with the names specified in channelNames
+        and remove it from all other channels
+        property = Property obj + channelName = channelName
+        will create and add the specified Tag to the channel with the name = channelName
         
         '''
         if not self.connection:
@@ -152,6 +156,11 @@ class ChannelFinderClient(object):
                                                     body=JSONEncoder().encode(self.encodeTag(kwds['tag'], withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
+        elif 'property' in kwds and 'channelName' in kwds:
+            channels = [Channel(kwds['channelName'], self.__userName, properties=[kwds['property']])]
+            response = self.connection.request_put(self.__propertiesResource + '/' + kwds['property'].Name, \
+                                                   body=JSONEncoder().encode(self.encodeProperty(kwds['property'], withChannels=channels)), \
+                                                   headers=copy(self.__jsonheader))
         else:
             raise Exception, 'Incorrect Usage: unknown keys'
     
@@ -183,7 +192,6 @@ class ChannelFinderClient(object):
         TODO figure out how python/json will handle the multivalue maps
         to specify multiple patterns simple pass a ????        
         '''
-        self.__reconnect()
         if not self.connection:
             raise Exception, 'Connection not created'
         if not len(kwds) > 0:
@@ -285,7 +293,11 @@ class ChannelFinderClient(object):
             channelsWithTag = self.find(tagName=kwds['tag'].Name)
             # remove channels from which tag is to be removed
             channelNames = [channel.Name for channel in channelsWithTag if channel.Name not in  kwds['channelNames']]
-            self.add(tag=kwds['tag'], channelNames=channelNames)            
+            self.add(tag=kwds['tag'], channelNames=channelNames)
+        elif 'property' in kwds and 'channelName' in kwds:
+            response = self.connection.request_delete(self.__propertiesResource + '/' + kwds['property'].Name + '/' + kwds['channelName'], \
+                                                      headers=copy(self.__jsonheader))
+            self.__checkResponseState(response)         
         else:
             raise Exception, ' unkown keys'
     
@@ -327,8 +339,11 @@ class ChannelFinderClient(object):
         ## TODO handle the case where there is a single property dict
         if body[u'properties'] and body[u'properties']['property']:
             properties = []
-            for validProperty in [ property for property in body[u'properties']['property'] if '@name' in property and '@owner' in property]:
-                    properties.append(cls.decodeProperty(validProperty))
+            if isinstance(body[u'properties']['property'], list):                
+                for validProperty in [ property for property in body[u'properties']['property'] if '@name' in property and '@owner' in property]:
+                        properties.append(cls.decodeProperty(validProperty))
+            elif isinstance(body[u'properties']['property'], dict):
+                properties.append(cls.decodeProperty(body[u'properties']['property']))
             return properties
         else:
             return None
@@ -392,11 +407,16 @@ class ChannelFinderClient(object):
         return d
     
     @classmethod
-    def encodeProperty(cls, property):
-        if property.Value:
-            return {'@name':str(property.Name), '@value':property.Value, '@owner':property.Owner}
+    def encodeProperty(cls, property, withChannels=None):
+        if not withChannels:
+            if property.Value:
+                return {'@name':str(property.Name), '@value':property.Value, '@owner':property.Owner}
+            else:
+                return {'@name':str(property.Name), '@owner':property.Owner}
         else:
-            return {'@name':str(property.Name), '@owner':property.Owner}
+            d = OrderedDict([('@name', str(property.Name)), ('@value', property.Value), ('@owner', property.Owner)])
+            d.update(cls.encodeChannels(withChannels))
+            return d
     
     @classmethod
     def encodeTags(cls, tags):
