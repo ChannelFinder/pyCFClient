@@ -3,8 +3,6 @@ Created on Feb 11, 2011
 
 @author: shroffk
 '''
-from Dictionary import Dictionary
-from _abcoll import Set
 
 class Channel(object):
     '''
