@@ -4,6 +4,7 @@ Created on Feb 15, 2011
 @author: shroffk
 '''
 import unittest
+
 from ChannelFinderClient import ChannelFinderClient
 from Channel import Channel, Property, Tag
 #===============================================================================
@@ -12,20 +13,15 @@ from Channel import Channel, Property, Tag
 class ConnectionTest(unittest.TestCase):
 
 
-    def setUp(self):
-        pass
-
-
-    def tearDown(self):
-        pass
-
+    
 
     def testConnection(self):        
         baseurl = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder'
         self.assertNotEqual(ChannelFinderClient(BaseURL=baseurl), None, 'failed to create client')
         badBaseurl = ['', 'noSuchURL']
         for url in badBaseurl:
-            with self.assertRaises(Exception):ChannelFinderClient(BaseURL=url)
+            self.assertRaises(Exception, ChannelFinderClient, BaseURL=url, msg='message')
+#            with self.assertRaises(Exception):ChannelFinderClient(BaseURL=url)
             
 #===============================================================================
 # 
@@ -36,6 +32,12 @@ class JSONparserTest(unittest.TestCase):
     singleChannels = {u'channels': {u'channel': {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:2', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'2'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'38'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}}}
     channel = {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:0', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'0'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'19'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}
     noChannel = {u'channels': None}
+         
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
 
     def testSingleChannelsParsing(self):
         reply = ChannelFinderClient.decodeChannels(self.singleChannels)
@@ -117,7 +119,8 @@ class OperationTest(unittest.TestCase):
         self.client.add(tag=testTag)
         self.assertTrue(self.client.findTag(tagName=testTag.Name).Name == testTag.Name, 'testTag not added')
         self.client.remove(tagName=testTag.Name)
-        self.assertIsNone(self.client.findTag(tagName=testTag.Name), 'tag not removed correctly')
+        self.assertEqual(self.client.findTag(tagName=testTag.Name), None, 'tag not removed correctly')
+#        self.assertIsNone(self.client.findTag(tagName=testTag.Name), 'tag not removed correctly')
         pass
     
     def testAddRemoveTags(self):
@@ -134,7 +137,8 @@ class OperationTest(unittest.TestCase):
             self.client.remove(tagName=tag.Name)
         # Check all the tags were correctly removed
         for tag in testTags:
-            self.assertIsNone(self.client.findTag(tagName='pyTag1'), 'Error: tag ' + tag.Name + ' was not removed')
+            self.assertEqual(self.client.findTag(tagName='pyTag1'), None, 'Error: tag ' + tag.Name + ' was not removed')
+#            self.assertIsNone(self.client.findTag(tagName='pyTag1'), 'Error: tag ' + tag.Name + ' was not removed')
         pass
     
     def testGetAllTags(self):
@@ -154,7 +158,8 @@ class OperationTest(unittest.TestCase):
             self.client.remove(tagName=tag.Name)
         # Check all the tags were correctly removed
         for tag in testTags:
-            self.assertIsNone(self.client.findTag(tagName=tag.Name), 'Error: tag ' + tag.Name + ' was not removed')
+            self.assertNotEqual(self.client.findTag(tagName=tag.Name), 'Error: tag ' + tag.Name + ' was not removed')
+#            self.assertIsNone(self.client.findTag(tagName=tag.Name), 'Error: tag ' + tag.Name + ' was not removed')
     
     def testAddRemoveProperty(self):
         testProperty = Property('pyProp', 'pyOwner', value=33)
@@ -162,8 +167,11 @@ class OperationTest(unittest.TestCase):
         self.assertTrue(self.client.findProperty(propertyName=testProperty.Name), \
                         'Error: ' + testProperty.Name + ' failed to be added')
         self.client.remove(propertyName=testProperty.Name)
-        self.assertIsNone(self.client.findProperty(propertyName=testProperty.Name), \
-                        'Error: ' + testProperty.Name + ' failed to remove')        
+        self.assertEqual(self.client.findProperty(propertyName=testProperty.Name), \
+                            None, \
+                            'Error: ' + testProperty.Name + ' failed to remove')
+#        self.assertIsNone(self.client.findProperty(propertyName=testProperty.Name), \
+#                        'Error: ' + testProperty.Name + ' failed to remove')        
         pass
     
     def testAddRemoveProperties(self):
@@ -178,8 +186,8 @@ class OperationTest(unittest.TestCase):
         for prop in testProps:
             self.client.remove(propertyName=prop.Name)
         for prop in testProps:
-            self.assertIsNone(self.client.findProperty(propertyName=prop.Name), \
-                            'Error: property ' + prop.Name + ' was not removed.')
+            self.assertEqual(self.client.findProperty(propertyName=prop.Name), None)
+#            self.assertIsNone(self.client.findProperty(propertyName=prop.Name))
         pass
     
     def testGetAllPropperties(self):
@@ -198,7 +206,8 @@ class OperationTest(unittest.TestCase):
             self.client.remove(propertyName=prop.Name)
         # Check all the tags were correctly removed
         for prop in testProps:
-            self.assertIsNone(self.client.findProperty(propertyName=prop.Name), 'Error: property ' + prop.Name + ' was not removed')
+            self.assertEqual(self.client.findProperty(propertyName=prop.Name), None, 'Error: property ' + prop.Name + ' was not removed')
+#            self.assertIsNone(self.client.findProperty(propertyName=prop.Name), 'Error: property ' + prop.Name + ' was not removed')
         pass
 
 #===============================================================================

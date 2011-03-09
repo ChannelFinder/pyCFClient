@@ -39,12 +39,12 @@ class ChannelFinderClient(object):
             self.__userName = username
             self.__password = password
             self.connection = Connection(self.__baseURL, username=self.__userName, password=self.__password)
+            resp = self.connection.request_get('/resources/tags', headers=copy(self.__jsonheader))
+            if resp[u'headers']['status'] != '200':
+                print 'error status' + resp[u'headers']['status']
+                raise Exception
         except Exception:
             Exception.message
-            raise Exception
-        resp = self.connection.request_get('/resources/tags', headers=copy(self.__jsonheader))
-        if resp[u'headers']['status'] != '200':
-            print 'error status' + resp[u'headers']['status']
             raise Exception
     
     def __reconnect(self):
