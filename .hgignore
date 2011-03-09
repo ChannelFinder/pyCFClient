@@ -12,3 +12,5 @@ syntax: regexp
 ^rawData$
 syntax: regexp
 ^raw_result$
+syntax: regexp
+^\.settings$
