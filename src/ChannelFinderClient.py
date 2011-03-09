@@ -47,14 +47,6 @@ class ChannelFinderClient(object):
             Exception.message
             raise Exception
     
-    def __reconnect(self):
-        '''
-        This method has been added to create a new connection with each request to avoid the
-        HTTP 505 error, when reusing the same socket in certain situations the server closes
-        the TCP connection
-        '''
-#        self.connection = Connection(self.__baseURL, self.__userName, self.__password)
-    
     def getAllChannels(self):
         if self.connection:
             resp = self.connection.request_get('/resources/channels', headers=copy(self.__jsonheader))
