@@ -26,6 +26,7 @@ import urlparse
 import urllib
 import base64
 from base64 import encodestring
+from urllib import quote
 
 #from mimeTypes import *
 
@@ -76,7 +77,7 @@ class Connection:
         
     def request(self, resource, method="get", args=None, body=None, filename=None, headers={}):
         params = None
-        path = resource
+        path = quote(resource)
         headers['User-Agent'] = 'Basic Agent'
         
         BOUNDARY = u'00hoYUXOnLD5RQ8SKGYVgLLt64jejnMwtO7q8XE1'
