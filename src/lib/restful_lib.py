@@ -59,16 +59,16 @@ class Connection:
         return self.request(resource, "get", args, headers=headers)
         
     def request_delete(self, resource, args=None, headers={}):
-        return self.request(resource, "delete", args, headers=headers)
+        return self.request(quote(resource), "delete", args, headers=headers)
         
     def request_head(self, resource, args=None, headers={}):
         return self.request(resource, "head", args, headers=headers)
         
     def request_post(self, resource, args=None, body=None, filename=None, headers={}):
-        return self.request(resource, "post", args , body=body, filename=filename, headers=headers)
+        return self.request(quote(resource), "post", args , body=body, filename=filename, headers=headers)
         
     def request_put(self, resource, args=None, body=None, filename=None, headers={}):
-        return self.request(resource, "put", args , body=body, filename=filename, headers=headers)
+        return self.request(quote(resource), "put", args , body=body, filename=filename, headers=headers)
         
     def get_content_type(self, filename):
         extension = filename.split('.')[-1]
@@ -77,7 +77,7 @@ class Connection:
         
     def request(self, resource, method="get", args=None, body=None, filename=None, headers={}):
         params = None
-        path = quote(resource)
+        path = resource
         headers['User-Agent'] = 'Basic Agent'
         
         BOUNDARY = u'00hoYUXOnLD5RQ8SKGYVgLLt64jejnMwtO7q8XE1'
