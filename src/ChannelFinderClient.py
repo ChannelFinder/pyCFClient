@@ -94,14 +94,12 @@ class ChannelFinderClient(object):
                                                    headers=copy(self.__jsonheader))
 #            print response
             self.__checkResponseState(response)
-            pass
         elif 'channels' in kwds :
 #            print JSONEncoder().encode(self.encodeChannels(kwds['channels']))
             response = self.connection.request_post(self.__channelsResource, \
                                                    body=JSONEncoder().encode(self.encodeChannels(kwds['channels'])), \
                                                    headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
-            pass
         elif 'tag' in kwds:
 #            print self.__tagsResource + '/' + kwds['tag'].Name
 #            print JSONEncoder().encode(self.encodeTag(kwds['tag']))
@@ -172,9 +170,7 @@ class ChannelFinderClient(object):
         simply checks the return status of the http response
         if the return status us 404 it returns None
         '''
-        if r[u'headers']['status'] == '404':
-            return None        
-        elif not int(r[u'headers']['status']) <= 206:
+        if not int(r[u'headers']['status']) <= 206:
                 raise Exception, 'HTTP Error status: ' + r[u'headers']['status'] + r[u'body']
         return r
     
@@ -229,34 +225,35 @@ class ChannelFinderClient(object):
         '''
         Searches for the _exact_ tagName and returns a single Tag object if found
         '''
-        self.__reconnect()
         url = self.__tagsResource + '/' + tagName
         r = self.connection.request_get(url, headers=copy(self.__jsonheader))
 #        JSONDecoder().decode(r[u'body'])
 #        print r
-        if self.__checkResponseState(r):
+        if r[u'headers']['status'] == '404':
+            return None
+        elif self.__checkResponseState(r):
             return self.decodeTag(JSONDecoder().decode(r[u'body']))
         else:
             return None
+               
     
     def findProperty(self, propertyName):
         '''
         Searches for the _exact_ propertyName and return a single Property object if found
         '''
-        self.__reconnect()
         url = self.__propertiesResource + '/' + propertyName
         r = self.connection.request_get(url, headers=copy(self.__jsonheader))
-        if self.__checkResponseState(r):
+        if r[u'headers']['status'] == '404':
+            return None
+        elif self.__checkResponseState(r):
             return self.decodeProperty(JSONDecoder().decode(r[u'body']))
         else:
             return None
-        
         
     def getAllTags(self):
         '''
         return a list of all the Tags present - even the ones not associated w/t any channel
         '''
-        self.__reconnect()
         url = self.__tagsResource
         r = self.connection.request_get(url, headers=copy(self.__jsonheader))       
         if self.__checkResponseState(r):
@@ -266,7 +263,6 @@ class ChannelFinderClient(object):
         '''
         return a list of all the Properties present - even the ones not associated w/t any channel
         '''
-        self.__reconnect()
         url = self.__propertiesResource
         r = self.connection.request_get(url, headers=copy(self.__jsonheader))
         if self.__checkResponseState(r):
