@@ -57,7 +57,9 @@ class Property(object):
         self.Owner = owner
         self.Value = value
     
-    def __cmp__(self, *arg, **kwargs):        
+    def __cmp__(self, *arg, **kwargs):  
+        if arg[0] == None:
+            return 1      
         return cmp((self.Name, self.Value), (arg[0].Name, arg[0].Value))
         
 class Tag(object):
@@ -70,4 +72,6 @@ class Tag(object):
         self.Owner = owner
     
     def __cmp__(self, *arg, **kwargs):
+        if arg[0] == None:
+            return 1
         return cmp(self.Name, arg[0].Name)
