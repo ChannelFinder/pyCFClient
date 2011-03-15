@@ -24,8 +24,6 @@ __version__ = '0.1'
 import httplib2
 import urlparse
 import urllib
-import base64
-from base64 import encodestring
 from urllib import quote
 
 #from mimeTypes import *
@@ -43,11 +41,11 @@ class Connection:
         
         self.url = urlparse.urlparse(base_url)
         
-        (scheme, netloc, path, query, fragment) = urlparse.urlsplit(base_url)
+        v = urlparse.urlsplit(base_url)
             
-        self.scheme = scheme
-        self.host = netloc
-        self.path = path
+        self.scheme = v[0] # scheme
+        self.host =   v[1] # netloc
+        self.path =   v[2] # path
         
         # Create Http class with support for Digest HTTP Authentication, if necessary
         self.h = httplib2.Http(".cache")
@@ -76,7 +74,6 @@ class Connection:
         return guessed_mimetype or 'application/octet-stream'
         
     def request(self, resource, method="get", args=None, body=None, filename=None, headers={}):
-        params = None
         path = quote(resource)
         headers['User-Agent'] = 'Basic Agent'
         
