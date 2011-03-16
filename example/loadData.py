@@ -118,36 +118,42 @@ if __name__ == '__main__':
     
     addProps(client)
 
-#    try:
-#        # the file has the following attributes:
-#        #index, read back, set point, phys name, len[m], s[m], type
-#        f = open('lat_conf_table.txt', 'r')
-#        lines = f.readlines()
-#        channels = []
-#        for line in lines:
-#            if not (line.startswith('#') or line.startswith('!') or not line.strip()):
-#                results = line.split()
-#                if len(results) < 7:
-#                    # input file format problem
-#                    raise
-#                
-#                if results[1] != 'NULL':
-#                    channels.append(Channel((u'%s' %results[1]), 'vioc', properties=buildProps(results, results[1], 'readback')))
-#                    #name = u'%s' % result[1]
-#                    #channels.append(Channel(name, 'vioc', properties=buildProps(results, results[1], 'readback')))
-#                    #client.add(channel = Channel((u'%s' %results[1]), 'vioc', properties=buildProps(results, results[1], 'readback')))
-#                if results[2] != 'NULL':
-#                    channels.append(Channel((u'%s' %results[2]), 'vioc', properties=buildProps(results, results[2], 'readback')))
-#                    #name = u'%s' % result[2]
-#                    #channels.append(Channel(name, 'vioc', properties=buildProps(results, results[2], 'readback')))
-#                    #client.add(channel = Channel((u'%s' %results[2]), 'vioc', properties=buildProps(results, results[2], 'setpoint')))
-#        client.add(channels=channels)
-#    finally:
-#        f.close()
+    try:
+        # the file has the following attributes:
+        #index, read back, set point, phys name, len[m], s[m], type
+        f = open('lat_conf_table.txt', 'r')
+        lines = f.readlines()
+        channels = []
+        for line in lines:
+            if not (line.startswith('#') or line.startswith('!') or not line.strip()):
+                results = line.split()
+                if len(results) < 7:
+                    # input file format problem
+                    raise
+                
+                if results[1] != 'NULL':
+                    channels.append(Channel((u'%s' %results[1]), 'vioc', properties=buildProps(results, results[1], 'readback')))
+                    #name = u'%s' % result[1]
+                    #channels.append(Channel(name, 'vioc', properties=buildProps(results, results[1], 'readback')))
+                    #client.add(channel = Channel((u'%s' %results[1]), 'vioc', properties=buildProps(results, results[1], 'readback')))
+                if results[2] != 'NULL':
+                    channels.append(Channel((u'%s' %results[2]), 'vioc', properties=buildProps(results, results[2], 'readback')))
+                    #name = u'%s' % result[2]
+                    #channels.append(Channel(name, 'vioc', properties=buildProps(results, results[2], 'readback')))
+                    #client.add(channel = Channel((u'%s' %results[2]), 'vioc', properties=buildProps(results, results[2], 'setpoint')))
+        beg = time.time()
+        client.add(channels=channels)
+        end = time.time()
+        print ('%.6f' % (end-beg))
+    finally:
+        f.close()
     
 #    channels = client.getAllChannels()
     channels = client.find(name='SR*')
+    print len(channels)
+#    beg = time.time()
     for channel in channels:
         print channel.Name
 #        client.remove(channelName=(u'%s' % channel.Name))
-    print len(channels)
+    end = time.time()
+#    print ('%.6f' % (end-beg))
