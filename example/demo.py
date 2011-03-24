@@ -31,6 +31,7 @@ if __name__ == '__main__':
     for channel in channels:
         print channel.Name
         props = channel.getProperties()
+        tags = channel.getTags()
         for k, v in props.items():
             print k, v
 #        client.remove(channelName=(u'%s' % channel.Name))

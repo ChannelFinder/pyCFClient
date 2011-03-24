@@ -32,6 +32,8 @@ class Channel(object):
         '''getProperties returns a dictionary containing all properties associated with calling channel.\
         the key= propertyName and the value=propertyValue'''
         propDictionary = {}
+        if self.Properties == None:
+            return None
         for property in self.Properties:
             propDictionary[property.Name] = property.Value
         return propDictionary
@@ -43,7 +45,10 @@ class Channel(object):
         '''
         get tags returns a list of tagNames for the tags associated with this channel
         '''
-        return set([ tag.Name for tag in self.Tags])
+        if self.Tags == None:
+            return None
+        else:
+            return set([ tag.Name for tag in self.Tags])
     
 #    tags = property(getTags)
 

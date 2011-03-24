@@ -25,6 +25,7 @@ Created on Mar 14, 2011
 
 import sys
 import time
+import re
 
 from ChannelFinderClient import ChannelFinderClient
 from Channel import Channel
@@ -62,6 +63,7 @@ def addProps(cf):
 #    beg1 = time.time()
     propDict = {'elem_type': 'vioc', \
                 'elem_name': 'vioc', \
+                'dev_name': 'vioc', \
                 'length': 'vioc', \
                 's_position': 'vioc', \
                 'ordinal': 'vioc', \
@@ -92,6 +94,7 @@ def addProps(cf):
 def buildProps(results, channame, chtype):
     properties = [Property('elem_type', 'vioc', results[6]),
                   Property('elem_name', 'vioc', results[3]),
+                  Property('dev_name', 'vioc', results[7]),
                   Property('length', 'vioc', results[4]),
                   Property('s_position', 'vioc', results[5]),
                   Property('ordinal', 'vioc', results[0])]
@@ -102,10 +105,21 @@ def buildProps(results, channame, chtype):
 
     # C00 stands for global pv                
     if channame.find('C00') == -1:
-        tmp = channame.split(':')
-        properties.append(Property('cell', 'vioc', tmp[1][1:3]))
-        properties.append(Property('girder', 'vioc', tmp[2][1:3]))
-        properties.append(Property('symmetry', 'vioc', tmp[2][3:4]))
+#        tmp = channame.split(':')
+#        properties.append(Property('cell', 'vioc', tmp[1][1:3]))
+#        properties.append(Property('girder', 'vioc', tmp[2][1:3]))
+#        properties.append(Property('symmetry', 'vioc', tmp[2][3:4]))
+#        print channame
+        try:
+            tmp = re.match(r'.*(C\d{1,2}).*(G\d{1,2})(.).*', channame)
+            properties.append(Property('cell', 'vioc', tmp.groups()[0]))
+            properties.append(Property('girder', 'vioc', tmp.groups()[1]))
+            properties.append(Property('symmetry', 'vioc', tmp.groups()[2]))
+#        properties.append(Property('cell', 'vioc', tmp.groups()[0]))
+#        properties.append(Property('girder', 'vioc', tmp.groups()[1]))
+#        properties.append(Property('symmetry', 'vioc', tmp.groups()[2]))
+        except:
+            raise
 
     properties.append(Property('handle', 'vioc', chtype))
     return properties
@@ -137,7 +151,7 @@ if __name__ == '__main__':
                     #channels.append(Channel(name, 'vioc', properties=buildProps(results, results[1], 'readback')))
                     #client.add(channel = Channel((u'%s' %results[1]), 'vioc', properties=buildProps(results, results[1], 'readback')))
                 if results[2] != 'NULL':
-                    channels.append(Channel((u'%s' %results[2]), 'vioc', properties=buildProps(results, results[2], 'readback')))
+                    channels.append(Channel((u'%s' %results[2]), 'vioc', properties=buildProps(results, results[2], 'setpoint')))
                     #name = u'%s' % result[2]
                     #channels.append(Channel(name, 'vioc', properties=buildProps(results, results[2], 'readback')))
                     #client.add(channel = Channel((u'%s' %results[2]), 'vioc', properties=buildProps(results, results[2], 'setpoint')))

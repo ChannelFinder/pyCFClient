@@ -42,10 +42,14 @@ class ChannelFinderClient(object):
             resp = self.connection.request_get('/resources/tags', headers=copy(self.__jsonheader))
             if resp[u'headers']['status'] != '200':
                 print 'error status' + resp[u'headers']['status']
-                raise Exception
-        except Exception:
-            Exception.message
-            raise Exception
+                raise
+#                raise Exception
+#        raise exception detail instead of bypassing it
+        except:
+            raise
+#        except Exception:
+#            Exception.message
+#            raise Exception
     
     def getAllChannels(self):
         if self.connection:
@@ -53,6 +57,8 @@ class ChannelFinderClient(object):
             if (resp[u'headers']['status'] != '404'):
                 j = JSONDecoder().decode(resp[u'body'])
                 return self.decodeChannels(j)
+#        return a None if fail
+        return None
 
     def add(self, **kwds):
         '''
