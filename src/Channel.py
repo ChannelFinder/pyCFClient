@@ -15,6 +15,10 @@ class Channel(object):
     def __init__(self, name, owner, properties=None, tags=None):
         '''
         Constructor
+        name = channel name
+        owner = channel owner
+        properties = list of properties of type Property
+        tags = list of tags of type Tag
         '''
         self.__Name = name;
         self.__Owner = owner;
