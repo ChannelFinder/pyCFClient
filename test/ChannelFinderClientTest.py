@@ -295,16 +295,96 @@ class AddOperationTest(unittest.TestCase):
 #===============================================================================
 class UpdateOperationTest(unittest.TestCase):
     def setUp(self):
-        baseurl = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder'
-        self.client = ChannelFinderClient(BaseURL=baseurl)
+        baseurl = 'https://channelfinder.nsls2.bnl.gov:8181/ChannelFinder'
+        self.client = ChannelFinderClient(BaseURL=baseurl, username='boss', password='1234')
+        orgTag = Tag('originalTag', 'originalOwner');
+        orgProp = Property('originalProp', 'originalOwner', 'originalValue');
+        self.client.add(tag=orgTag);
+        self.client.add(property=orgProp);
+        self.client.add(channel=Channel('originalChannelName', 'originalOwner', \
+                                          properties=[orgProp], \
+                                          tags=[orgTag]))
+        ch = self.client.find(name='originalChannelName')
+        self.assertTrue(len(ch) == 1 and 
+                        orgProp in ch[0].Properties and \
+                        orgTag in ch[0].Tags);
+        pass
+    
+    def testUpdateTagName(self):
+        pass
+    
+    def testUpdateTagOwner(self):
+        pass
+    
+    def testUpdatePropName(self):
+        pass
+    
+    def testUpdatePropOwner(self):
+        pass
+    
+    def testUpdateChannelName(self):
+        ch = self.client.find(name='originalChannelName')[0]
+        newChannel = Channel('updatedChannelName', ch.Owner, properties=ch.Properties, tags=ch.Tags)
+        self.client.update(originalChannelName='originalChannelName', \
+                           channel=newChannel)
+        self.assertTrue(self.client.find(name='originalChannelName') == None)
+        self.assertTrue(len(self.client.find(name='updatedChannelName')) == 1)
+        # reset the channel back
+        self.client.update(originalChannelName='updatedChannelName', \
+                           channel=ch)
+        self.assertTrue(len(self.client.find(name='originalChannelName')) == 1)
+        self.assertTrue(self.client.find(name='updatedChannelName') == None)
+        pass
+    
+    def testUpdateChannelOwner(self):
+        ch = self.client.find(name='originalChannelName')[0]
+        newChannel = Channel(ch.Name, 'updatedOwner', properties=ch.Properties, tags=ch.Tags)
+        self.client.update(originalChannelName='originalChannelName', \
+                           channel=newChannel)
+        self.assertTrue(self.client.find(name='originalChannelName')[0].Owner == 'updatedOwner')                             
+        pass
+    
+    def testUpdateChannel(self):
+        '''
+        the test updates the channel name and owner
+        it also updates an existing property
+        and adds a new property and tag
+        leaving an existing tag untouched
+        '''
+        ch = self.client.find(name='originalChannelName')[0]
+        updatedProp = Property('originalProp', 'updatedOwner', 'updatedValue')
+        newTag = Tag('updatedTag', 'updatedOwner')
+        newProp = Property('newProp', 'updatedOwner', 'newValue')
+        self.client.add(tag=newTag)
+        self.client.add(property=newProp)
+        newChannel = Channel('updatedChannelName', 'updatedOwner', \
+                             properties=[updatedProp, newProp], \
+                             tags=[newTag])
+        self.client.update(originalChannelName='originalChannelName', \
+                           channel=newChannel)
+        foundChannel = self.client.find(name='updatedChannelName')[0]
+        self.assertTrue(foundChannel.Name == 'updatedChannelName' and
+                        foundChannel.Owner == 'updatedOwner' and \
+                        updatedProp in foundChannel.Properties and\
+                        newProp in foundChannel.Properties and \
+                        newTag in foundChannel.Tags and \
+                        'originalTag' in foundChannel.getTags())
+        #reset
+        self.client.update(originalChannelName='updatedChannelName', \
+                           channel=ch)
+        pass
+    
+    def testUpdateChannels(self):
         pass
     
     def tearDown(self):
+        self.client.remove(channelName='originalChannelName')
+        self.client.remove(tagName='originalTag')
+        self.client.remove(propertyName='originalProp')
         pass
 
 #===========================================================================
 # Query Tests
-#===========================================================================
 
 class QueryTest(unittest.TestCase):
     
@@ -327,7 +407,7 @@ class QueryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testConnection']
-    suite = unittest.TestLoader().loadTestsFromTestCase(OperationTest)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+#    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateOperationTest)
+#    unittest.TextTestRunner(verbosity=2).run(suite)
     
     unittest.main()

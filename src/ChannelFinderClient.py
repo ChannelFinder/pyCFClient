@@ -174,7 +174,6 @@ class ChannelFinderClient(object):
     def __checkResponseState(self, r):
         '''
         simply checks the return status of the http response
-        if the return status us 404 it returns None
         '''
         if not int(r[u'headers']['status']) <= 206:
                 raise Exception, 'HTTP Error status: ' + r[u'headers']['status'] + r[u'body']
@@ -339,7 +338,35 @@ class ChannelFinderClient(object):
             self.add(property=kwds['property'], channelNames=channelNames)        
         else:
             raise Exception, ' unkown keys'
-   
+
+#===============================================================================
+# Update methods
+#===============================================================================
+    def update(self, **kwds):
+        '''
+        channel = the new channel obj
+        originalChannelName = the original name of the channel to be updated
+        if not specified the name is extracted from the channel obj
+        '''
+        if len(kwds) != 2:
+            raise Exception, 'incorrect usage'
+        if 'channel' in kwds:
+            ch = kwds['channel']
+            channelName = ch.Name
+            if 'originalChannelName' in kwds:
+                channelName = kwds['originalChannelName']
+            url = self.__channelsResource + '/' + channelName
+            try:
+                response = self.connection.request_post(url, \
+                                                        body=JSONEncoder().encode(self.encodeChannel(ch)) , \
+                                                        headers=copy(self.__jsonheader))                
+            except Exception:
+                print Exception
+            self.__checkResponseState(response)
+
+#===============================================================================
+# Methods for encoding decoding will be make private
+#===============================================================================
     @classmethod
     def decodeChannels(cls, body):
         '''
