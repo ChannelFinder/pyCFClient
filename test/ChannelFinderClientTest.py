@@ -209,6 +209,33 @@ class OperationTest(unittest.TestCase):
             self.assertEqual(self.client.findProperty(propertyName=prop.Name), None, 'Error: property ' + prop.Name + ' was not removed')
 #            self.assertIsNone(self.client.findProperty(propertyName=prop.Name), 'Error: property ' + prop.Name + ' was not removed')
         pass
+    
+    def testAddRemoveSpecialChar(self):
+        spChannel = Channel('special<chName:->*?', 'pyOwner')
+        spProperty = Property('special<propName:->*?', 'pyOwner', 'sp<Val:->*?')
+        spTag = Tag('special<tagName:->*?', 'pyOwner')
+        spChannel.Properties = [spProperty]
+        spChannel.Tags = [spTag]
+        
+        self.client.add(tag=spTag)
+        print self.client.findTag(spTag.Name)
+        self.assertNotEqual(self.client.findTag(spTag.Name), None, 'failed to add Tag with special chars')
+        self.client.add(property=spProperty)
+        self.assertNotEqual(self.client.findProperty(spProperty.Name), None, 'failed to add Property with special chars')
+        self.client.add(channel=spChannel)
+        foundChannels = self.client.find(name=spChannel.Name)
+        self.assertNotEqual(foundChannels[0], None, 'failed to add channel with special chars')
+        self.assertTrue(foundChannels[0].Name == spChannel.Name and \
+                        spTag in foundChannels[0].Tags and \
+                        spProperty in foundChannels[0].Properties, \
+                        'Returned channel missing required properties and/or tags')
+        self.client.remove(channelName=spChannel.Name)
+        self.assertEqual(self.client.find(name=spChannel.Name), None, 'failed to remove channel with special char')
+        self.client.remove(tagName=spTag.Name)
+        self.assertTrue(self.client.findTag(spTag.Name) == None)
+        self.client.remove(propertyName=spProperty.Name)
+        self.assertTrue(self.client.findProperty(spProperty.Name) == None)
+
 
 #===============================================================================
 #  Add Operation Test
