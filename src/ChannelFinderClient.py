@@ -78,6 +78,9 @@ class ChannelFinderClient(object):
         and remove it from all other channels
         property = Property obj + channelName = channelName
         will create and add the specified Tag to the channel with the name = channelName
+        property = Property obj + channelNames = list of channelName 
+        will create and add the specified Tag to the channels with the names specified in channelNames
+        and remove it from all other channels
         
         '''
         if not self.connection:
@@ -288,6 +291,15 @@ class ChannelFinderClient(object):
         channelName = name of channel to be removed
         tagName = tag name of the tag to be removed from all channels
         propertyName = property name of property to be removed from all channels
+        
+        tag = Tag obj + channelName = channelName 
+        -remove the tag from the specified channel
+        tag = Tag ogj + channelNames = list of channelName 
+        - remove the tag from all the channels specified in the channelNames list
+        property = Property obj + channelName = channelName
+        - remove the property from the specified channel
+        roperty = Property obj + channelNames = list of channelName 
+        - remove the property from all the channels in the channelNames list
         '''
         if not self.connection:
             raise Exception, 'Connection not created'
