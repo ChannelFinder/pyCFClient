@@ -211,9 +211,9 @@ class OperationTest(unittest.TestCase):
         pass
     
     def testAddRemoveSpecialChar(self):
-        spChannel = Channel('special<chName:->*?', 'pyOwner')
-        spProperty = Property('special<propName:->*?', 'pyOwner', 'sp<Val:->*?')
-        spTag = Tag('special<tagName:->*?', 'pyOwner')
+        spChannel = Channel('special{}<chName:->*?', 'pyOwner')
+        spProperty = Property('special{}<propName:->*?', 'pyOwner', 'sp<Val:->*?')
+        spTag = Tag('special{}<tagName:->*?', 'pyOwner')
         spChannel.Properties = [spProperty]
         spChannel.Tags = [spTag]
         
