@@ -344,6 +344,14 @@ class UpdateOperationTest(unittest.TestCase):
         pass
     
     def testUpdatePropName(self):
+        self.assertTrue(self.client.findProperty('originalProp') != None)
+        updatedProp = self.client.update(property=Property('updatedProperty', 'updatedOwner'), \
+                                         originalPropertyName='originalProp')
+        self.assertTrue(self.client.findProperty('originalProp') == None and \
+                        self.client.findProperty('updatedProperty') != None)
+        channelProperties = self.client.find(name='originalChannelName')[0].getProperties.keys()
+        self.assertTrue('originalProp' not in channelProperties and \
+                        'updatedProperty' in channelProperties)
         pass
     
     def testUpdatePropOwner(self):
