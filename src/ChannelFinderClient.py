@@ -359,6 +359,10 @@ class ChannelFinderClient(object):
         channel = the new channel obj
         originalChannelName = the original name of the channel to be updated
         if not specified the name is extracted from the channel obj
+        
+        property = the new property obj
+        originalPropertyName = the original name of the property to be updated
+        if not specified the name is extracted from the property obj
         '''
         if len(kwds) != 2:
             raise Exception, 'incorrect usage'
@@ -375,6 +379,19 @@ class ChannelFinderClient(object):
             except Exception:
                 print Exception
             self.__checkResponseState(response)
+        elif 'property' in kwds:
+            prop = kwds['property']
+            propName = prop.Name
+            if 'originalPropertyName' in kwds:
+                propName = kwds['originalPropertyName']
+                print JSONEncoder().encode(self.encodeProperty(prop))
+            url = self.__propertiesResource + '/' + propName
+            response = self.connection.request_post(url, \
+                                                    body=JSONEncoder().encode(self.encodeProperty(prop)), \
+                                                    headers=copy(self.__jsonheader))
+            self.__checkResponseState(response)
+        else:
+            raise Exception, ' unkown keys'
 
 #===============================================================================
 # Methods for encoding decoding will be make private

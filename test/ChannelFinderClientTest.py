@@ -114,6 +114,23 @@ class OperationTest(unittest.TestCase):
             self.client.remove(channelName=str(ch.Name))
         pass
     
+    
+    def testAddRemoveChannelsCheck(self):
+        '''
+        This test will check that a POST in the channels resources is destructive
+        '''
+        testProp = Property('testProp', 'pyOwner')
+        self.client.add(property=testProp)
+        testProp.Value = 'original'        
+        testChannels = [Channel('pyChannel1', 'pyOwner'), \
+                        Channel('pyChannel2', 'pyOwner'), \
+                        Channel('pyChannel3', 'pyOwner')]
+        self.client.add(channel=testChannels[0])        
+        self.client.add(channels=testChannels)
+        r = self.client.find(name='pyChannel*')
+        
+        
+    
     def testAddRemoveTag(self):
         testTag = Tag('pyTag', 'pyOwner')
         self.client.add(tag=testTag)
@@ -344,6 +361,14 @@ class UpdateOperationTest(unittest.TestCase):
         pass
     
     def testUpdatePropName(self):
+        self.assertTrue(self.client.findProperty('originalProp') != None)
+        updatedProp = self.client.update(property=Property('updatedProperty', 'updatedOwner'), \
+                                         originalPropertyName='originalProp')
+        self.assertTrue(self.client.findProperty('originalProp') == None and \
+                        self.client.findProperty('updatedProperty') != None)
+        channelProperties = self.client.find(name='originalChannelName')[0].getProperties.keys()
+        self.assertTrue('originalProp' not in channelProperties and \
+                        'updatedProperty' in channelProperties)
         pass
     
     def testUpdatePropOwner(self):
@@ -402,6 +427,15 @@ class UpdateOperationTest(unittest.TestCase):
         pass
     
     def testUpdateChannels(self):
+        prop1 = Property('originalProp1','originalOwner',value='originalVal')
+        prop2 = Property('originalProp2','originalOwner',value='originalVal')
+        ch1 = Channel('orgChannel1','orgOwner', properties=[prop1, prop2])
+        ch2 = Channel('orgChannel2','orgOwner', properties=[prop1, prop2])
+        ch3 = Channel('orgChannel3','orgOwner', properties=[prop1])
+        self.client.add(channels = [ch1,ch2,ch3])
+        chs = self.client.find(property=[('originalProp1','originalVal'),('originalProp2','originalVal')])
+        self.assertTrue(len(chs) == 2)
+        self.assertTrue('orgChannel1' in chs and 'orgChannel2' in chs and 'orgChannel3' not in chs, 'find query failed to yield expected result')
         pass
     
     def tearDown(self):
@@ -434,7 +468,7 @@ class QueryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testConnection']
-#    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateOperationTest)
-#    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateOperationTest)
+    unittest.TextTestRunner(verbosity=2).run(suite)
     
-    unittest.main()
+#    unittest.main()
