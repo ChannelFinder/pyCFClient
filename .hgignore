@@ -16,3 +16,5 @@ syntax: regexp
 ^\.settings$
 syntax: regexp
 ^test/\.cache$
+syntax: regexp
+^src/build$
