@@ -5,7 +5,7 @@ Created on Feb 11, 2011
 '''
 import unittest
 
-from Channel import Channel, Tag
+from channelfinder.Channel import Channel, Tag
 
 class Test(unittest.TestCase):
 
