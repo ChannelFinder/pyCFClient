@@ -23,9 +23,9 @@ Created on Mar 14, 2011
 @author: G. Shen
 """
 
-from ChannelFinderClient import ChannelFinderClient
-from Channel import Tag
-from Channel import Channel
+from channelfinder.ChannelFinderClient import ChannelFinderClient
+from channelfinder.Channel import Tag
+from channelfinder.Channel import Channel
 
 if __name__ == '__main__':
     cf = ChannelFinderClient(BaseURL = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder', username='boss', password='1234')

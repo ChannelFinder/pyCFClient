@@ -27,9 +27,9 @@ import sys
 import time
 import re
 
-from ChannelFinderClient import ChannelFinderClient
-from Channel import Channel
-from Channel import Property
+from channelfinder.ChannelFinderClient import ChannelFinderClient
+from channelfinder.Channel import Channel
+from channelfinder.Channel import Property
 
 def addProps(cf):
     # every property has to be added first before using it.
