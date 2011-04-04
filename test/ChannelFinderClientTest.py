@@ -402,6 +402,15 @@ class UpdateOperationTest(unittest.TestCase):
         pass
     
     def testUpdateChannels(self):
+        prop1 = Property('originalProp1','originalOwner',value='originalVal')
+        prop2 = Property('originalProp2','originalOwner',value='originalVal')
+        ch1 = Channel('orgChannel1','orgOwner', properties=[prop1, prop2])
+        ch2 = Channel('orgChannel2','orgOwner', properties=[prop1, prop2])
+        ch3 = Channel('orgChannel3','orgOwner', properties=[prop1])
+        self.client.add(channels = [ch1,ch2,ch3])
+        chs = self.client.find(property=[('originalProp1','originalVal'),('originalProp2','originalVal')])
+        self.assertTrue(len(chs) == 2)
+        self.assertTrue('orgChannel1' in chs and 'orgChannel2' in chs and 'orgChannel3' not in chs, 'find query failed to yield expected result')
         pass
     
     def tearDown(self):
@@ -434,7 +443,7 @@ class QueryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testConnection']
-#    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateOperationTest)
-#    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateOperationTest)
+    unittest.TextTestRunner(verbosity=2).run(suite)
     
-    unittest.main()
+#    unittest.main()
