@@ -114,6 +114,23 @@ class OperationTest(unittest.TestCase):
             self.client.remove(channelName=str(ch.Name))
         pass
     
+    
+    def testAddRemoveChannelsCheck(self):
+        '''
+        This test will check that a POST in the channels resources is destructive
+        '''
+        testProp = Property('testProp', 'pyOwner')
+        self.client.add(property=testProp)
+        testProp.Value = 'original'        
+        testChannels = [Channel('pyChannel1', 'pyOwner'), \
+                        Channel('pyChannel2', 'pyOwner'), \
+                        Channel('pyChannel3', 'pyOwner')]
+        self.client.add(channel=testChannels[0])        
+        self.client.add(channels=testChannels)
+        r = self.client.find(name='pyChannel*')
+        
+        
+    
     def testAddRemoveTag(self):
         testTag = Tag('pyTag', 'pyOwner')
         self.client.add(tag=testTag)
@@ -344,6 +361,14 @@ class UpdateOperationTest(unittest.TestCase):
         pass
     
     def testUpdatePropName(self):
+        self.assertTrue(self.client.findProperty('originalProp') != None)
+        updatedProp = self.client.update(property=Property('updatedProperty', 'updatedOwner'), \
+                                         originalPropertyName='originalProp')
+        self.assertTrue(self.client.findProperty('originalProp') == None and \
+                        self.client.findProperty('updatedProperty') != None)
+        channelProperties = self.client.find(name='originalChannelName')[0].getProperties.keys()
+        self.assertTrue('originalProp' not in channelProperties and \
+                        'updatedProperty' in channelProperties)
         pass
     
     def testUpdatePropOwner(self):
