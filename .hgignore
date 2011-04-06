@@ -18,3 +18,5 @@ syntax: regexp
 ^test/\.cache$
 syntax: regexp
 ^src/build$
+syntax: regexp
+^build$
