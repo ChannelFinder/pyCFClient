@@ -25,7 +25,6 @@ Created on Mar 14, 2011
 
 from channelfinder.ChannelFinderClient import ChannelFinderClient
 from channelfinder.Channel import Tag
-from channelfinder.Channel import Channel
 
 if __name__ == '__main__':
     cf = ChannelFinderClient(BaseURL = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder', username='boss', password='1234')
@@ -39,34 +38,30 @@ if __name__ == '__main__':
     cf.add(tags=tags)
     
     channels = cf.find(name='SR*')
-    chantags = []
-    for channel in channels:
-#        print channel.Name
-        props = channel.getProperties()
-#        tags = channel.getTags()
-        # attach tags to a channel
-        chantags.append(Channel((u'%s' % (channel.Name)), 'vioc', tags=tags))
-        
-#        for k, v in props.items():
-#            print k, v
-#        client.remove(channelName=(u'%s' % channel.Name))
-    cf.add(channels=chantags)
+    channelNames = [channel.Name for channel in channels]
     
-    # update channels
-    channels = cf.find(name='SR*')
-    for channel in channels:
-        print channel.Name
-        # get tags for each channel
-        tmp_tags = channel.getTags()
-        if tmp_tags != None:
-            for tmp_tag in tmp_tags:
-                print tmp_tag
+    # add a tag to many channels
+    cf.add(tag=tag, channelNames=channelNames)
+    
+    # add tags to many channels
+    for tag in tags:
+        cf.add(tag=tag, channelNames=channelNames)
+
+    # retrieve channel, properties, and tags
+#    channels = cf.find(name='SR*')
+#    for channel in channels:
+#        print channel.Name
+#        # get tags for each channel
+#        tmp_tags = channel.getTags()
+#        if tmp_tags != None:
+#            for tmp_tag in tmp_tags:
+#                print tmp_tag
         
-    # remove one example tags
-    cf.remove(tagName='example1')
-    cf.remove(tagName='example2')
-    cf.remove(tagName='example3')
-    cf.remove(tagName='example4')
-    cf.remove(tagName='example5')
+    # remove one tag
+#    cf.remove(tagName='example1')
+#    cf.remove(tagName='example2')
+#    cf.remove(tagName='example3')
+#    cf.remove(tagName='example4')
+#    cf.remove(tagName='example5')
     
 #    print len(channels)
