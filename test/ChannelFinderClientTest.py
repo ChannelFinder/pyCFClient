@@ -12,12 +12,9 @@ from channelfinder.Channel import Channel, Property, Tag
 #===============================================================================
 class ConnectionTest(unittest.TestCase):
 
-
-    
-
     def testConnection(self):        
-        baseurl = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder'
-        self.assertNotEqual(ChannelFinderClient(BaseURL=baseurl), None, 'failed to create client')
+#        baseurl = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder'
+        self.assertNotEqual(ChannelFinderClient(), None, 'failed to create client')
         badBaseurl = ['', 'noSuchURL']
         for url in badBaseurl:
             self.assertRaises(Exception, ChannelFinderClient, BaseURL=url, msg='message')
@@ -82,8 +79,7 @@ class JSONparserTest(unittest.TestCase):
 class OperationTest(unittest.TestCase):
     
     def setUp(self):
-        baseurl = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder'
-        self.client = ChannelFinderClient(BaseURL=baseurl, username='boss', password='1234')
+        self.client = ChannelFinderClient()
         pass
     
     def tearDown(self):
@@ -235,7 +231,7 @@ class OperationTest(unittest.TestCase):
         spChannel.Tags = [spTag]
         
         self.client.add(tag=spTag)
-        print self.client.findTag(spTag.Name)
+ #       print self.client.findTag(spTag.Name)
         self.assertNotEqual(self.client.findTag(spTag.Name), None, 'failed to add Tag with special chars')
         self.client.add(property=spProperty)
         self.assertNotEqual(self.client.findProperty(spProperty.Name), None, 'failed to add Property with special chars')
@@ -258,9 +254,8 @@ class OperationTest(unittest.TestCase):
 #  Add Operation Test
 #===============================================================================
 class AddOperationTest(unittest.TestCase):
-    def setUp(self):
-        baseurl = 'https://channelfinder.nsls2.bnl.gov:8181/ChannelFinder'
-        self.client = ChannelFinderClient(BaseURL=baseurl, username='boss', password='1234')
+    def setUp(self):        
+        self.client = ChannelFinderClient()
         self.testChannels = [Channel('pyTestChannel1', 'pyOwner'), \
                         Channel('pyTestChannel2', 'pyOwner'), \
                         Channel('pyTestChannel3', 'pyOwner')]
@@ -339,8 +334,7 @@ class AddOperationTest(unittest.TestCase):
 #===============================================================================
 class UpdateOperationTest(unittest.TestCase):
     def setUp(self):
-        baseurl = 'https://channelfinder.nsls2.bnl.gov:8181/ChannelFinder'
-        self.client = ChannelFinderClient(BaseURL=baseurl, username='boss', password='1234')
+        self.client = ChannelFinderClient()
         orgTag = Tag('originalTag', 'originalOwner');
         orgProp = Property('originalProp', 'originalOwner', 'originalValue');
         self.client.add(tag=orgTag);
@@ -469,8 +463,7 @@ class UpdateOperationTest(unittest.TestCase):
 class QueryTest(unittest.TestCase):
     
     def setUp(self):
-        baseurl = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder'
-        self.client = ChannelFinderClient(BaseURL=baseurl)
+        self.client = ChannelFinderClient()
         pass
 
 
@@ -487,7 +480,7 @@ class QueryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testConnection']
-    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateOperationTest)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+#    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateOperationTest)
+#    unittest.TextTestRunner(verbosity=2).run(suite)
     
-#    unittest.main()
+    unittest.main()

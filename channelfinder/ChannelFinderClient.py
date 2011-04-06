@@ -5,6 +5,7 @@ Created on Feb 15, 2011
 '''
 from lib.restful_lib import Connection
 from copy import copy
+from _conf import _conf
 try: 
     from json import JSONDecoder, JSONEncoder
 except ImportError: 
@@ -33,24 +34,24 @@ class ChannelFinderClient(object):
         '''
         Constructor
         '''
-        try:
-            
-            self.__baseURL = BaseURL
-            self.__userName = username
-            self.__password = password
+        try:            
+            self.__baseURL = self.__getDefaultConfig('BaseURL', BaseURL)
+            self.__userName = self.__getDefaultConfig('username', username)
+            self.__password = self.__getDefaultConfig('password', password)
+#            print 'creating a connection to ', self.__baseURL, self.__userName, self.__password
             self.connection = Connection(self.__baseURL, username=self.__userName, password=self.__password)
             resp = self.connection.request_get('/resources/tags', headers=copy(self.__jsonheader))
             if resp[u'headers']['status'] != '200':
                 print 'error status' + resp[u'headers']['status']
-                raise
-#                raise Exception
-#        raise exception detail instead of bypassing it
         except:
             raise
-#        except Exception:
-#            Exception.message
-#            raise Exception
-    
+
+    def __getDefaultConfig(self, arg, value):
+        if value == None and _conf.has_option('DEFAULT', arg):
+            return _conf.get('DEFAULT', arg)
+        else:
+            return value
+        
     def getAllChannels(self):
         if self.connection:
             resp = self.connection.request_get('/resources/channels', headers=copy(self.__jsonheader))
