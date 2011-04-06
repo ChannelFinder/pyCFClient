@@ -71,14 +71,14 @@ class ChannelFinderClient(object):
         properties = list of Property obj
         
         *** IMP NOTE: Following operation are destructive ***
-        tag = Tag obj + channelName = channelName 
+        tag = Tag obj, channelName = channelName 
         will create and add the specified Tag to the channel with the name = channelName
-        tag = Tag ogj + channelNames = list of channelName 
+        tag = Tag ogj, channelNames = list of channelName 
         will create and add the specified Tag to the channels with the names specified in channelNames
         and remove it from all other channels
-        property = Property obj + channelName = channelName
+        property = Property obj, channelName = channelName
         will create and add the specified Tag to the channel with the name = channelName
-        property = Property obj + channelNames = list of channelName 
+        property = Property obj, channelNames = list of channelName 
         will create and add the specified Tag to the channels with the names specified in channelNames
         and remove it from all other channels
         
