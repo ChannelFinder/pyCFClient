@@ -18,7 +18,7 @@ def __loadConfig():
     dflt={'BaseURL':'http://localhost:8080/ChannelFinder'
         }
     cf=ConfigParser.SafeConfigParser(defaults=dflt)
-    print os.path.normpath(os.path.expanduser('~/channelfinderapi.conf'))
+#    print os.path.normpath(os.path.expanduser('~/channelfinderapi.conf'))
     cf.read([
         '/etc/channelfinderapi.conf',
         os.path.expanduser('~/channelfinderapi.conf'),
