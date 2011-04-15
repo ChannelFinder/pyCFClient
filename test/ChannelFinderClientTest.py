@@ -249,6 +249,13 @@ class OperationTest(unittest.TestCase):
         self.assertTrue(self.client.findTag(spTag.Name) == None)
         self.client.delete(propertyName=spProperty.Name)
         self.assertTrue(self.client.findProperty(spProperty.Name) == None)
+    
+    def testSpaceQuotes(self):
+        spChannel = Channel('\'"Name Name', 'pyOwner')
+        self.client.set(channel=spChannel)
+        self.assertTrue(len(self.client.find(name='\'"Name Name'))==1)
+        self.client.delete(channelName='\'"Name Name')
+        pass
 
 
 #===============================================================================
@@ -534,6 +541,12 @@ class TestUpdateAppend(unittest.TestCase):
         self.assertTrue(len(self.client.find(tagName=self.Tag1.Name))==3)
         pass
     
+    def testUpdateAppendProperty2Channel(self):
+        
+        pass
+    
+    def testUpdateAppendProperty2Channels(self):
+        pass
 
 #===========================================================================
 # Query Tests
