@@ -61,27 +61,29 @@ class ChannelFinderClient(object):
 #        return a None if fail
         return None
 
-    def add(self, **kwds):
+    def set(self, **kwds):
         '''
-        method to allow various types of add operations to add one or many channels, tags or properties\
+        method to allow various types of set operations on one or many channels, tags or properties\
+        The operation creates a new entry is none exists and replaces existing entries.
         channel = single Channel obj
         channels = list of Channel obj
         tag = single Tag obj
         tags = list of Tag obj
         property = single Property obj
         properties = list of Property obj
+            
         
         *** IMP NOTE: Following operation are destructive ***
         tag = Tag obj, channelName = channelName 
-        will create and add the specified Tag to the channel with the name = channelName
+        will create set add the specified Tag to the channel with the name = channelName
         tag = Tag ogj, channelNames = list of channelName 
-        will create and add the specified Tag to the channels with the names specified in channelNames
-        and remove it from all other channels
+        will create set add the specified Tag to the channels with the names specified in channelNames
+        and delete it from all other channels
         property = Property obj, channelName = channelName
-        will create and add the specified Tag to the channel with the name = channelName
+        will create set add the specified Tag to the channel with the name = channelName
         property = Property obj, channelNames = list of channelName 
-        will create and add the specified Tag to the channels with the names specified in channelNames
-        and remove it from all other channels
+        will create set add the specified Tag to the channels with the names specified in channelNames
+        and delete it from all other channels
         
         '''
         if not self.connection:
@@ -95,31 +97,21 @@ class ChannelFinderClient(object):
     def __hadleSingleAddParameter(self, **kwds):
         if 'channel' in kwds :
             ch = kwds['channel']
-#            print JSONEncoder().encode(self.encodeChannel(ch))
-#            print self.__channelsResource + '/' + ch.Name
-#            b = '{"channels": {"channel": {"@name": "pyChannelName", "@owner": "pyChannelOwner"}}}'
-#            response = self.connection.request_put(self.__channelsResource + '/' + ch.Name, body=JSONEncoder().encode(self.encodeChannels([ch])), headers=copy(self.__jsonheader))
             response = self.connection.request_put(self.__channelsResource + '/' + ch.Name, \
                                                    body=JSONEncoder().encode(self.encodeChannel(ch)), \
                                                    headers=copy(self.__jsonheader))
-#            print response
             self.__checkResponseState(response)
         elif 'channels' in kwds :
-#            print JSONEncoder().encode(self.encodeChannels(kwds['channels']))
             response = self.connection.request_post(self.__channelsResource, \
                                                    body=JSONEncoder().encode(self.encodeChannels(kwds['channels'])), \
                                                    headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'tag' in kwds:
-#            print self.__tagsResource + '/' + kwds['tag'].Name
-#            print JSONEncoder().encode(self.encodeTag(kwds['tag']))
             response = self.connection.request_put(self.__tagsResource + '/' + kwds['tag'].Name, \
                                                    body=JSONEncoder().encode(self.encodeTag(kwds['tag'])), \
                                                    headers=copy(self.__jsonheader))
-#            print response
             self.__checkResponseState(response)
         elif 'tags' in kwds:
-#            print JSONEncoder().encode({'tags':{'tag':self.encodeTags(kwds['tags'])}})
             response = self.connection.request_post(self.__tagsResource, \
                                                     body=JSONEncoder().encode({'tags':{'tag':self.encodeTags(kwds['tags'])}}), \
                                                     headers=copy(self.__jsonheader))
@@ -140,7 +132,7 @@ class ChannelFinderClient(object):
             raise Exception, 'Incorrect Usage: unknown key'   
     
     def __handleMultipleAddParameters(self, **kwds):
-        # add a tag to a channel
+        # set a tag to a channel
         if 'tag' in kwds and 'channelName' in kwds:
             channels = [Channel(kwds['channelName'], self.__userName, tags=[kwds['tag']])]
             response = self.connection.request_put(self.__tagsResource + '/' + kwds['tag'].Name, \
@@ -286,7 +278,7 @@ class ChannelFinderClient(object):
         if self.__checkResponseState(r):
             return self.decodeProperties(JSONDecoder().decode(r[u'body']))
         
-    def remove(self, **kwds):
+    def delete(self, **kwds):
         '''
         Method to delete a channel, property, tag
         channelName = name of channel to be removed
@@ -294,24 +286,24 @@ class ChannelFinderClient(object):
         propertyName = property name of property to be removed from all channels
         
         tag = Tag obj + channelName = channelName 
-        -remove the tag from the specified channel
+        -delete the tag from the specified channel
         tag = Tag ogj + channelNames = list of channelName 
-        - remove the tag from all the channels specified in the channelNames list
+        - delete the tag from all the channels specified in the channelNames list
         property = Property obj + channelName = channelName
-        - remove the property from the specified channel
+        - delete the property from the specified channel
         roperty = Property obj + channelNames = list of channelName 
-        - remove the property from all the channels in the channelNames list
+        - delete the property from all the channels in the channelNames list
         '''
         if not self.connection:
             raise Exception, 'Connection not created'
         if len(kwds) == 1:
-            self.__handleSingleRemoveParameter(**kwds)
+            self.__handleSingleDeleteParameter(**kwds)
         elif len(kwds) == 2:
-            self.__handleMultipleRemoveParameters(**kwds)
+            self.__handleMultipleDeleteParameters(**kwds)
         else:
             raise Exception, 'incorrect usage: Delete a single Channel/tag/property'
     
-    def __handleSingleRemoveParameter(self, **kwds):
+    def __handleSingleDeleteParameter(self, **kwds):
         if 'channelName' in kwds:
             url = self.__channelsResource + '/' + kwds['channelName']
             response = self.connection.request_delete(url, headers=copy(self.__jsonheader))   
@@ -330,7 +322,7 @@ class ChannelFinderClient(object):
         else:
             raise Exception, ' unkown key use channelName, tagName or proprtyName'
     
-    def __handleMultipleRemoveParameters(self, **kwds):
+    def __handleMultipleDeleteParameters(self, **kwds):
         if 'tag' in kwds and 'channelName' in kwds:
             response = self.connection.request_delete(self.__tagsResource + '/' + kwds['tag'].Name + '/' + kwds['channelName'], \
                                                      headers=copy(self.__jsonheader))
@@ -338,9 +330,9 @@ class ChannelFinderClient(object):
         elif 'tag' in kwds and 'channelNames' in kwds:
             # find channels with the tag
             channelsWithTag = self.find(tagName=kwds['tag'].Name)
-            # remove channels from which tag is to be removed
+            # delete channels from which tag is to be removed
             channelNames = [channel.Name for channel in channelsWithTag if channel.Name not in  kwds['channelNames']]
-            self.add(tag=kwds['tag'], channelNames=channelNames)
+            self.set(tag=kwds['tag'], channelNames=channelNames)
         elif 'property' in kwds and 'channelName' in kwds:
             response = self.connection.request_delete(self.__propertiesResource + '/' + kwds['property'].Name + '/' + kwds['channelName'], \
                                                       headers=copy(self.__jsonheader))
@@ -348,7 +340,7 @@ class ChannelFinderClient(object):
         elif 'property' in kwds and 'channelNames' in kwds:
             channelsWithProp = self.find(property=[(kwds['property'].Name, '*')])
             channelNames = [channel.Name for channel in channelsWithProp if channel.Name not in kwds['channelNames']]
-            self.add(property=kwds['property'], channelNames=channelNames)        
+            self.set(property=kwds['property'], channelNames=channelNames)        
         else:
             raise Exception, ' unkown keys'
 
@@ -357,39 +349,67 @@ class ChannelFinderClient(object):
 #===============================================================================
     def update(self, **kwds):
         '''
-        channel = the new channel obj
-        originalChannelName = the original name of the channel to be updated
-        if not specified the name is extracted from the channel obj
-        
+        channel = the new channel obj        
         property = the new property obj
-        originalPropertyName = the original name of the property to be updated
-        if not specified the name is extracted from the property obj
+        tag = the new Tag obj
+        
+        channel = new Channel obj, originalChannelName = name of the original channel to be updated
+        property = new property obj, originalPropertyName = the original name of the property to be updated
+        tab = new tag object, originalTagName = name of the original tag to be updated
         '''
-        if len(kwds) != 2:
-            raise Exception, 'incorrect usage'
+        
+        if not self.connection:
+            raise Exception, 'Connection not created'
+        if len(kwds) == 1:
+            self.__handleSingleUpdateParameter(**kwds)
+        elif len(kwds) == 2:
+            self.__handleMultipleUpdateParameters(**kwds)
+        else:
+            raise Exception, 'incorrect usage: '
+    
+    def __handleSingleUpdateParameter(self, **kwds):
         if 'channel' in kwds:
             ch = kwds['channel']
-            channelName = ch.Name
-            if 'originalChannelName' in kwds:
-                channelName = kwds['originalChannelName']
-            url = self.__channelsResource + '/' + channelName
-            try:
-                response = self.connection.request_post(url, \
-                                                        body=JSONEncoder().encode(self.encodeChannel(ch)) , \
-                                                        headers=copy(self.__jsonheader))                
-            except Exception:
-                print Exception
+            response = self.connection.request_post(self.__channelsResource + '/' + ch.Name, \
+                                                    body=JSONEncoder().encode(self.encodeChannel(ch)), \
+                                                    headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'property' in kwds:
+            property = kwds['property']
+            response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
+                                                    body=JSONEncoder().encode(self.encodeProperty(property)), \
+                                                    headers=copy(self.__jsonheader))
+            self.__checkResponseState(response)
+        elif 'tag' in kwds:
+            tag = kwds['tag']
+            response = self.connection.request_post(self.__tagsResource + '/' + tag.Name, \
+                                                    body=JSONEncoder().encode(self.encodeTag(tag)), \
+                                                    headers=copy(self.__jsonheader))
+        else:
+            raise Exception, ' unkown key '
+        
+    def __handleMultipleUpdateParameters(self, **kwds):        
+        if 'originalChannelName' in kwds and 'channel' in kwds:
+            ch = kwds['channel']
+            channelName = kwds['originalChannelName']
+            response = self.connection.request_post(self.__channelsResource + '/' + channelName, \
+                                                    body=JSONEncoder().encode(self.encodeChannel(ch)) , \
+                                                    headers=copy(self.__jsonheader))                
+            self.__checkResponseState(response)
+        elif 'originalPropertyName' in kwds and 'property' in kwds:
             prop = kwds['property']
-            propName = prop.Name
-            if 'originalPropertyName' in kwds:
-                propName = kwds['originalPropertyName']
-                print JSONEncoder().encode(self.encodeProperty(prop))
-            url = self.__propertiesResource + '/' + propName
-            response = self.connection.request_post(url, \
+            propName = kwds['originalPropertyName']
+            response = self.connection.request_post(self.__propertiesResource + '/' + propName, \
                                                     body=JSONEncoder().encode(self.encodeProperty(prop)), \
                                                     headers=copy(self.__jsonheader))
+            self.__checkResponseState(response)
+        elif 'originalTagName' in kwds and 'tag' in kwds: 
+            tag = kwds['tag']
+            tagName = kwds['originalTagName']
+            response = self.connection.request_post(self.__tagsResource+'/'+tagName, \
+                                                    body=JSONEncoder().encode(self.encodeTag(tag)), \
+                                                    headers=copy(self.__jsonheader))
+            print response
             self.__checkResponseState(response)
         else:
             raise Exception, ' unkown keys'

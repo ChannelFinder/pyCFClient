@@ -36,7 +36,7 @@ def addProps(cf):
     properties = []
     
     # connect to server is time-consuming
-    # A bad example to add multiple properties
+    # A bad example to set multiple properties
 #    beg = time.time()
 #    if cf.findProperty('dev_type') == None:
 #        properties.append(Property('dev_type', 'vioc'))
@@ -87,7 +87,7 @@ def addProps(cf):
 #    print ('%.6f' % (end1 - beg1))
 
     if len(properties) > 0:
-        cf.add(properties=properties)
+        cf.set(properties=properties)
     else:
         print 'all properties are in database already.'
 
@@ -149,14 +149,14 @@ if __name__ == '__main__':
                     channels.append(Channel((u'%s' %results[1]), 'vioc', properties=buildProps(results, results[1], 'readback')))
                     #name = u'%s' % result[1]
                     #channels.append(Channel(name, 'vioc', properties=buildProps(results, results[1], 'readback')))
-                    #client.add(channel = Channel((u'%s' %results[1]), 'vioc', properties=buildProps(results, results[1], 'readback')))
+                    #client.set(channel = Channel((u'%s' %results[1]), 'vioc', properties=buildProps(results, results[1], 'readback')))
                 if results[2] != 'NULL':
                     channels.append(Channel((u'%s' %results[2]), 'vioc', properties=buildProps(results, results[2], 'setpoint')))
                     #name = u'%s' % result[2]
                     #channels.append(Channel(name, 'vioc', properties=buildProps(results, results[2], 'readback')))
-                    #client.add(channel = Channel((u'%s' %results[2]), 'vioc', properties=buildProps(results, results[2], 'setpoint')))
+                    #client.set(channel = Channel((u'%s' %results[2]), 'vioc', properties=buildProps(results, results[2], 'setpoint')))
         beg = time.time()
-        client.add(channels=channels)
+        client.set(channels=channels)
         end = time.time()
         print ('%.6f' % (end-beg))
     finally:

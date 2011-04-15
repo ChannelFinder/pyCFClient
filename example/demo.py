@@ -29,23 +29,23 @@ from channelfinder.Channel import Tag
 if __name__ == '__main__':
     cf = ChannelFinderClient(BaseURL = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder', username='boss', password='1234')
     
-    # add one tag
+    # set one tag
     tag = Tag('example1', 'vioc')
-    cf.add(tag=tag)
+    cf.set(tag=tag)
     
-    # add a set of tags
+    # set a set of tags
     tags = [Tag('example2', 'vioc'), Tag('example3', 'vioc'), Tag('example4', 'vioc'), Tag('example5', 'vioc')]
-    cf.add(tags=tags)
+    cf.set(tags=tags)
     
     channels = cf.find(name='SR*')
     channelNames = [channel.Name for channel in channels]
     
-    # add a tag to many channels
-    cf.add(tag=tag, channelNames=channelNames)
+    # set a tag to many channels
+    cf.set(tag=tag, channelNames=channelNames)
     
-    # add tags to many channels
+    # set tags to many channels
     for tag in tags:
-        cf.add(tag=tag, channelNames=channelNames)
+        cf.set(tag=tag, channelNames=channelNames)
 
     # retrieve channel, properties, and tags
 #    channels = cf.find(name='SR*')
