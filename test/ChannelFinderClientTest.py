@@ -271,7 +271,10 @@ class SetOperationTest(unittest.TestCase):
         pass
     
     def testSetRemoveTag2Channel(self):
-        # set tag to channel removing it from all other channels
+        ''' 
+        Set Tag to channel removing it from all other channels
+        for non destructive operation check TestUpdateAppend
+        '''
         testTag = Tag('pySetTag', 'boss')
         self.client.set(tag=testTag, channelName=self.testChannels[0].Name)
         self.assertTrue(testTag in self.client.find(name='pyTestChannel1')[0].Tags, \
@@ -306,7 +309,7 @@ class SetOperationTest(unittest.TestCase):
        
     def __checkTagExists(self, channelName, tag):
         '''
-        utility method which return ture is channelName contains tag
+        utility method which return true is channelName contains tag
         '''
         ch = self.client.find(name=channelName)[0]
         if ch.Tags != None and tag in ch.Tags:
@@ -316,6 +319,10 @@ class SetOperationTest(unittest.TestCase):
     
     
     def testSetRemoveProperty2Channel(self):
+        '''
+        Set Property on a channel and remove it from all others
+        **Destructive operation for non destructive addition of properties check TestUpdateAppend
+        '''
         testProperty = Property('pySetProp', 'pyOwner')
         chName = self.testChannels[0].Name
         self.client.set(property=testProperty, channelName=chName)
@@ -376,7 +383,9 @@ class SetOperationTest(unittest.TestCase):
         self.client.delete(propertyName=prop2.Name)
         pass
     
-
+#===============================================================================
+# 
+#===============================================================================
     
 #===============================================================================
 # Update Opertation Tests
@@ -490,14 +499,39 @@ class UpdateOperationTest(unittest.TestCase):
 # Update operations to append tags and properties
 #===============================================================================
 
-class TestUpdateAppend():
+class TestUpdateAppend(unittest.TestCase):
+    
     def setUp(self):
+        self.client = ChannelFinderClient()
+        self.Tag1 = Tag('tag1', 'owner')
+        self.Tag2 = Tag('tag2', 'owner')
+        self.ch1 = Channel('orgChannel1', 'orgOwner', tags=[self.Tag1, self.Tag2])
+        self.ch2 = Channel('orgChannel2', 'orgOwner', tags=[self.Tag2])
+        self.ch3 = Channel('orgChannel3', 'orgOwner')
+        self.channels = [self.ch1, self.ch2, self.ch3]
+        self.client.set(tags=[self.Tag1,self.Tag2])
+        self.client.set(channels=self.channels)
+        # originally 1 channel has tag Tag1 and 2 channels have tag Tag2
+        self.assertTrue(len(self.client.find(tagName=self.Tag1.Name))==1)
+        self.assertTrue(len(self.client.find(tagName=self.Tag2.Name))==2)     
         pass
     
     def tearDown(self):
+        self.client.delete(tagName=self.Tag1.Name)
+        self.client.delete(tagName=self.Tag2.Name)
+        for channel in self.channels:
+            self.client.delete(channelName=channel.Name)
+        self.assertTrue(self.client.find(name='orgChannel?')==None)
         pass
     
     def testUpdateAppendTag2Channel(self):
+        # Add tag to channel3 without removing it from the first 2 channels
+        self.client.update(tag=self.Tag2, channelName=self.ch3.Name)
+        self.assertTrue(len(self.client.find(tagName=self.Tag2.Name))==3)
+        # Add tag to channels 2-3 without removing it from channel 1
+        channelNames = [ channel.Name for channel in self.channels]
+        self.client.update(tag=self.Tag1, channelNames=channelNames)
+        self.assertTrue(len(self.client.find(tagName=self.Tag1.Name))==3)
         pass
     
 

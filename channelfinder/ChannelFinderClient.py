@@ -74,6 +74,8 @@ class ChannelFinderClient(object):
             
         
         *** IMP NOTE: Following operation are destructive ***
+        *** if you simply want to append a tag or property use the update operation***
+        
         tag = Tag obj, channelName = channelName 
         will create set add the specified Tag to the channel with the name = channelName
         tag = Tag ogj, channelNames = list of channelName 
@@ -349,10 +351,16 @@ class ChannelFinderClient(object):
 #===============================================================================
     def update(self, **kwds):
         '''
-        channel = the new channel obj        
+        channel = the new channel obj
         property = the new property obj
         tag = the new Tag obj
-                
+        
+        tag = tag obj, channelName = String channel name
+        Add tag to channel with name channelName
+        tag = tag obj, channelNames = list of channelNames
+        Add tag to channels with names in channeNames
+        
+        ## RENAME OPERATIONS ##       
         channel = new Channel obj, originalChannelName = name of the original channel to be updated
         property = new property obj, originalPropertyName = the original name of the property to be updated
         tab = new tag object, originalTagName = name of the original tag to be updated
@@ -388,8 +396,24 @@ class ChannelFinderClient(object):
         else:
             raise Exception, ' unkown key '
         
-    def __handleMultipleUpdateParameters(self, **kwds):        
-        if 'originalChannelName' in kwds and 'channel' in kwds:
+    def __handleMultipleUpdateParameters(self, **kwds):
+        if 'tag' in kwds and 'channelName' in kwds:
+            tag = kwds['tag']
+            channels = [Channel(kwds['channelName'], self.__userName)]
+            response = self.connection.request_post(self.__tagsResource+'/'+tag.Name, \
+                                                    body=JSONEncoder().encode(self.encodeTag(tag, withChannels=channels)), \
+                                                    headers=copy(self.__jsonheader))
+            self.__checkResponseState(response) 
+        elif 'tag' in kwds and 'channelNames' in kwds:
+            tag = kwds['tag']
+            channels = []
+            for eachChannel in kwds['channelNames']:
+                channels.append(Channel(eachChannel, self.__userName))
+            response = self.connection.request_post(self.__tagsResource+'/'+tag.Name, \
+                                                    body=JSONEncoder().encode(self.encodeTag(tag, withChannels=channels)), \
+                                                    headers=copy(self.__jsonheader))
+            self.__checkResponseState(response)                                
+        elif 'originalChannelName' in kwds and 'channel' in kwds:
             ch = kwds['channel']
             channelName = kwds['originalChannelName']
             response = self.connection.request_post(self.__channelsResource + '/' + channelName, \
