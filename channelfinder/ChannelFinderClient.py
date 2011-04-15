@@ -352,7 +352,7 @@ class ChannelFinderClient(object):
         channel = the new channel obj        
         property = the new property obj
         tag = the new Tag obj
-        
+                
         channel = new Channel obj, originalChannelName = name of the original channel to be updated
         property = new property obj, originalPropertyName = the original name of the property to be updated
         tab = new tag object, originalTagName = name of the original tag to be updated

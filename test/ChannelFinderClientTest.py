@@ -271,14 +271,18 @@ class SetOperationTest(unittest.TestCase):
         pass
     
     def testSetRemoveTag2Channel(self):
-        # set tag to channel
+        # set tag to channel removing it from all other channels
         testTag = Tag('pySetTag', 'boss')
         self.client.set(tag=testTag, channelName=self.testChannels[0].Name)
         self.assertTrue(testTag in self.client.find(name='pyTestChannel1')[0].Tags, \
                         'Error: Tag-pySetTag not added to the channel-pyTestChannel1')
-        self.client.delete(tag=testTag, channelName=self.testChannels[0].Name)
-        self.assertTrue(self.client.find(name='pyTestChannel1')[0].Tags == None or \
-                         testTag not in self.client.find(name='pyTestChannel1')[0].Tags, \
+        self.client.set(tag=testTag, channelName=self.testChannels[1].Name)
+        # check if the tag has been added to the new channel and removed from the old channel
+        self.assertTrue(self.__checkTagExists(self.testChannels[1].Name, testTag) and 
+                        not self.__checkTagExists(self.testChannels[0].Name, testTag), \
+                        'Error: Tag-pySetTag not added to the channel-pyTestChannel2')
+        self.client.delete(tag=testTag, channelName=self.testChannels[1].Name)
+        self.assertTrue(not self.__checkTagExists(self.testChannels[1].Name, testTag), \
                           'Error: Failed to delete the tag-pySetTag from channel-pyTestChannel1')
         pass
     
@@ -300,6 +304,17 @@ class SetOperationTest(unittest.TestCase):
                 self.assertFalse(ch in responseChannelNames, 'Error: tag-pySetTag not removed from channel ' + ch)
         pass
        
+    def __checkTagExists(self, channelName, tag):
+        '''
+        utility method which return ture is channelName contains tag
+        '''
+        ch = self.client.find(name=channelName)[0]
+        if ch.Tags != None and tag in ch.Tags:
+            return True
+        else:
+            return False
+    
+    
     def testSetRemoveProperty2Channel(self):
         testProperty = Property('pySetProp', 'pyOwner')
         chName = self.testChannels[0].Name
@@ -314,7 +329,7 @@ class SetOperationTest(unittest.TestCase):
                          [property.Name for property in  self.client.find(name=chName)[0].Properties], \
                         'Error: Property-pySetProp not removed from the channel-' + chName)
         pass
-    
+
     def testSetRemoveProperty2Channels(self):
         testProperty = Property('pySetProp', 'pyOwner', '55')
         channelNames = [channel.Name for channel in self.testChannels]
@@ -329,6 +344,39 @@ class SetOperationTest(unittest.TestCase):
             for ch in channelNames :
                 self.assertFalse(ch in responseChannelNames, 'Error: tag-pySetTag not removed from channel ' + ch)
         pass
+    
+       
+    def testSetChannels(self):
+        '''
+        This method creates a set of channels and then updates the property values
+        using the set method with the channels parameter.
+        '''
+        prop1 = Property('originalProp1', 'originalOwner', value='originalVal')
+        prop2 = Property('originalProp2', 'originalOwner', value='originalVal')
+        ch1 = Channel('orgChannel1', 'orgOwner', properties=[prop1, prop2])
+        ch2 = Channel('orgChannel2', 'orgOwner', properties=[prop1, prop2])
+        ch3 = Channel('orgChannel3', 'orgOwner', properties=[prop1])
+        channels = [ch1, ch2, ch3]
+        self.client.set(property=prop1)
+        self.client.set(property=prop2)
+        self.client.set(channels=channels)
+        chs = self.client.find(property=[('originalProp1', 'originalVal'), ('originalProp2', 'originalVal')])
+        self.assertTrue(len(chs) == 2)
+#        for p in chs[0].Properties:
+#            if len(p) == 2: 
+#                p[1] = 'newVal'
+        for ch in chs:
+            if (ch.Properties[0]).Name == 'originalProp1':
+                (ch.Properties[0]).Value = 'newVal'
+        self.client.set(channels=chs)
+        self.assertTrue(len(self.client.find(property=[('originalProp1', 'newVal')])) == 2, 'failed to update prop value')
+        for ch in channels:
+            self.client.delete(channelName=ch.Name)
+        self.client.delete(propertyName=prop1.Name)
+        self.client.delete(propertyName=prop2.Name)
+        pass
+    
+
     
 #===============================================================================
 # Update Opertation Tests
@@ -431,42 +479,27 @@ class UpdateOperationTest(unittest.TestCase):
         self.client.update(originalChannelName='updatedChannelName', \
                            channel=ch)
         pass
-    
-    def testUpdateChannels(self):
-        '''
-        This methid creates a set of channels and then updates the property values
-        using the set methos with the channels parameter.
-        '''
-        prop1 = Property('originalProp1', 'originalOwner', value='originalVal')
-        prop2 = Property('originalProp2', 'originalOwner', value='originalVal')
-        ch1 = Channel('orgChannel1', 'orgOwner', properties=[prop1, prop2])
-        ch2 = Channel('orgChannel2', 'orgOwner', properties=[prop1, prop2])
-        ch3 = Channel('orgChannel3', 'orgOwner', properties=[prop1])
-        channels = [ch1, ch2, ch3]
-        self.client.set(property=prop1)
-        self.client.set(property=prop2)
-        self.client.set(channels=channels)
-        chs = self.client.find(property=[('originalProp1', 'originalVal'), ('originalProp2', 'originalVal')])
-        self.assertTrue(len(chs) == 2)
-#        for p in chs[0].Properties:
-#            if len(p) == 2: 
-#                p[1] = 'newVal'
-        for ch in chs:
-            if (ch.Properties[0]).Name == 'originalProp1':
-                (ch.Properties[0]).Value = 'newVal'
-        self.client.set(channels=chs)
-        self.assertTrue(len(self.client.find(property=[('originalProp1', 'newVal')])) == 2, 'failed to update prop value')
-        for ch in channels:
-            self.client.delete(channelName=ch.Name)
-        self.client.delete(propertyName=prop1.Name)
-        self.client.delete(propertyName=prop2.Name)
-        pass
-    
+ 
     def tearDown(self):
         self.client.delete(channelName='originalChannelName')
         self.client.delete(tagName='originalTag')
         self.client.delete(propertyName='originalProp')
         pass
+
+#===============================================================================
+# Update operations to append tags and properties
+#===============================================================================
+
+class TestUpdateAppend():
+    def setUp(self):
+        pass
+    
+    def tearDown(self):
+        pass
+    
+    def testUpdateAppendTag2Channel(self):
+        pass
+    
 
 #===========================================================================
 # Query Tests
