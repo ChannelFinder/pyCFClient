@@ -34,7 +34,10 @@ class Test(unittest.TestCase):
         self.assertEqual(tags, channel.Tags)
         pass
     
-    def testImmutability(self):
+    def Immutability(self):
+        '''
+        removed test cause the ability to add property and tag list is required.
+        '''
         channel = Channel('ChannelName', 'ChannelOwner')
         self.assertRaises(AttributeError, channel.Properties, [])
         self.assertRaises(AttributeError, channel.Tags, [])
@@ -42,7 +45,7 @@ class Test(unittest.TestCase):
 class ErrorTest(unittest.TestCase):   
     
     def setUp(self):
-        self.testChannel = Channel('ChannelName', 'ChannelOwner')     
+        self.testChannel = Channel('ChannelName', 'ChannelOwner',properties=[],tags=[])     
         pass
 
     def tearDown(self):
