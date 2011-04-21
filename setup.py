@@ -11,5 +11,6 @@ setup(name='channelfinder',
       description='Python ChannelFinder Client Lib',
       author='Kunal Shroff',
       author_email='shroffk@bnl.gov',
-      packages = find_packages()
+      packages=find_packages(),
+      scripts=['cf-update-ioc']
      )
