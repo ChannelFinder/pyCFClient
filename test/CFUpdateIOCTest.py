@@ -6,7 +6,7 @@ Created on Apr 5, 2011
 import unittest
 from channelfinder.Channel import Channel, Property
 from channelfinder.ChannelFinderClient import ChannelFinderClient
-from channelfinder.cfUpdate.CFUpdateIOCList import getArgsFromFilename, updateChannelFinder, ifNoneReturnDefault
+from channelfinder.cfUpdate.CFUpdateIOC import getArgsFromFilename, updateChannelFinder, ifNoneReturnDefault
 from time import time
 
 class Test(unittest.TestCase):
