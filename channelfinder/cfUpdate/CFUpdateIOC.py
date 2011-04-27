@@ -57,12 +57,13 @@ def updateChannelFinder(pvNames, hostName, iocName, \
     if previousChannelsList != None:
         for ch in previousChannelsList:
             if pvNames != None and ch.Name in pvNames:
-                channels.append(createChannel(ch.Name, ch.Owner, \
+                channels.append(updateChannel(ch, \
                                               hostName=hostName, \
                                               iocName=iocName))
                 pvNames.remove(ch.Name)
             elif pvNames == None or ch.Name not in pvNames:
-                channels.append(createChannel(ch.Name, ch.Owner))
+                #  orphan the channel
+                channels.append(updateChannel(ch))
     # now pvNames contains a list of pv's new on this host/ioc
     for pv in pvNames:
         ch = client.find(name=pv)
@@ -72,11 +73,26 @@ def updateChannelFinder(pvNames, hostName, iocName, \
                                           hostName=hostName, \
                                           iocName=iocName))
         elif ch[0] != None:
-            channels.append(createChannel(pv, 'dbUpdate', \
+            # update existing channel
+            channels.append(updateChannel(ch[0], \
                                           hostName=hostName, \
                                           iocName=iocName))
     client.set(channels=channels)
-    pass
+
+def updateChannel(channel, hostName=None, iocName=None):
+    '''
+    Helper to update a channel object so as to not affect the existing properties
+    '''
+    if isinstance(channel, Channel):
+        # properties list devoid of hostName and iocName properties
+        properties = [property for property in channel.Properties \
+                      if property.Name != 'hostName' and property.Name != 'iocName']
+        if hostName != None:
+            properties.append(Property('hostName', 'dbUpdate', hostName))
+        if iocName != None:
+            properties.append(Property('iocName', 'dbUpdate', iocName))
+        channel.Properties = properties
+        return channel
 
 def createChannel(chName, chOwner, hostName=None, iocName=None):
     '''

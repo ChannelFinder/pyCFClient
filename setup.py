@@ -6,6 +6,8 @@ Created on Apr 4, 2011
 
 from setuptools import setup, find_packages
 
+print find_packages()
+
 setup(name='channelfinder',
       version='1.0',
       description='Python ChannelFinder Client Lib',

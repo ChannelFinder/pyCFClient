@@ -79,6 +79,34 @@ class Test(unittest.TestCase):
         client.delete(channelName='cf-update-pv2')
         pass
     
+    def testAddUpdateChannelsWithProperties(self):
+        '''
+        This is to check that existing properties of channels are not affected.
+        '''
+        unaffectedProperty = Property('unaffectedProperty', 'boss', 'unchanged')
+        # create default client
+        client = ChannelFinderClient()
+        client.set(property=unaffectedProperty)
+        
+        # add new pv's
+        t1 = str(time())
+        hostName1 = 'update-test-hostname' + t1
+        iocName1 = 'update-test-iocName' + t1
+        # New Channels added
+        client.set(channel=Channel('cf-update-pv1', 'boss', properties=[unaffectedProperty]))
+        updateChannelFinder(['cf-update-pv1', 'cf-update-pv2'], \
+                            hostName1, \
+                            iocName1)
+        channels = client.find(property=[('hostName', hostName1), ('iocName', iocName1)])
+        self.assertTrue(len(channels) == 2, 'failed to create the channels with appropriate properties')
+        channels = client.find(name='cf-update-pv1')
+        self.assertTrue(len(channels) == 1)
+        self.assertTrue(len(channels[0].Properties) == 3)
+        # Cleanup
+        client.delete(channelName='cf-update-pv1')
+        client.delete(channelName='cf-update-pv2')
+        
+        
     def testNoneCheck(self):
         self.assertTrue(ifNoneReturnDefault('Value', 'default') == 'Value')
         self.assertTrue(ifNoneReturnDefault(None, 'default') == 'default')
