@@ -66,15 +66,20 @@ class ChannelFinderClient(object):
         method to allow various types of set operations on one or many channels, tags or properties
         The operation creates a new entry if none exists and destructively replaces existing entries.
         set(channel = Channel)
-        >>> set(channel=Channel('channelName', 'channelOwner'))        
+        >>> set(channel=Channel('channelName', 'channelOwner'))
+        
         set(channels = [Channel])
         >>> set(channels=[Channel('chName1','chOwner'),Channel('chName2','chOwner')])
+        
         set(tag = Tag)
         >>> set(tag=Tag('tagName','tagOwner'))
+        
         set(tags = [Tag])
         >>> set(tags=[Tag('tag1','tagOwner'),Tag('tag2','tagOwner')])
+        
         set(property = Property )
         >>> set(property=Property('propertyName','propertyOwner','propertyValue'))
+        
         set(properties = [Property])
         >>> set(properties=[Property('prop1','propOwner'),'prop2','propOwner']) 
                    
@@ -85,15 +90,18 @@ class ChannelFinderClient(object):
         >>> set(tag=Tag('tagName','tagOwner), channelName='chName')
         # will create/replace specified Tag
         # and add it to the channel with the name = channelName
+        
         set(tag=Tag, channelNames=[String])
         >>> set (tag=Tag('tagName','tagOwner), channelNames=['ch1','ch2','ch3'])
         # will create/replace the specified Tag 
         # and add it to the channels with the names specified in channelNames
         # and delete it from all other channels
+        
         set(property=Property, channelName=String)
         >>> set(property=Property('propName','propOwner','propValue'), channelName='channelName')
         # will create/replace the specified Property 
         # and add it to the channel with the name = channelName
+        
         set(property=Property, channelNames=[String])
         >>> set(property=Property('propName','propOwner','propValue'), channelNames=[String])
         # will create/replace the specified Property
@@ -196,8 +204,10 @@ class ChannelFinderClient(object):
         find(name = channelNamePattern)
         >>> find(name='*')
         >>> find(name='SR:C01*')
+        
         find(tagName = tagNamePattern)
         >>> find(tagName = 'myTag')
+        
         find(property = [(propertyName,propertyValuePattern)])
         >>> find(property=[('position','*')])
         >>> find(property=[('position','*'),('cell','')])
@@ -303,9 +313,11 @@ class ChannelFinderClient(object):
         Method to delete a channel, property, tag
         delete(channelName = String)
         >>> delete(channelName = 'ch1')
+        
         delete(tagName = String)
         >>> delete(tagName = 'myTag')
         # tagName = tag name of the tag to be removed from all channels
+        
         delete(propertyName = String)
         >>> delete(propertyName = 'position')
         # propertyName = property name of property to be removed from all channels
@@ -313,12 +325,15 @@ class ChannelFinderClient(object):
         delete(tag = Tag ,channelName = String)
         >>> delete(tag=Tag('myTag','tagOwner'), channelName = 'chName') 
         # delete the tag from the specified channel _chName_
+        
         delete(tag = Tag ,channelNames = [String])
         >>> delete(tag=Tag('myTag','tagOwner'), channelNames=['ch1','ch2','ch3'])
         # delete the tag from all the channels specified in the channelNames list
+        
         delete(property = Property ,channelName = String)
         >>> delete(property = Property('propName','propOwner') ,channelName = 'chName')
         # delete the property from the specified channel
+        
         delete(property = Property ,channelNames = [String])
         >>> delete(property = Property('propName','propOwner') ,channelNames = ['ch1','ch2','ch3'])
         # delete the property from all the channels in the channelNames list
@@ -387,6 +402,7 @@ class ChannelFinderClient(object):
                                      tags=[Tag('mytag','tagOwner')])
         # updates the channel 'existingCh' with the new provided properties and tags 
         # without affecting the other tags and properties of this channel 
+        
         update(property = Property)
         update(tag = Tag)
         
@@ -394,6 +410,7 @@ class ChannelFinderClient(object):
         >>> update(tag = Tag('myTag','tagOwner'), channelName='chName')
         # Add tag to channel with name chName
         # without affecting the other channels using this tag
+        
         update(tag = Tag, channelNames = [String])
         >>> update(tag = Tag('tagName'), channelNames=['ch1','ch2','ch3'])
         # Add tag to channels with names in the list channeNames
@@ -404,11 +421,13 @@ class ChannelFinderClient(object):
         >>> update(channel = Channel('newChannelName','channelOwner), 
                                      originalChannelName = 'oldChannelName')
         # rename the channel 'oldChannelName' to 'newChannelName'
+        
         update(property = Property, originalPropertyName = String)
         >>> update(property = Property('newPropertyName','propOwner'), 
                                        originalPropertyName = 'oldPropertyName')
         # rename the property 'oldPropertyName' to 'newPropertyName'
         # the channels with the old property are also updated
+        
         update(tab = Tag, originalTagName = String)
         >>> update(tab = Tag('newTagName','tagOwner'), originalTagName = 'oldTagName')
         # rename the tag 'oldTagName' to 'newTagName'
