@@ -64,28 +64,41 @@ class ChannelFinderClient(object):
     def set(self, **kwds):
         '''
         method to allow various types of set operations on one or many channels, tags or properties\
-        The operation creates a new entry is none exists and replaces existing entries.
-        channel = single Channel obj
-        channels = list of Channel obj
-        tag = single Tag obj
-        tags = list of Tag obj
-        property = single Property obj
-        properties = list of Property obj
-            
-        
+        The operation creates a new entry if none exists and destructively replaces existing entries.
+        set(channel = Channel)
+        >>> set(channel=Channel('channelName', 'channelOwner'))        
+        set(channels = [Channel])
+        >>> set(channels=[Channel('chName1','chOwner'),Channel('chName2','chOwner')])
+        set(tag = Tag)
+        >>> set(tag=Tag('tagName','tagOwner'))
+        set(tags = [Tag])
+        >>> set(tags=[Tag('tag1','tagOwner'),Tag('tag2','tagOwner')])
+        set(property = Property )
+        >>> set(property=Property('propertyName','propertyOwner','propertyValue'))
+        set(properties = [Property])
+        >>> set(properties=[Property('prop1','propOwner'),'prop2','propOwner']) 
+                   
         *** IMP NOTE: Following operation are destructive ***
         *** if you simply want to append a tag or property use the update operation***
         
-        tag = Tag obj, channelName = channelName 
-        will create set add the specified Tag to the channel with the name = channelName
-        tag = Tag ogj, channelNames = list of channelName 
-        will create set add the specified Tag to the channels with the names specified in channelNames
-        and delete it from all other channels
-        property = Property obj, channelName = channelName
-        will create set add the specified Tag to the channel with the name = channelName
-        property = Property obj, channelNames = list of channelName 
-        will create set add the specified Tag to the channels with the names specified in channelNames
-        and delete it from all other channels
+        set(tag=Tag, channelName=String)
+        >>> set(tag=Tag('tagName','tagOwner), channelName='chName')
+        # will create/replace specified Tag
+        # and add it to the channel with the name = channelName
+        set(tag=Tag, channelNames=[String])
+        >>> set (tag=Tag('tagName','tagOwner), channelNames=['ch1','ch2','ch3'])
+        # will create/replace the specified Tag 
+        # and add it to the channels with the names specified in channelNames
+        # and delete it from all other channels
+        set(property=Property, channelName=String)
+        >>> set(property=Property('propName','propOwner','propValue'), channelName='channelName')
+        # will create/replace the specified Property 
+        # and add it to the channel with the name = channelName
+        set(property=Property, channelNames=[String])
+        >>> set(property=Property('propName','propOwner','propValue'), channelNames=[String])
+        # will create/replace the specified Property
+        # and add it to the channels with the names specified in channelNames
+        # and delete it from all other channels
         
         '''
         if not self.connection:
@@ -180,9 +193,14 @@ class ChannelFinderClient(object):
     def find(self, **kwds):
         '''
         Method allows you to query for a channel/s based on name, properties, tags
-        name = channelNamePattern
-        tagName = tagNamePattern                
-        property = [(propertyName,propertyValuePattern)]
+        find(name = channelNamePattern)
+        >>> find(name='*')
+        >>> find(name='SR:C01*')
+        find(tagName = tagNamePattern)
+        >>> find(tagName = 'myTag')
+        find(property = [(propertyName,propertyValuePattern)])
+        >>> find(property=[('position','*')])
+        >>> find(property=[('position','*'),('cell','')])
         
         returns a _list_ of matching Channels
         special pattern matching char 
@@ -192,7 +210,7 @@ class ChannelFinderClient(object):
         To query for the existance of a tag or property use findTag and findProperty.
                 
         TODO figure out how python/json will handle the multivalue maps
-        to specify multiple patterns simple pass a ????        
+        to specify multiple patterns simply pass a ????        
         '''
         if not self.connection:
             raise Exception, 'Connection not created'
@@ -283,18 +301,27 @@ class ChannelFinderClient(object):
     def delete(self, **kwds):
         '''
         Method to delete a channel, property, tag
-        channelName = name of channel to be removed
-        tagName = tag name of the tag to be removed from all channels
-        propertyName = property name of property to be removed from all channels
+        delete(channelName = String)
+        >>> delete(channelName = 'ch1')
+        delete(tagName = String)
+        >>> delete(tagName = 'myTag')
+        # tagName = tag name of the tag to be removed from all channels
+        delete(propertyName = String)
+        >>> delete(propertyName = 'position')
+        # propertyName = property name of property to be removed from all channels
         
-        tag = Tag obj + channelName = channelName 
-        -delete the tag from the specified channel
-        tag = Tag ogj + channelNames = list of channelName 
-        - delete the tag from all the channels specified in the channelNames list
-        property = Property obj + channelName = channelName
-        - delete the property from the specified channel
-        roperty = Property obj + channelNames = list of channelName 
-        - delete the property from all the channels in the channelNames list
+        delete(tag = Tag ,channelName = String)
+        >>> delete(tag=Tag('myTag','tagOwner'), channelName = 'chName') 
+        # delete the tag from the specified channel _chName_
+        delete(tag = Tag ,channelNames = [String])
+        >>> delete(tag=Tag('myTag','tagOwner'), channelNames=['ch1','ch2','ch3'])
+        # delete the tag from all the channels specified in the channelNames list
+        delete(property = Property ,channelName = String)
+        >>> delete(property = Property('propName','propOwner') ,channelName = 'chName')
+        # delete the property from the specified channel
+        delete(property = Property ,channelNames = [String])
+        >>> delete(property = Property('propName','propOwner') ,channelNames = ['ch1','ch2','ch3'])
+        # delete the property from all the channels in the channelNames list
         '''
         if not self.connection:
             raise Exception, 'Connection not created'
@@ -351,19 +378,41 @@ class ChannelFinderClient(object):
 #===============================================================================
     def update(self, **kwds):
         '''
-        channel = the new channel obj
-        property = the new property obj
-        tag = the new Tag obj
+        update(channel = Channel)
+        >>> update(channel = Channel('existingCh',
+                                     'chOwner'),
+                                     properties=[
+                                        Property('newProp','propOwner','Val'),
+                                        Property('existingProp','propOwner','newVal')],
+                                     tags=[Tag('mytag','tagOwner')])
+        # updates the channel 'existingCh' with the new provided properties and tags 
+        # without affecting the other tags and properties of this channel 
+        update(property = Property)
+        update(tag = Tag)
         
-        tag = tag obj, channelName = String channel name
-        Add tag to channel with name channelName
-        tag = tag obj, channelNames = list of channelNames
-        Add tag to channels with names in channeNames
+        update(tag = Tag, channelName = String)
+        >>> update(tag = Tag('myTag','tagOwner'), channelName='chName')
+        # Add tag to channel with name chName
+        # without affecting the other channels using this tag
+        update(tag = Tag, channelNames = [String])
+        >>> update(tag = Tag('tagName'), channelNames=['ch1','ch2','ch3'])
+        # Add tag to channels with names in the list channeNames
+        # without affecting the other channels using this tag 
         
-        ## RENAME OPERATIONS ##       
-        channel = new Channel obj, originalChannelName = name of the original channel to be updated
-        property = new property obj, originalPropertyName = the original name of the property to be updated
-        tab = new tag object, originalTagName = name of the original tag to be updated
+        ## RENAME OPERATIONS ##    
+        update(channel = Channel, originalChannelName = String)
+        >>> update(channel = Channel('newChannelName','channelOwner), \
+                                     originalChannelName = 'oldChannelName')
+        # rename the channel 'oldChannelName' to 'newChannelName'
+        update(property = Property, originalPropertyName = String)
+        >>> update(property = Property('newPropertyName','propOwner'), \
+                                       originalPropertyName = 'oldPropertyName')
+        # rename the property 'oldPropertyName' to 'newPropertyName'
+        # the channels with the old property are also updated
+        update(tab = Tag, originalTagName = String)
+        >>> update(tab = Tag('newTagName','tagOwner'), originalTagName = 'oldTagName')
+        # rename the tag 'oldTagName' to 'newTagName'
+        # the channel with the old tag are also updated
         '''
         
         if not self.connection:
