@@ -5,7 +5,7 @@ Created on Feb 11, 2011
 '''
 import unittest
 
-from channelfinder.Channel import Channel, Tag
+from channelfinder.core.Channel import Channel, Tag
 
 class Test(unittest.TestCase):
 
@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
 class ErrorTest(unittest.TestCase):   
     
     def setUp(self):
-        self.testChannel = Channel('ChannelName', 'ChannelOwner',properties=[],tags=[])     
+        self.testChannel = Channel('ChannelName', 'ChannelOwner', properties=[], tags=[])     
         pass
 
     def tearDown(self):

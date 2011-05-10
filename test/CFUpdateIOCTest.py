@@ -4,8 +4,8 @@ Created on Apr 5, 2011
 @author: shroffk
 '''
 import unittest
-from channelfinder.Channel import Channel, Property
-from channelfinder.ChannelFinderClient import ChannelFinderClient
+from channelfinder.core.Channel import Channel, Property
+from channelfinder.core.ChannelFinderClient import ChannelFinderClient
 from channelfinder.cfUpdate.CFUpdateIOC import getArgsFromFilename, updateChannelFinder, ifNoneReturnDefault
 from time import time
 

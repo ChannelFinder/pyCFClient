@@ -6,8 +6,8 @@ Created on Feb 15, 2011
 import unittest
 import sys
 
-from channelfinder.ChannelFinderClient import ChannelFinderClient
-from channelfinder.Channel import Channel, Property, Tag
+from channelfinder.core.ChannelFinderClient import ChannelFinderClient
+from channelfinder.core.Channel import Channel, Property, Tag
 #===============================================================================
 # 
 #===============================================================================
@@ -253,7 +253,7 @@ class OperationTest(unittest.TestCase):
     def testSpaceQuotes(self):
         spChannel = Channel('\'"Name Name', 'pyOwner')
         self.client.set(channel=spChannel)
-        self.assertTrue(len(self.client.find(name='\'"Name Name'))==1)
+        self.assertTrue(len(self.client.find(name='\'"Name Name')) == 1)
         self.client.delete(channelName='\'"Name Name')
         pass
 
@@ -516,11 +516,11 @@ class TestUpdateAppend(unittest.TestCase):
         self.ch2 = Channel('orgChannel2', 'orgOwner', tags=[self.Tag2])
         self.ch3 = Channel('orgChannel3', 'orgOwner')
         self.channels = [self.ch1, self.ch2, self.ch3]
-        self.client.set(tags=[self.Tag1,self.Tag2])
+        self.client.set(tags=[self.Tag1, self.Tag2])
         self.client.set(channels=self.channels)
         # originally 1 channel has tag Tag1 and 2 channels have tag Tag2
-        self.assertTrue(len(self.client.find(tagName=self.Tag1.Name))==1)
-        self.assertTrue(len(self.client.find(tagName=self.Tag2.Name))==2)     
+        self.assertTrue(len(self.client.find(tagName=self.Tag1.Name)) == 1)
+        self.assertTrue(len(self.client.find(tagName=self.Tag2.Name)) == 2)     
         pass
     
     def tearDown(self):
@@ -528,17 +528,17 @@ class TestUpdateAppend(unittest.TestCase):
         self.client.delete(tagName=self.Tag2.Name)
         for channel in self.channels:
             self.client.delete(channelName=channel.Name)
-        self.assertTrue(self.client.find(name='orgChannel?')==None)
+        self.assertTrue(self.client.find(name='orgChannel?') == None)
         pass
     
     def testUpdateAppendTag2Channel(self):
         # Add tag to channel3 without removing it from the first 2 channels
         self.client.update(tag=self.Tag2, channelName=self.ch3.Name)
-        self.assertTrue(len(self.client.find(tagName=self.Tag2.Name))==3)
+        self.assertTrue(len(self.client.find(tagName=self.Tag2.Name)) == 3)
         # Add tag to channels 2-3 without removing it from channel 1
         channelNames = [ channel.Name for channel in self.channels]
         self.client.update(tag=self.Tag1, channelNames=channelNames)
-        self.assertTrue(len(self.client.find(tagName=self.Tag1.Name))==3)
+        self.assertTrue(len(self.client.find(tagName=self.Tag1.Name)) == 3)
         pass
     
     def testUpdateAppendProperty2Channel(self):

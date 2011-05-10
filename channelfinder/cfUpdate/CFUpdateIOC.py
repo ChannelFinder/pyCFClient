@@ -7,8 +7,8 @@ import os
 import re
 from optparse import OptionParser
 from getpass import getpass
-from channelfinder.Channel import Channel, Property
-from channelfinder.ChannelFinderClient import ChannelFinderClient
+from channelfinder.core.Channel import Channel, Property
+from channelfinder.core.ChannelFinderClient import ChannelFinderClient
 from glob import glob
 
 def getArgsFromFilename(completeFilePath):

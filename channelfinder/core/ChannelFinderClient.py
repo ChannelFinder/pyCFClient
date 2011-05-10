@@ -3,7 +3,7 @@ Created on Feb 15, 2011
 
 @author: shroffk
 '''
-from lib.restful_lib import Connection
+from channelfinder.lib.restful_lib import Connection
 from copy import copy
 from _conf import _conf
 try: 
@@ -14,7 +14,7 @@ from Channel import Channel, Property, Tag
 try: 
     from collections import OrderedDict
 except :
-    from lib.myCollections import OrderedDict
+    from channelfinder.lib.myCollections import OrderedDict
 
     
 
@@ -400,7 +400,7 @@ class ChannelFinderClient(object):
         if 'tag' in kwds and 'channelName' in kwds:
             tag = kwds['tag']
             channels = [Channel(kwds['channelName'], self.__userName)]
-            response = self.connection.request_post(self.__tagsResource+'/'+tag.Name, \
+            response = self.connection.request_post(self.__tagsResource + '/' + tag.Name, \
                                                     body=JSONEncoder().encode(self.encodeTag(tag, withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response) 
@@ -409,7 +409,7 @@ class ChannelFinderClient(object):
             channels = []
             for eachChannel in kwds['channelNames']:
                 channels.append(Channel(eachChannel, self.__userName))
-            response = self.connection.request_post(self.__tagsResource+'/'+tag.Name, \
+            response = self.connection.request_post(self.__tagsResource + '/' + tag.Name, \
                                                     body=JSONEncoder().encode(self.encodeTag(tag, withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)                                
@@ -430,7 +430,7 @@ class ChannelFinderClient(object):
         elif 'originalTagName' in kwds and 'tag' in kwds: 
             tag = kwds['tag']
             tagName = kwds['originalTagName']
-            response = self.connection.request_post(self.__tagsResource+'/'+tagName, \
+            response = self.connection.request_post(self.__tagsResource + '/' + tagName, \
                                                     body=JSONEncoder().encode(self.encodeTag(tag)), \
                                                     headers=copy(self.__jsonheader))
             print response
