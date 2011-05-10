@@ -63,7 +63,7 @@ class ChannelFinderClient(object):
 
     def set(self, **kwds):
         '''
-        method to allow various types of set operations on one or many channels, tags or properties\
+        method to allow various types of set operations on one or many channels, tags or properties
         The operation creates a new entry if none exists and destructively replaces existing entries.
         set(channel = Channel)
         >>> set(channel=Channel('channelName', 'channelOwner'))        
@@ -401,11 +401,11 @@ class ChannelFinderClient(object):
         
         ## RENAME OPERATIONS ##    
         update(channel = Channel, originalChannelName = String)
-        >>> update(channel = Channel('newChannelName','channelOwner), \
+        >>> update(channel = Channel('newChannelName','channelOwner), 
                                      originalChannelName = 'oldChannelName')
         # rename the channel 'oldChannelName' to 'newChannelName'
         update(property = Property, originalPropertyName = String)
-        >>> update(property = Property('newPropertyName','propOwner'), \
+        >>> update(property = Property('newPropertyName','propOwner'), 
                                        originalPropertyName = 'oldPropertyName')
         # rename the property 'oldPropertyName' to 'newPropertyName'
         # the channels with the old property are also updated
