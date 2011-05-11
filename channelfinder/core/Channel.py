@@ -6,7 +6,8 @@ Created on Feb 11, 2011
 
 class Channel(object):
     '''
-    channel class 
+    A Channel object consists of a unique name, an owner and an optional list
+    of Tags and Properties 
     '''
     # TODO
     # updated the properties datastructure by splitting it into 2 dict 
@@ -33,8 +34,10 @@ class Channel(object):
         
     ## TODO don't recreate the dictionary with every get, 
     def getProperties(self):
-        '''getProperties returns a dictionary containing all properties associated with calling channel.\
-        the key= propertyName and the value=propertyValue'''
+        '''
+        getProperties returns a dictionary containing all properties associated with calling channel.
+        the key= propertyName and the value=propertyValue
+        '''
         propDictionary = {}
         if self.Properties == None:
             return None
@@ -58,7 +61,7 @@ class Channel(object):
 
 class Property(object):
     '''
-    Property consists of a name ,an owner and  
+    Property consists of a name, an owner and a value  
     '''
     
     def __init__(self, name, owner, value=None):
@@ -73,7 +76,7 @@ class Property(object):
         
 class Tag(object):
     '''
-    Tag 
+    Tag object consists on a name and an owner
     '''
     
     def __init__(self, name, owner):

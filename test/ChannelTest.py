@@ -5,7 +5,7 @@ Created on Feb 11, 2011
 '''
 import unittest
 
-from channelfinder.core.Channel import Channel, Tag
+from channelfinder.core.Channel import Channel, Property, Tag
 
 class Test(unittest.TestCase):
 
@@ -23,17 +23,18 @@ class Test(unittest.TestCase):
         pass
     
     def testAddProperty(self):
-        properties = {'prop1':('value1', 'owner1'), 'prop2':('value2', 'owner2')}
+        properties = [Property('prop1', 'propOwner', 'val1'),
+                      Property('prop2', 'propOwner', 'val2')]        
         channel = Channel('ChannelName', 'ChannelOwner', properties=properties)
         self.assertEqual(properties, channel.Properties)
         pass
     
     def testAddTag(self):
-        tags = {'tag1':'owner1', 'tag2':'owner2'}
+        tags = [Tag('tag1', 'tagOwner'), Tag('tag2', 'tagOwner')]
         channel = Channel('ChannelName', 'ChannelOwner', tags=tags)
         self.assertEqual(tags, channel.Tags)
         pass
-    
+       
     def Immutability(self):
         '''
         removed test cause the ability to add property and tag list is required.
