@@ -205,7 +205,6 @@ class OperationTest(unittest.TestCase):
         pass
     
     def testGetAllPropperties(self):
-        initial = len(self.client.getAllProperties())
         testProps = []
         testProps.append(Property('pyProp1', 'pyOwner'))
         testProps.append(Property('pyProp2', 'pyOwner'))
@@ -563,6 +562,30 @@ class QueryTest(unittest.TestCase):
     
     def testQueryChannel(self):
         pass
+    
+    def QueryChannelWithAnyTag(self):
+        '''
+        Will check if OR'd queries work
+        '''
+        tagA = Tag('tagA', 'pyOwner')
+        tagB = Tag('tagB', 'pyOwner')
+        self.client.set(tag = tagA)
+        self.client.set(tag = tagB)                        
+        self.client.set(channel = Channel('pyTestChannelA', 'pyOwner',tag = [tagA]))
+        self.client.set(channel = Channel('pyTestChannelB', 'pyOwner',tag = [tagB]))
+        self.client.set(channel = Channel('pyTestChannelAB', 'pyOwner',tag = [tagA,tagB]))
+        
+        channels = self.client.find(tagName = 'tagA,tagB')
+        self.assertEqual(len(channels), 3, 'failed to complete a query with ORed tagNames')
+        self.client.delete(channelName = 'pyTestChannelA')
+        self.client.delete(channelName = 'pyTestChannelB')
+        self.client.delete(channelName = 'pyTestChannelAB')
+        
+        self.client.delete(tagName = tagA.Name)
+        self.client.delete(tagName = tagB.Name)
+        
+        
+        
     
     
 #===============================================================================
