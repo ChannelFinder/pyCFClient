@@ -31,6 +31,8 @@ def getPVNames(completeFilePath):
     try:
         f = open(completeFilePath)
         pvNames = f.read().splitlines()
+        pvNames=map(lambda x: x.strip(), pvNames)
+        pvNames=filter(lambda x: len(x)>0, pvNames)
         return pvNames
     except IOError:
         return None
@@ -113,7 +115,7 @@ def checkPropertiesExist(client):
     requiredProperties = ['hostName', 'iocName']
     for propName in requiredProperties:   
         if client.findProperty(propName) == None:
-            client.add(property=Property(propName, 'dbUpdate'))                
+            client.set(property=Property(propName, 'dbUpdate'))                
 
 def ifNoneReturnDefault(object, default):
     '''
@@ -137,14 +139,14 @@ def mainRun(opts, args):
                 updateChannelFinder(getPVNames(completeFilePath), \
                             ifNoneReturnDefault(opts.hostName, fHostName), \
                             ifNoneReturnDefault(opts.iocName, fIocName), \
-                            service=opts.serviceURL)
+                            service=opts.serviceURL, username=opts.username, password=opts.password)
         else:
             completeFilePath = os.path.abspath(filename)
             fHostName, fIocName = getArgsFromFilename(completeFilePath)
             updateChannelFinder(getPVNames(completeFilePath), \
                             ifNoneReturnDefault(opts.hostName, fHostName), \
                             ifNoneReturnDefault(opts.iocName, fIocName), \
-                            service=opts.serviceURL)
+                            service=opts.serviceURL, username=opts.username, password=opts.password)
 def main():
     usage = "usage: %prog [options] filename"
     parser = OptionParser(usage=usage)
@@ -162,7 +164,7 @@ def main():
                       help='username')
     parser.add_option('-p', '--password', \
                       action='callback', callback=getPassword, \
-                      type='string', dest='password', \
+                      dest='password', \
                       help='prompt user for password')
     opts, args = parser.parse_args()
     if len(args) == 0 or args == None:
@@ -174,7 +176,6 @@ def getPassword(option, opt_str, value, parser):
     Simple method to prompt user for password
     TODO do not show the password.
     '''
-    print parser.values    
     parser.values.password = getpass()        
             
 if __name__ == '__main__':
