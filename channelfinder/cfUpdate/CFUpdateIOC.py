@@ -76,7 +76,7 @@ def updateChannelFinder(pvNames, hostName, iocName, \
                                           iocName=iocName))
         elif ch[0] != None:
             # update existing channel
-            channels.append(updateChannel(ch[0], \
+            channels.append(updateChannel(ch[0], username, \
                                           hostName=hostName, \
                                           iocName=iocName))
     client.set(channels=channels)
