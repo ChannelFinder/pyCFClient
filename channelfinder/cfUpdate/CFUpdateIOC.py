@@ -54,7 +54,7 @@ def updateChannelFinder(pvNames, hostName, iocName, \
         raise Exception, 'missing hostName or iocName'
     channels = []
     client = ChannelFinderClient(BaseURL=service, username=username, password=password)
-    checkPropertiesExist(client)
+    checkPropertiesExist(client, username)
     previousChannelsList = client.find(property=[('hostName', hostName), ('iocName', iocName)])
     if previousChannelsList != None:
         for ch in previousChannelsList:
@@ -71,7 +71,7 @@ def updateChannelFinder(pvNames, hostName, iocName, \
         ch = client.find(name=pv)
         if ch == None:
             # New channel
-            channels.append(createChannel(pv, 'dbUpdate', \
+            channels.append(createChannel(pv, username, \
                                           hostName=hostName, \
                                           iocName=iocName))
         elif ch[0] != None:
@@ -81,7 +81,7 @@ def updateChannelFinder(pvNames, hostName, iocName, \
                                           iocName=iocName))
     client.set(channels=channels)
 
-def updateChannel(channel, hostName=None, iocName=None):
+def updateChannel(channel, username, hostName=None, iocName=None):
     '''
     Helper to update a channel object so as to not affect the existing properties
     '''
@@ -90,9 +90,9 @@ def updateChannel(channel, hostName=None, iocName=None):
         properties = [property for property in channel.Properties \
                       if property.Name != 'hostName' and property.Name != 'iocName']
         if hostName != None:
-            properties.append(Property('hostName', 'dbUpdate', hostName))
+            properties.append(Property('hostName', username, hostName))
         if iocName != None:
-            properties.append(Property('iocName', 'dbUpdate', iocName))
+            properties.append(Property('iocName', username, iocName))
         channel.Properties = properties
         return channel
 
@@ -103,19 +103,19 @@ def createChannel(chName, chOwner, hostName=None, iocName=None):
     ch = Channel(chName, chOwner)
     ch.Properties = []
     if hostName != None:
-        ch.Properties.append(Property('hostName', 'dbUpdate', hostName))
+        ch.Properties.append(Property('hostName', chOwner, hostName))
     if iocName != None:
-        ch.Properties.append(Property('iocName', 'dbUpdate', iocName))
+        ch.Properties.append(Property('iocName', chOwner, iocName))
     return ch
 
-def checkPropertiesExist(client):
+def checkPropertiesExist(client, username):
     '''
     Checks if the properties used by dbUpdate are present if not it creates them
     '''
     requiredProperties = ['hostName', 'iocName']
-    for propName in requiredProperties:   
+    for propName in requiredProperties:
         if client.findProperty(propName) == None:
-            client.set(property=Property(propName, 'dbUpdate'))                
+            client.set(property=Property(propName, username))                
 
 def ifNoneReturnDefault(object, default):
     '''
