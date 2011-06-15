@@ -10,6 +10,7 @@ from getpass import getpass
 from channelfinder.core.Channel import Channel, Property
 from channelfinder.core.ChannelFinderClient import ChannelFinderClient
 from glob import glob
+from channelfinder.core._conf import _conf
 
 def getArgsFromFilename(completeFilePath):
     fileName = os.path.split(os.path.normpath(completeFilePath))[1]
@@ -59,13 +60,13 @@ def updateChannelFinder(pvNames, hostName, iocName, \
     if previousChannelsList != None:
         for ch in previousChannelsList:
             if pvNames != None and ch.Name in pvNames:
-                channels.append(updateChannel(ch, \
+                channels.append(updateChannel(ch, username,\
                                               hostName=hostName, \
                                               iocName=iocName))
                 pvNames.remove(ch.Name)
             elif pvNames == None or ch.Name not in pvNames:
                 #  orphan the channel
-                channels.append(updateChannel(ch))
+                channels.append(updateChannel(ch, username))
     # now pvNames contains a list of pv's new on this host/ioc
     for pv in pvNames:
         ch = client.find(name=pv)
@@ -139,14 +140,25 @@ def mainRun(opts, args):
                 updateChannelFinder(getPVNames(completeFilePath), \
                             ifNoneReturnDefault(opts.hostName, fHostName), \
                             ifNoneReturnDefault(opts.iocName, fIocName), \
-                            service=opts.serviceURL, username=opts.username, password=opts.password)
+                            service=__getDefaultConfig('BaseURL',opts.serviceURL), \
+                            username=__getDefaultConfig('username',opts.username), \
+                            password=__getDefaultConfig('password',opts.password))
         else:
             completeFilePath = os.path.abspath(filename)
             fHostName, fIocName = getArgsFromFilename(completeFilePath)
             updateChannelFinder(getPVNames(completeFilePath), \
                             ifNoneReturnDefault(opts.hostName, fHostName), \
                             ifNoneReturnDefault(opts.iocName, fIocName), \
-                            service=opts.serviceURL, username=opts.username, password=opts.password)
+                            service=__getDefaultConfig('BaseURL',opts.serviceURL), \
+                            username=__getDefaultConfig('username',opts.username), \
+                            password=__getDefaultConfig('password',opts.password))
+            
+def __getDefaultConfig(self, arg, value):
+        if value == None and _conf.has_option('DEFAULT', arg):
+            return _conf.get('DEFAULT', arg)
+        else:
+            return value
+        
 def main():
     usage = "usage: %prog [options] filename"
     parser = OptionParser(usage=usage)
