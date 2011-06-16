@@ -153,7 +153,7 @@ def mainRun(opts, args):
                             username=__getDefaultConfig('username',opts.username), \
                             password=__getDefaultConfig('password',opts.password))
             
-def __getDefaultConfig(self, arg, value):
+def __getDefaultConfig(arg, value):
         if value == None and _conf.has_option('DEFAULT', arg):
             return _conf.get('DEFAULT', arg)
         else:
