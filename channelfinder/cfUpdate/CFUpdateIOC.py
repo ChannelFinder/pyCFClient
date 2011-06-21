@@ -38,13 +38,15 @@ def getPVNames(completeFilePath):
     except IOError:
         return None
 
-def updateChannelFinder(pvNames, hostName, iocName, \
+def updateChannelFinder(pvNames, hostName, iocName, owner, \
                         service=None, username=None, password=None):
     '''
     pvNames = list of pvNames 
     (None permitted will effectively remove the hostname, iocname from all channels)
     hostName = pv hostName (None not permitted)
     iocName = pv iocName (None not permitted)
+    owner = the owner of the channels and properties being added, this can be different from the user
+    e.g. user = abc might create a channel with owner = group-abc
     [optional] if not specified the default values are used by the 
     channelfinderapi lib
     service = channelfinder service URL
@@ -58,7 +60,7 @@ def updateChannelFinder(pvNames, hostName, iocName, \
         client = ChannelFinderClient(BaseURL=service, username=username, password=password)
     except:
         raise Exception, 'Unable to create a valid webResourceClient'
-    checkPropertiesExist(client)
+    checkPropertiesExist(client, owner)
     previousChannelsList = client.find(property=[('hostName', hostName), ('iocName', iocName)])
     if previousChannelsList != None:
         for ch in previousChannelsList:
@@ -76,6 +78,7 @@ def updateChannelFinder(pvNames, hostName, iocName, \
         if ch == None:
             # New channel
             channels.append(createChannel(pv, \
+                                          chOwner = owner, \
                                           hostName=hostName, \
                                           iocName=iocName))
         elif ch[0] != None:
@@ -103,19 +106,19 @@ def updateChannel(channel, hostName=None, iocName=None):
         channel.Properties = properties
         return channel
 
-def createChannel(chName, hostName=None, iocName=None):
+def createChannel(chName, chOwner, hostName=None, iocName=None):
     '''
     Helper to create a channel object with the required properties
     '''
-    ch = Channel(chName, 'cf-update')
+    ch = Channel(chName, chOwner)
     ch.Properties = []
     if hostName != None:
-        ch.Properties.append(Property('hostName', 'cf-update', hostName))
+        ch.Properties.append(Property('hostName', chOwner, hostName))
     if iocName != None:
-        ch.Properties.append(Property('iocName', 'cf-update', iocName))
+        ch.Properties.append(Property('iocName', chOwner, iocName))
     return ch
 
-def checkPropertiesExist(client):
+def checkPropertiesExist(client, propOwner):
     '''
     Checks if the properties used by dbUpdate are present if not it creates them
     '''
@@ -123,7 +126,7 @@ def checkPropertiesExist(client):
     for propName in requiredProperties:
         if client.findProperty(propName) == None:
             try:
-                client.set(property=Property(propName, 'cf-update'))
+                client.set(property=Property(propName, propOwner))
             except Exception as e:
                 print 'Failed to create the property',propName
                 print 'CAUSE:',e.message
@@ -150,6 +153,7 @@ def mainRun(opts, args):
                 updateChannelFinder(getPVNames(completeFilePath), \
                             ifNoneReturnDefault(opts.hostName, fHostName), \
                             ifNoneReturnDefault(opts.iocName, fIocName), \
+                            ifNoneReturnDefault(opts.owners,__getDefaultConfig('username', opts.username)), \
                             service=__getDefaultConfig('BaseURL',opts.serviceURL), \
                             username=__getDefaultConfig('username',opts.username), \
                             password=__getDefaultConfig('password',opts.password))
@@ -159,6 +163,7 @@ def mainRun(opts, args):
             updateChannelFinder(getPVNames(completeFilePath), \
                             ifNoneReturnDefault(opts.hostName, fHostName), \
                             ifNoneReturnDefault(opts.iocName, fIocName), \
+                            ifNoneReturnDefault(opts.owners,__getDefaultConfig('username', opts.username)), \
                             service=__getDefaultConfig('BaseURL',opts.serviceURL), \
                             username=__getDefaultConfig('username',opts.username), \
                             password=__getDefaultConfig('password',opts.password))
@@ -184,6 +189,9 @@ def main():
     parser.add_option('-u', '--username', \
                       action='store', type='string', dest='username', \
                       help='username')
+    parser.add_option('-o', '--owner', \
+                      action='store', type='string', dest='owner', \
+                      help='owner if not specified username will default as owner')
     parser.add_option('-p', '--password', \
                       action='callback', callback=getPassword, \
                       dest='password', \
