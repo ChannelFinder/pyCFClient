@@ -102,14 +102,15 @@ class OperationTest(unittest.TestCase):
         testChannels = [Channel('pyChannel1', 'pyOwner'), \
                         Channel('pyChannel2', 'pyOwner'), \
                         Channel('pyChannel3', 'pyOwner')]
-        self.client.set(channels=testChannels)
-        r = self.client.find(name='pyChannel*')
-        self.assertTrue(len(r) == 3, 'ERROR: # of channels returned expected ' + str(len(r)) + ' expected 3')
-        # delete each individually
-        for ch in testChannels:
-#            print ch.Name
-            self.client.delete(channelName=str(ch.Name))
-        pass
+        try:
+            self.client.set(channels=testChannels)
+            r = self.client.find(name='pyChannel*')
+            self.assertTrue(len(r) == 3, 'ERROR: # of channels returned expected ' + str(len(r)) + ' expected 3')
+        finally:
+            # delete each individually
+            for ch in testChannels:
+                self.client.delete(channelName=str(ch.Name))
+            pass
     
     
     def testSetRemoveChannelsCheck(self):
