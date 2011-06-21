@@ -4,10 +4,14 @@ Created on Apr 5, 2011
 @author: shroffk
 '''
 import unittest
+import os
 from channelfinder.core.Channel import Channel, Property
 from channelfinder.core.ChannelFinderClient import ChannelFinderClient
 from channelfinder.cfUpdate.CFUpdateIOC import getArgsFromFilename, updateChannelFinder, ifNoneReturnDefault
 from time import time
+from tempfile import NamedTemporaryFile
+from channelfinder.cfUpdate.CFUpdateIOC import getPVNames
+from copy import copy
 
 class Test(unittest.TestCase):
     baseURL = 'https://localhost:8181/ChannelFinder'
@@ -191,6 +195,30 @@ class Test(unittest.TestCase):
             client.delete(channelName ='ch1')
             client.delete(channelName ='ch2')
     
+    def testRegularExperssion(self):
+        tempFile = NamedTemporaryFile(delete=False)
+        publicPVs = ['publicPV1', 'publicPV2', 'publicPV3']
+        privatePVS = ['_privatePV1', '_privatePV2']
+        allPVs = copy(publicPVs);
+        allPVs.extend(privatePVS)
+        for pv in allPVs:
+            tempFile.write(pv+'\n')
+        tempFile.close();        
+        try:
+            pvNames = getPVNames(tempFile.name)
+            self.assertEqual(len(pvNames), len(allPVs), \
+                             'expected '+str(len(allPVs))+ ' but got '+str(len(pvNames)))
+            pvNames = getPVNames(tempFile.name, pattern='[^_]+')
+            self.assertEqual(len(pvNames), len(publicPVs), \
+                             'expected '+str(len(allPVs))+ ' but got '+str(len(publicPVs)))
+            self.assertTrue(frozenset(pvNames).issuperset(frozenset(publicPVs)), \
+                            'resulting pvNames contains invalid non public pvs')
+            self.assertTrue(frozenset(pvNames).isdisjoint(frozenset(privatePVS)), \
+                            'result pvNames contains invalid private pvs')            
+            pass
+        finally:
+            os.remove(tempFile.name)
+        pass
         
 
 if __name__ == "__main__":

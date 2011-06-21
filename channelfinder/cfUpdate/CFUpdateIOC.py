@@ -28,12 +28,14 @@ def getArgsFromFilename(completeFilePath):
         iocName = None
     return hostName, iocName
 
-def getPVNames(completeFilePath):
+def getPVNames(completeFilePath, pattern=None):
     try:
         f = open(completeFilePath)
         pvNames = f.read().splitlines()
         pvNames=map(lambda x: x.strip(), pvNames)
         pvNames=filter(lambda x: len(x)>0, pvNames)
+        if pattern:
+            pvNames=[ re.match(pattern,pvName).group() for pvName in pvNames if re.match(pattern, pvName) ]
         return pvNames
     except IOError:
         return None
@@ -66,29 +68,31 @@ def updateChannelFinder(pvNames, hostName, iocName, owner, \
         for ch in previousChannelsList:
             if pvNames != None and ch.Name in pvNames:
                 channels.append(updateChannel(ch,\
+                                              owner=owner, \
                                               hostName=hostName, \
                                               iocName=iocName))
                 pvNames.remove(ch.Name)
             elif pvNames == None or ch.Name not in pvNames:
                 #  orphan the channel
-                channels.append(updateChannel(ch))
+                channels.append(updateChannel(ch), owner=owner)
     # now pvNames contains a list of pv's new on this host/ioc
     for pv in pvNames:
         ch = client.find(name=pv)
         if ch == None:
             # New channel
             channels.append(createChannel(pv, \
-                                          chOwner = owner, \
+                                          chOwner=owner, \
                                           hostName=hostName, \
                                           iocName=iocName))
         elif ch[0] != None:
             # update existing channel
             channels.append(updateChannel(ch[0], \
+                                          owner=owner, \
                                           hostName=hostName, \
                                           iocName=iocName))
     client.set(channels=channels)
 
-def updateChannel(channel, hostName=None, iocName=None):
+def updateChannel(channel, owner, hostName=None, iocName=None):
     '''
     Helper to update a channel object so as to not affect the existing properties
     '''
@@ -100,9 +104,9 @@ def updateChannel(channel, hostName=None, iocName=None):
         else:
             properties = []
         if hostName != None:
-            properties.append(Property('hostName', 'cf-update', hostName))
+            properties.append(Property('hostName', owner, hostName))
         if iocName != None:
-            properties.append(Property('iocName', 'cf-update', iocName))
+            properties.append(Property('iocName', owner, iocName))
         channel.Properties = properties
         return channel
 
@@ -186,12 +190,15 @@ def main():
     parser.add_option('-s', '--service', \
                       action='store', type='string', dest='serviceURL', \
                       help='the service URL')
-    parser.add_option('-u', '--username', \
-                      action='store', type='string', dest='username', \
-                      help='username')
     parser.add_option('-o', '--owner', \
                       action='store', type='string', dest='owner', \
                       help='owner if not specified username will default as owner')
+    parser.add_option('-re', '--pattern', \
+                      action='store', type='string', dest='pattern', \
+                      help='pattern to match valid channel names')
+    parser.add_option('-u', '--username', \
+                      action='store', type='string', dest='username', \
+                      help='username')
     parser.add_option('-p', '--password', \
                       action='callback', callback=getPassword, \
                       dest='password', \
