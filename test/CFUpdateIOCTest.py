@@ -7,16 +7,23 @@ import unittest
 import os
 from channelfinder.core.Channel import Channel, Property
 from channelfinder.core.ChannelFinderClient import ChannelFinderClient
-from channelfinder.cfUpdate.CFUpdateIOC import getArgsFromFilename, updateChannelFinder, ifNoneReturnDefault
+from _testConf import _testConf
+from channelfinder.cfUpdate.CFUpdateIOC import getPVNames, getArgsFromFilename, updateChannelFinder, ifNoneReturnDefault
 from time import time
 from tempfile import NamedTemporaryFile
-from channelfinder.cfUpdate.CFUpdateIOC import getPVNames
 from copy import copy
 
-class Test(unittest.TestCase):
-    baseURL = 'https://localhost:8181/ChannelFinder'
+class Test(unittest.TestCase):    
     
     def setUp(self):
+        if _testConf.has_option('DEFAULT', 'BaseURL'):
+            self.baseURL = _testConf.get('DEFAULT', 'BaseURL')
+        if _testConf.has_option('DEFAULT', 'username'):
+            self.username = _testConf.get('DEFAULT', 'username')
+        if _testConf.has_option('DEFAULT', 'password'):
+            self.password = _testConf.get('DEFAULT', 'password')
+        if _testConf.has_option('DEFAULT', 'owner'):
+            self.owner = _testConf.get('DEFAULT', 'owner')
         pass
 
 
@@ -63,10 +70,10 @@ class Test(unittest.TestCase):
         updateChannelFinder(['cf-update-pv1', 'cf-update-pv2'], \
                             hostName1, \
                             iocName1, \
-                            owner = 'cf-update', \
-                            service = self.baseURL ,\
-                            username='cf-update', \
-                            password='1234')
+                            owner=self.owner, \
+                            service=self.baseURL ,\
+                            username=self.username, \
+                            password=self.password)
         channels = client.find(property=[('hostName', hostName1), ('iocName', iocName1)])
         self.assertTrue(len(channels) == 2, 'failed to create the channels with appropriate properties')
         t2 = str(time())
@@ -76,10 +83,10 @@ class Test(unittest.TestCase):
         updateChannelFinder(['cf-update-pv1', 'cf-update-pv2'], \
                             hostName2, \
                             iocName2, \
-                            owner = 'cf-update', \
+                            owner = self.owner, \
                             service = self.baseURL ,\
-                            username='cf-update', \
-                            password='1234')
+                            username=self.username, \
+                            password=self.password)
         # no channels should have the old proerty values 
         self.assertTrue(client.find(property=[('hostName', hostName1), ('iocName', iocName1)]) == None, \
                         'failed to update the channels with appropriate properties, old values found')
@@ -87,7 +94,7 @@ class Test(unittest.TestCase):
         self.assertTrue(len(client.find(property=[('hostName', hostName2), ('iocName', iocName2)])) == 2, \
                         'failed to update the channels with appropriate properties')
         # Cleanup
-        client = ChannelFinderClient(BaseURL=self.baseURL, username='cf-update', password='1234')
+        client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password)
         client.delete(channelName='cf-update-pv1')
         client.delete(channelName='cf-update-pv2')
         pass
@@ -96,9 +103,9 @@ class Test(unittest.TestCase):
         '''
         This is to check that existing properties of channels are not affected.
         '''
-        unaffectedProperty = Property('unaffectedProperty', 'cf-properties', 'unchanged')
+        unaffectedProperty = Property('unaffectedProperty', self.owner, 'unchanged')
         # create default client
-        client = ChannelFinderClient(BaseURL=self.baseURL, username='property', password='1234')
+        client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password)
         client.set(property=unaffectedProperty)
         
         # add new pv's
@@ -106,15 +113,15 @@ class Test(unittest.TestCase):
         hostName1 = 'update-test-hostname' + t1
         iocName1 = 'update-test-iocName' + t1
         # New Channels added
-        client = ChannelFinderClient(BaseURL=self.baseURL, username='cf-update', password='1234');
+        client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password);
         client.set(channel=Channel('cf-update-pv1', 'cf-update', properties=[unaffectedProperty]))
         updateChannelFinder(['cf-update-pv1', 'cf-update-pv2'], \
                             hostName1, \
                             iocName1, \
-                            'cf-update', \
+                            owner = self.owner, \
                             service = self.baseURL ,\
-                            username='cf-update', \
-                            password='1234')
+                            username=self.username, \
+                            password=self.password)
         channels = client.find(property=[('hostName', hostName1), ('iocName', iocName1)])
         self.assertTrue(len(channels) == 2, 'failed to create the channels with appropriate properties')
         channels = client.find(name='cf-update-pv1')
@@ -139,15 +146,21 @@ class Test(unittest.TestCase):
         IOC turned on with ch1, ch2
         '''
         try:
-            updateChannelFinder(['ch1', 'ch2'], 'testHost', 'testIOC', owner='cf-update', service=self.baseURL ,username='cf-update',password='1234')
-            client = ChannelFinderClient(BaseURL=self.baseURL, username='cf-update',password='1234')
+            updateChannelFinder(['ch1', 'ch2'], 'testHost', 'testIOC', \
+                                owner=self.owner, service=self.baseURL, \
+                                username=self.username, password=self.password)
+            client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username,password=self.password)
             chs = client.find(property=[('hostName','testHost'),('iocName','testIOC')])
             self.assertEqual(len(chs), 2, 'Expected 2 positive matches but found '+str(len(chs)))
-            updateChannelFinder(['ch1'],'testHost','testIOC', owner='cf-update', service=self.baseURL ,username='cf-update',password='1234')
+            updateChannelFinder(['ch1'],'testHost','testIOC', \
+                                owner=self.owner, service=self.baseURL, \
+                                username=self.username, password=self.password)
             chs = client.find(property=[('hostName','testHost'),('iocName','testIOC')])
             self.assertEqual(len(chs), 1, 'Expected 1 positive matches but found '+str(len(chs)))
             self.assertTrue(chs[0].Name == 'ch1', 'channel with name ch1 not found')
-            updateChannelFinder(['ch1', 'ch2'], 'testHost', 'testIOC', owner='cf-update', service=self.baseURL ,username='cf-update',password='1234')
+            updateChannelFinder(['ch1', 'ch2'], 'testHost', 'testIOC', \
+                                owner=self.owner, service=self.baseURL, \
+                                username=self.username, password=self.password)
             chs = client.find(property=[('hostName','testHost'),('iocName','testIOC')])
             self.assertEqual(len(chs), 2, 'Expected 2 positive matches but found '+str(len(chs)))
         finally:
@@ -163,13 +176,19 @@ class Test(unittest.TestCase):
         ch1, ch2 on host1, ioc1 (reset)
         '''
         try:
-            updateChannelFinder(['ch1', 'ch2'], 'host1', 'ioc1', owner='cf-update', service=self.baseURL ,username='cf-update',password='1234')
-            client = ChannelFinderClient(BaseURL=self.baseURL, username='cf-update',password='1234')
+            updateChannelFinder(['ch1', 'ch2'], 'host1', 'ioc1', \
+                                owner=self.owner, service=self.baseURL, \
+                                username=self.username, password=self.password)
+            client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password)
             chs = client.find(property=[('hostName','host1'),('iocName','ioc1')])
             self.assertEqual(len(chs), 2, 'Expected 2 positive matches but found '+str(len(chs)))
             '''CASE1'''
-            updateChannelFinder(['ch1'],'host1','ioc1', owner='cf-update', service=self.baseURL ,username='cf-update',password='1234')
-            updateChannelFinder(['ch2'],'host1','ioc2', owner='cf-update', service=self.baseURL ,username='cf-update',password='1234')
+            updateChannelFinder(['ch1'],'host1','ioc1', \
+                                owner=self.owner, service=self.baseURL, \
+                                username=self.username, password=self.password)
+            updateChannelFinder(['ch2'],'host1','ioc2', \
+                                owner=self.owner, service=self.baseURL, \
+                                username=self.username,password=self.password)
             chs = client.find(property=[('hostName','host1')])
             self.assertEqual(len(chs), 2, 'Expected 1 positive matches but found '+str(len(chs)))
             self.assertEqual(client.find(property=[('hostName','host1'),('iocName','ioc1')])[0].Name, 'ch1', \
@@ -177,18 +196,26 @@ class Test(unittest.TestCase):
             self.assertEqual(client.find(property=[('hostName','host1'),('iocName','ioc2')])[0].Name, 'ch2', \
                              'Failed to find the expected channel _ch2_ with prop host1, ioc2')
             '''RESET'''
-            updateChannelFinder(['ch1', 'ch2'], 'host1', 'ioc1', owner='cf-update', service=self.baseURL ,username='cf-update',password='1234')
+            updateChannelFinder(['ch1', 'ch2'], 'host1', 'ioc1', \
+                                owner=self.owner, service=self.baseURL, \
+                                username=self.username, password=self.password)
             self.assertEqual(len(client.find(property=[('hostName','host1'),('iocName','ioc1')])), 2, \
                              'Failed to reset the channels' )            
             '''CASE2'''
-            updateChannelFinder(['ch1'],'host1','ioc1', owner='cf-update', service=self.baseURL ,username='cf-update',password='1234')
-            updateChannelFinder(['ch2'],'host2','ioc2', owner='cf-update', service=self.baseURL ,username='cf-update',password='1234')
+            updateChannelFinder(['ch1'],'host1','ioc1', owner=self.owner, \
+                                service=self.baseURL, username=self.username, \
+                                password=self.password)
+            updateChannelFinder(['ch2'],'host2','ioc2', \
+                                owner=self.owner, service=self.baseURL, \
+                                username=self.username, password=self.password)
             self.assertEqual(client.find(property=[('hostName','host1'),('iocName','ioc1')])[0].Name, 'ch1', \
                              'Failed to find the expected channel _ch1_ with prop host1, ioc1')
             self.assertEqual(client.find(property=[('hostName','host2'),('iocName','ioc2')])[0].Name, 'ch2', \
                              'Failed to find the expected channel _ch2_ with prop host1, ioc2')
             '''RESET'''
-            updateChannelFinder(['ch1', 'ch2'], 'host1', 'ioc1', owner='cf-update', service=self.baseURL ,username='cf-update',password='1234')
+            updateChannelFinder(['ch1', 'ch2'], 'host1', 'ioc1', \
+                                owner=self.owner, service=self.baseURL, \
+                                username=self.username, password=self.password)
             self.assertEqual(len(client.find(property=[('hostName','host1'),('iocName','ioc1')])), 2, \
                              'Failed to reset the channels' )
         finally:
