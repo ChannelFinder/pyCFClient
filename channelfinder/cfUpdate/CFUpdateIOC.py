@@ -74,7 +74,7 @@ def updateChannelFinder(pvNames, hostName, iocName, owner, \
                 pvNames.remove(ch.Name)
             elif pvNames == None or ch.Name not in pvNames:
                 #  orphan the channel
-                channels.append(updateChannel(ch), owner=owner)
+                channels.append(updateChannel(ch, owner=owner))
     # now pvNames contains a list of pv's new on this host/ioc
     for pv in pvNames:
         ch = client.find(name=pv)
