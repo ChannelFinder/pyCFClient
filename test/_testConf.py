@@ -18,7 +18,9 @@ def __loadConfig():
     dflt={'BaseURL':'http://localhost:8080/ChannelFinder',
           'username' : 'cf-update',
           'password' : '1234',
-          'owner' : 'cf-update'
+          'owner' : 'cf-update',
+          'tagOwner' : 'cf-tags',
+          'propOwner' : 'cf-properties'
         }
     cf=ConfigParser.SafeConfigParser(defaults=dflt)
 #    print os.path.normpath(os.path.expanduser('~/channelfinderapi.conf'))

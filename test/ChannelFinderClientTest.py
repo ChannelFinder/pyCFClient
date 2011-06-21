@@ -8,6 +8,8 @@ import sys
 
 from channelfinder.core.ChannelFinderClient import ChannelFinderClient
 from channelfinder.core.Channel import Channel, Property, Tag
+
+from _testConf import _testConf
 #===============================================================================
 # 
 #===============================================================================
@@ -157,7 +159,6 @@ class OperationTest(unittest.TestCase):
         pass
     
     def testGetAllTags(self):
-        initial = len(self.client.getAllTags())
         testTags = []
         testTags.append(Tag('pyTag1', 'pyOwner'))
         testTags.append(Tag('pyTag2', 'pyOwner'))
