@@ -54,69 +54,79 @@ def updateChannelFinder(pvNames, hostName, iocName, \
     if hostName == None or iocName == None:
         raise Exception, 'missing hostName or iocName'
     channels = []
-    client = ChannelFinderClient(BaseURL=service, username=username, password=password)
-    checkPropertiesExist(client, username)
+    try:
+        client = ChannelFinderClient(BaseURL=service, username=username, password=password)
+    except:
+        raise Exception, 'Unable to create a valid webResourceClient'
+    checkPropertiesExist(client)
     previousChannelsList = client.find(property=[('hostName', hostName), ('iocName', iocName)])
     if previousChannelsList != None:
         for ch in previousChannelsList:
             if pvNames != None and ch.Name in pvNames:
-                channels.append(updateChannel(ch, username,\
+                channels.append(updateChannel(ch,\
                                               hostName=hostName, \
                                               iocName=iocName))
                 pvNames.remove(ch.Name)
             elif pvNames == None or ch.Name not in pvNames:
                 #  orphan the channel
-                channels.append(updateChannel(ch, username))
+                channels.append(updateChannel(ch))
     # now pvNames contains a list of pv's new on this host/ioc
     for pv in pvNames:
         ch = client.find(name=pv)
         if ch == None:
             # New channel
-            channels.append(createChannel(pv, username, \
+            channels.append(createChannel(pv, \
                                           hostName=hostName, \
                                           iocName=iocName))
         elif ch[0] != None:
             # update existing channel
-            channels.append(updateChannel(ch[0], username, \
+            channels.append(updateChannel(ch[0], \
                                           hostName=hostName, \
                                           iocName=iocName))
     client.set(channels=channels)
 
-def updateChannel(channel, username, hostName=None, iocName=None):
+def updateChannel(channel, hostName=None, iocName=None):
     '''
     Helper to update a channel object so as to not affect the existing properties
     '''
     if isinstance(channel, Channel):
         # properties list devoid of hostName and iocName properties
-        properties = [property for property in channel.Properties \
-                      if property.Name != 'hostName' and property.Name != 'iocName']
+        if channel.Properties:
+            properties = [property for property in channel.Properties \
+                          if property.Name != 'hostName' and property.Name != 'iocName']
+        else:
+            properties = []
         if hostName != None:
-            properties.append(Property('hostName', username, hostName))
+            properties.append(Property('hostName', 'cf-update', hostName))
         if iocName != None:
-            properties.append(Property('iocName', username, iocName))
+            properties.append(Property('iocName', 'cf-update', iocName))
         channel.Properties = properties
         return channel
 
-def createChannel(chName, chOwner, hostName=None, iocName=None):
+def createChannel(chName, hostName=None, iocName=None):
     '''
     Helper to create a channel object with the required properties
     '''
-    ch = Channel(chName, chOwner)
+    ch = Channel(chName, 'cf-update')
     ch.Properties = []
     if hostName != None:
-        ch.Properties.append(Property('hostName', chOwner, hostName))
+        ch.Properties.append(Property('hostName', 'cf-update', hostName))
     if iocName != None:
-        ch.Properties.append(Property('iocName', chOwner, iocName))
+        ch.Properties.append(Property('iocName', 'cf-update', iocName))
     return ch
 
-def checkPropertiesExist(client, username):
+def checkPropertiesExist(client):
     '''
     Checks if the properties used by dbUpdate are present if not it creates them
     '''
     requiredProperties = ['hostName', 'iocName']
     for propName in requiredProperties:
         if client.findProperty(propName) == None:
-            client.set(property=Property(propName, username))                
+            try:
+                client.set(property=Property(propName, 'cf-update'))
+            except Exception as e:
+                print 'Failed to create the property',propName
+                print 'CAUSE:',e.message
 
 def ifNoneReturnDefault(object, default):
     '''
