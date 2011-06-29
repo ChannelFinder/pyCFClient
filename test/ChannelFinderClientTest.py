@@ -80,23 +80,22 @@ class JSONparserTest(unittest.TestCase):
 #===============================================================================
 class OperationTest(unittest.TestCase):
     
-    @classmethod
-    def setUpClass(cls):
+    def setUpClass(self):
         '''Default Owners'''
-        cls.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
-        cls.propOwner = _testConf.get('DEFAULT', 'propOwner')
-        cls.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
+        self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
+        self.propOwner = _testConf.get('DEFAULT', 'propOwner')
+        self.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
         '''Default Clients'''
-        cls.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+        self.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'username'), \
                                           password=_testConf.get('DEFAULT', 'password'))
-        cls.clientCh = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+        self.clientCh = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'channelUsername'), \
                                           password=_testConf.get('DEFAULT', 'channelPassword'))
-        cls.clientProp = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+        self.clientProp = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'propUsername'), \
                                           password=_testConf.get('DEFAULT', 'propPassword'))
-        cls.clientTag = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+        self.clientTag = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'tagUsername'), \
                                           password=_testConf.get('DEFAULT', 'tagPassword'))            
     
@@ -460,11 +459,14 @@ class UpdateOperationTest(unittest.TestCase):
         '''Default set of clients'''
         self.client = ChannelFinderClient()
         self.clientCh = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
-                                            username='channel', password=_testConf.get('DEFAULT', 'password'))
+                                            username=_testConf.get('DEFAULT', 'channelUsername'), \
+                                            password=_testConf.get('DEFAULT', 'channelPassword'))
         self.clientProp = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
-                                            username='property', password=_testConf.get('DEFAULT', 'password'))
+                                            username=_testConf.get('DEFAULT', 'propUsername'), \
+                                            password=_testConf.get('DEFAULT', 'propPassword'))
         self.clientTag = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
-                                            username='tag', password=_testConf.get('DEFAULT', 'password'))
+                                            username=_testConf.get('DEFAULT', 'tagUsername'), \
+                                            password=_testConf.get('DEFAULT', 'tagPassword'))
         ''' Test Properties and Tags '''
         orgTag = Tag('originalTag', self.tagOwner)
         orgProp = Property('originalProp', self.propOwner, 'originalValue')
