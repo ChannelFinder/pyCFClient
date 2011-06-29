@@ -80,7 +80,7 @@ class JSONparserTest(unittest.TestCase):
 #===============================================================================
 class OperationTest(unittest.TestCase):
     
-    def setUpClass(self):
+    def setUp(self):
         '''Default Owners'''
         self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
         self.propOwner = _testConf.get('DEFAULT', 'propOwner')
