@@ -86,39 +86,54 @@ class OperationTest(unittest.TestCase):
         self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
         self.propOwner = _testConf.get('DEFAULT', 'propOwner')
         self.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
-        ''''''
+        '''Default Clients'''
         self.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'username'), \
                                           password=_testConf.get('DEFAULT', 'password'))
+        self.clientCh = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+                                          username=_testConf.get('DEFAULT', 'channelUsername'), \
+                                          password=_testConf.get('DEFAULT', 'channelPassword'))
+        self.clientProp = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+                                          username=_testConf.get('DEFAULT', 'propUsername'), \
+                                          password=_testConf.get('DEFAULT', 'propPassword'))
+        self.clientTag = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+                                          username=_testConf.get('DEFAULT', 'tagUsername'), \
+                                          password=_testConf.get('DEFAULT', 'tagPassword'))
         pass
     
     def tearDown(self):
         pass
     
-    def testSetRemoveChannel(self):
-        # Set a channel
-        testChannel = Channel('pyChannelName', self.channelOwner)
-        self.client.set(channel=testChannel)
-        result = self.client.find(name='pyChannelName')
-        self.assertTrue(len(result) == 1, 'incorrect number of channels returned')
-        self.assertTrue(result[0].Name == 'pyChannelName', 'incorrect channel returned')
-        self.client.delete(channelName=testChannel.Name) 
-        result = self.client.find(name='pyChannelName')
-        self.assertTrue(result == None, 'incorrect number of channels returned')  
-        pass
+    def testSetDeleteChannel(self):
+        '''
+        Set and Delete a channel
+        '''
+        try:
+            testChannel = Channel('pyChannelName', self.channelOwner)
+            self.clientCh.set(channel=testChannel)
+            result = self.client.find(name='pyChannelName')
+            self.assertTrue(len(result) == 1, 'incorrect number of channels returned')
+            self.assertTrue(result[0].Name == 'pyChannelName', 'incorrect channel returned')
+        finally:
+            self.clientCh.delete(channelName=testChannel.Name) 
+            result = self.client.find(name='pyChannelName')
+            self.assertTrue(result == None, 'incorrect number of channels returned')
     
     def testSetRemoveChannels(self):
+        '''
+        Test Set and Delete on a list of channels
+        '''
         testChannels = [Channel('pyChannel1', self.channelOwner), \
                         Channel('pyChannel2', self.channelOwner), \
                         Channel('pyChannel3', self.channelOwner)]
         try:
-            self.client.set(channels=testChannels)
+            self.clientCh.set(channels=testChannels)
             r = self.client.find(name='pyChannel*')
             self.assertTrue(len(r) == 3, 'ERROR: # of channels returned expected ' + str(len(r)) + ' expected 3')
         finally:
             # delete each individually
             for ch in testChannels:
-                self.client.delete(channelName=str(ch.Name))
+                self.clientCh.delete(channelName=str(ch.Name))
             pass
     
     
@@ -126,28 +141,37 @@ class OperationTest(unittest.TestCase):
         '''
         This test will check that a POST in the channels resources is destructive
         '''
-        testProp = Property('testProp', self.propOwner)
-        self.client.set(property=testProp)
-        testProp.Value = 'original'        
-        testChannels = [Channel('pyChannel1', self.channelOwner), \
-                        Channel('pyChannel2', self.channelOwner), \
-                        Channel('pyChannel3', self.channelOwner)]
-        try:
-            self.client.set(channel=testChannels[0])        
-            self.client.set(channels=testChannels)
+        testProp = Property('testProp', self.propOwner)        
+        try:            
+            self.clientProp.set(property=testProp)     
+            testProp.Value = 'original'
+            testChannels = [Channel('pyChannel1', self.channelOwner, properties=[testProp]), \
+                            Channel('pyChannel2', self.channelOwner), \
+                            Channel('pyChannel3', self.channelOwner)] 
+            self.clientCh.set(channel=testChannels[0])
+            self.assertEqual(len(self.client.find(name='pyChannel*')), 1, \
+                             'Failed to set a single channel correctly')
+            self.assertTrue(testProp in self.client.find(name='pyChannel1')[0].Properties, \
+                            'Failed to add pychannel1 correctly')
+            testChannels[0] = Channel('pyChannel1', self.channelOwner)
+            self.clientCh.set(channels=testChannels)
             self.assertEqual(len(self.client.find(name='pyChannel*')), 3, \
                              'Failed to set a list of channels correctly')
+            self.assertTrue(testProp not in self.client.find(name='pyChannel1')[0].Properties, \
+                            'Failed to add pychannel1 correctly')
         finally:
-            self.client.delete(propertyName=testProp.Name)
+            for ch in testChannels:
+                self.clientCh.delete(channelName=ch.Name)
+            self.clientProp.delete(propertyName=testProp.Name)
                 
         
     
     def testSetRemoveTag(self):
         testTag = Tag('pyTag', self.tagOwner)
-        self.client.set(tag=testTag)
+        self.clientTag.set(tag=testTag)
         self.assertTrue(self.client.findTag(tagName=testTag.Name).Name == testTag.Name, \
                         'testTag with name _pyTag_ not added')
-        self.client.delete(tagName=testTag.Name)
+        self.clientTag.delete(tagName=testTag.Name)
         self.assertEqual(self.client.findTag(tagName=testTag.Name), None, \
                          'tag not removed correctly')
 #        self.assertIsNone(self.client.findTag(tagName=testTag.Name), 'tag not removed correctly')
@@ -158,52 +182,52 @@ class OperationTest(unittest.TestCase):
         testTags.append(Tag('pyTag1', self.tagOwner))
         testTags.append(Tag('pyTag2', self.tagOwner))
         testTags.append(Tag('pyTag3', self.tagOwner))
-        self.client.set(tags=testTags)
-        # Check if all the tags were correctly Added
-        for tag in testTags:
-            self.assertTrue(self.client.findTag(tagName=tag.Name), \
-                            'Error: tag ' + tag.Name + ' was not added')
-        # delete the Tags
-        for tag in testTags:
-            self.client.delete(tagName=tag.Name)
-        # Check all the tags were correctly removed
-        for tag in testTags:
-            self.assertEqual(self.client.findTag(tagName='pyTag1'), None, \
-                             'Error: tag ' + tag.Name + ' was not removed')
-#            self.assertIsNone(self.client.findTag(tagName='pyTag1'), 'Error: tag ' + tag.Name + ' was not removed')
-        pass
+        try:
+            self.clientTag.set(tags=testTags)
+            ''' Check if all the tags were correctly Added '''
+            for tag in testTags:
+                self.assertTrue(self.client.findTag(tagName=tag.Name), \
+                                'Error: tag ' + tag.Name + ' was not added')
+        finally:
+            ''' delete the Tags '''
+            for tag in testTags:
+                self.clientTag.delete(tagName=tag.Name)
+            ''' Check all the tags were correctly removed '''
+            for tag in testTags:
+                self.assertEqual(self.client.findTag(tagName='pyTag1'), None, \
+                                 'Error: tag ' + tag.Name + ' was not removed')
     
     def testGetAllTags(self):
         testTags = []
         testTags.append(Tag('pyTag1', self.tagOwner))
         testTags.append(Tag('pyTag2', self.tagOwner))
         testTags.append(Tag('pyTag3', self.tagOwner))
-        self.client.set(tags=testTags)
-        allTags = self.client.getAllTags();
-        # this test introduces a race condition
-#        self.assertTrue(len(allTags) == (initial + 3), 'unexpected number of tags')
-        for tag in testTags:
-            self.assertTrue(tag in allTags, 'tag ' + tag.Name + ' missing')
-        # delete the Tags
-        for tag in testTags:
-            self.client.delete(tagName=tag.Name)
-        # Check all the tags were correctly removed
-        for tag in testTags:
-            self.assertNotEqual(self.client.findTag(tagName=tag.Name), 'Error: tag ' + tag.Name + ' was not removed')
-#            self.assertIsNone(self.client.findTag(tagName=tag.Name), 'Error: tag ' + tag.Name + ' was not removed')
+        try:
+            self.clientTag.set(tags=testTags)
+            allTags = self.client.getAllTags();
+            ''' this test introduces a race condition '''
+            for tag in testTags:
+                self.assertTrue(tag in allTags, 'tag ' + tag.Name + ' missing')
+        finally:
+            ''' delete the Tags '''
+            for tag in testTags:
+                self.client.delete(tagName=tag.Name)
+            ''' Check all the tags were correctly removed '''
+            for tag in testTags:
+                self.assertNotEqual(self.client.findTag(tagName=tag.Name), \
+                                    'Error: tag ' + tag.Name + ' was not removed')
     
     def testSetRemoveProperty(self):
         testProperty = Property('pyProp', self.propOwner, value=33)
-        self.client.set(property=testProperty)
-        self.assertTrue(self.client.findProperty(propertyName=testProperty.Name), \
-                        'Error: ' + testProperty.Name + ' failed to be added')
-        self.client.delete(propertyName=testProperty.Name)
-        self.assertEqual(self.client.findProperty(propertyName=testProperty.Name), \
-                            None, \
-                            'Error: ' + testProperty.Name + ' failed to delete')
-#        self.assertIsNone(self.client.findProperty(propertyName=testProperty.Name), \
-#                        'Error: ' + testProperty.Name + ' failed to delete')        
-        pass
+        try:
+            self.clientProp.set(property=testProperty)
+            self.assertTrue(self.client.findProperty(propertyName=testProperty.Name), \
+                            'Error: ' + testProperty.Name + ' failed to be added')
+        finally:
+            self.clientProp.delete(propertyName=testProperty.Name)
+            self.assertEqual(self.client.findProperty(propertyName=testProperty.Name), \
+                                None, \
+                                'Error: ' + testProperty.Name + ' failed to delete')
     
     def testSetRemoveProperties(self):
         testProps = []
@@ -710,7 +734,7 @@ class QueryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testConnection']
-    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateAppendTest)
+    suite = unittest.TestLoader().loadTestsFromTestCase(OperationTest)
     unittest.TextTestRunner(verbosity=2).run(suite)
     
 #    print sys.path
