@@ -395,16 +395,13 @@ class ChannelFinderClient(object):
         '''
         update(channel = Channel)
         >>> update(channel = Channel('existingCh',
-                                     'chOwner'),
+                                     'chOwner',
                                      properties=[
                                         Property('newProp','propOwner','Val'),
                                         Property('existingProp','propOwner','newVal')],
                                      tags=[Tag('mytag','tagOwner')])
         # updates the channel 'existingCh' with the new provided properties and tags 
         # without affecting the other tags and properties of this channel 
-        
-        update(property = Property)
-        update(tag = Tag)
         
         update(tag = Tag, channelName = String)
         >>> update(tag = Tag('myTag','tagOwner'), channelName='chName')
@@ -415,6 +412,11 @@ class ChannelFinderClient(object):
         >>> update(tag = Tag('tagName'), channelNames=['ch1','ch2','ch3'])
         # Add tag to channels with names in the list channeNames
         # without affecting the other channels using this tag 
+        
+        
+        
+        update(property = Property)
+        update(tag = Tag)
         
         ## RENAME OPERATIONS ##    
         update(channel = Channel, originalChannelName = String)
@@ -480,7 +482,13 @@ class ChannelFinderClient(object):
             response = self.connection.request_post(self.__tagsResource + '/' + tag.Name, \
                                                     body=JSONEncoder().encode(self.encodeTag(tag, withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)                                
+            self.__checkResponseState(response)
+        elif 'property' in kwds and 'channelName' in kwds:
+            property = kwds['property']
+            channels = [Channel(kwds['channelName'], self.__userName)]
+            response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
+                                                    body=JSONEncoder().encode(self.encodeProperty(property, withChannels=channels)),\
+                                                    headers=copy(self.__jsonheader))                               
         elif 'originalChannelName' in kwds and 'channel' in kwds:
             ch = kwds['channel']
             channelName = kwds['originalChannelName']

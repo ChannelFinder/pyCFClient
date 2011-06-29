@@ -20,8 +20,14 @@ def __loadConfig():
           'password' : '1234',
           'owner' : 'cf-update',
           'channelOwner' : 'cf-channels',
+          'channelUsername' : 'channel',
+          'channelPassword' : '1234',          
+          'propOwner' : 'cf-properties',
+          'propUsername' : 'property',
+          'propPassword' : '1234',
           'tagOwner' : 'cf-tags',
-          'propOwner' : 'cf-properties'
+          'tagUsername' : 'tag',
+          'tagPassword' : '1234'
         }
     cf=ConfigParser.SafeConfigParser(defaults=dflt)
 #    print os.path.normpath(os.path.expanduser('~/channelfinderapi.conf'))

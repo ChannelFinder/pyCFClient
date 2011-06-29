@@ -24,7 +24,7 @@ class ConnectionTest(unittest.TestCase):
 #            with self.assertRaises(Exception):ChannelFinderClient(BaseURL=url)
             
 #===============================================================================
-# 
+# Test JSON Parsing
 #===============================================================================
 class JSONparserTest(unittest.TestCase):
     
@@ -82,12 +82,14 @@ class JSONparserTest(unittest.TestCase):
 class OperationTest(unittest.TestCase):
     
     def setUp(self):
+        '''Default Owners'''
         self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
         self.propOwner = _testConf.get('DEFAULT', 'propOwner')
         self.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
+        ''''''
         self.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
-                                          username='channel', \
-                                          password='1234')
+                                          username=_testConf.get('DEFAULT', 'username'), \
+                                          password=_testConf.get('DEFAULT', 'password'))
         pass
     
     def tearDown(self):
@@ -282,7 +284,8 @@ class SetOperationTest(unittest.TestCase):
         self.propOwner = _testConf.get('DEFAULT', 'propOwner')
         self.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
         self.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
-                                          username='channel', password='1234')
+                                          username=_testConf.get('DEFAULT', 'username'), \
+                                          password=_testConf.get('DEFAULT', 'password'))
         self.testChannels = [Channel('pyTestChannel1', self.ChannelOwner), \
                         Channel('pyTestChannel2', self.ChannelOwner), \
                         Channel('pyTestChannel3', self.ChannelOwner)]
@@ -441,10 +444,15 @@ class UpdateOperationTest(unittest.TestCase):
                                             username='property', password=_testConf.get('DEFAULT', 'password'))
         self.clientTag = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                             username='tag', password=_testConf.get('DEFAULT', 'password'))
+        ''' Test Properties and Tags '''
         orgTag = Tag('originalTag', self.tagOwner)
         orgProp = Property('originalProp', self.propOwner, 'originalValue')
-        self.clientTag.set(tag=orgTag);
-        self.clientProp.set(property=orgProp);
+        newTag = Tag('newTag', self.tagOwner)
+        newProp = Property('newProperty', self.propOwner)
+        
+        self.clientTag.set(tag=orgTag)
+        self.clientProp.set(property=orgProp)
+        
         self.clientCh.set(channel=Channel('originalChannelName', \
                                           self.channelOwner, \
                                           properties=[orgProp], \
@@ -554,7 +562,7 @@ class UpdateOperationTest(unittest.TestCase):
 # Update operations to append tags and properties
 #===============================================================================
 
-class TestUpdateAppend(unittest.TestCase):
+class UpdateAppendTest(unittest.TestCase):
     
     def setUp(self):
         '''Default Owners'''
@@ -563,16 +571,25 @@ class TestUpdateAppend(unittest.TestCase):
         self.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
         '''Default Client''' 
         self.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
-                                          username='channel', \
-                                          password='1234')
+                                          username=_testConf.get('DEFAULT', 'username'), \
+                                          password=_testConf.get('DEFAULT', 'password'))
+        self.clientProp = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+                                          username=_testConf.get('DEFAULT', 'propUsername'), \
+                                          password=_testConf.get('DEFAULT', 'propPassword'))
+        self.clientTag = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+                                          username=_testConf.get('DEFAULT', 'tagUsername'), \
+                                          password=_testConf.get('DEFAULT', 'tagPassword'))
         
         self.Tag1 = Tag('tag1', self.tagOwner)
         self.Tag2 = Tag('tag2', self.tagOwner)
+        self.Prop1 = Property('prop1', self.propOwner)
+        self.Prop2 = Property('prop2', self.propOwner)
         self.ch1 = Channel('orgChannel1', self.ChannelOwner, tags=[self.Tag1, self.Tag2])
         self.ch2 = Channel('orgChannel2', self.ChannelOwner, tags=[self.Tag2])
         self.ch3 = Channel('orgChannel3', self.ChannelOwner)
         self.channels = [self.ch1, self.ch2, self.ch3]
-        self.client.set(tags=[self.Tag1, self.Tag2])
+        self.clientTag.set(tags=[self.Tag1, self.Tag2])
+        self.clientProp.set(properties=[self.Prop1, self.Prop2])
         self.client.set(channels=self.channels)
         # originally 1 channel has tag Tag1 and 2 channels have tag Tag2
         self.assertTrue(len(self.client.find(tagName=self.Tag1.Name)) == 1)
@@ -580,30 +597,56 @@ class TestUpdateAppend(unittest.TestCase):
         pass
     
     def tearDown(self):
-        self.client.delete(tagName=self.Tag1.Name)
-        self.client.delete(tagName=self.Tag2.Name)
+        self.clientTag.delete(tagName=self.Tag1.Name)
+        self.clientTag.delete(tagName=self.Tag2.Name)
+        self.clientProp.delete(propertyName=self.Prop1.Name)
+        self.clientProp.delete(propertyName=self.Prop2.Name)
         for channel in self.channels:
             self.client.delete(channelName=channel.Name)
         self.assertTrue(self.client.find(name='orgChannel?') == None)
         pass
     
     def testUpdateAppendTag2Channel(self):
-        # Add tag to channel3 without removing it from the first 2 channels
-        self.client.update(tag=self.Tag2, channelName=self.ch3.Name)
+        '''
+        Add tag to channel3 without removing it from the first 2 channels
+        '''
+        self.clientTag.update(tag=self.Tag2, channelName=self.ch3.Name)
         self.assertTrue(len(self.client.find(tagName=self.Tag2.Name)) == 3)
-        # Add tag to channels 2-3 without removing it from channel 1
+    
+    def testUpdateAppendTag2Channels(self):
+        '''
+        Add tag to channels 2-3 without removing it from channel 1
+        '''
         channelNames = [ channel.Name for channel in self.channels]
-        self.client.update(tag=self.Tag1, channelNames=channelNames)
+        self.clientTag.update(tag=self.Tag1, channelNames=channelNames)
         self.assertTrue(len(self.client.find(tagName=self.Tag1.Name)) == 3)
+    
+    def testUpdateAppendTags2Channel(self):
+        pass
+    
+    def testUpdateAppendTags2Channels(self):
         pass
     
     def testUpdateAppendProperty2Channel(self):
-        
+        '''
+        Test to update a channel with a property 
+        '''
+        self.assertTrue(len(self.client.find(name=self.ch3.Name)) ==1 and \
+                         self.client.find(name=self.ch3.Name)[0].Properties == None,\
+                         'the channel already has properties')
+        self.clientProp.update(property=self.Prop1, channelName=self.ch3.Name)
+        self.assertTrue(len(self.client.find(name=self.ch3.Name)) == 1 and \
+                        self.Prop1 in self.client.find(name=self.ch3.Name)[0].Properties, \
+                            'failed to update the channel with a new property')
+        self.clientProp.update(property=self.Prop2, channelName=self.ch3.Name)
+        chs = self.client.find(name=self.ch3.Name)
+        self.assertTrue(len(chs) == 1 and \
+                        self.Prop1 in chs[0].Properties and \
+                        self.Prop2 in chs[0].Properties ,\
+                        'Failed to update the channel with a new property without disturbing the old one')
+        self.client.set(channel = self.ch3)
         pass
-    
-    def testUpdateAppendProperty2Channels(self):
-        pass
-
+ 
 #===========================================================================
 # Query Tests
 
@@ -615,7 +658,9 @@ class QueryTest(unittest.TestCase):
         self.propOwner = _testConf.get('DEFAULT', 'propOwner')
         self.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
         '''Default Client'''
-        self.client = ChannelFinderClient()
+        self.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+                                          username=_testConf.get('DEFAULT', 'username'), \
+                                          password=_testConf.get('DEFAULT', 'password'))
         pass
 
 
@@ -653,9 +698,9 @@ class QueryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testConnection']
-#    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateOperationTest)
-#    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateAppendTest)
+    unittest.TextTestRunner(verbosity=2).run(suite)
     
-    print sys.path
+#    print sys.path
     
-    unittest.main()
+#    unittest.main()
