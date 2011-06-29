@@ -4,7 +4,6 @@ Created on Feb 15, 2011
 @author: shroffk
 '''
 import unittest
-import sys
 
 from channelfinder.core.ChannelFinderClient import ChannelFinderClient
 from channelfinder.core.Channel import Channel, Property, Tag
@@ -81,27 +80,25 @@ class JSONparserTest(unittest.TestCase):
 #===============================================================================
 class OperationTest(unittest.TestCase):
     
-    def setUpClass(self):
+    @classmethod
+    def setUpClass(cls):
         '''Default Owners'''
-        self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
-        self.propOwner = _testConf.get('DEFAULT', 'propOwner')
-        self.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
+        cls.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
+        cls.propOwner = _testConf.get('DEFAULT', 'propOwner')
+        cls.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
         '''Default Clients'''
-        self.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+        cls.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'username'), \
                                           password=_testConf.get('DEFAULT', 'password'))
-        self.clientCh = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+        cls.clientCh = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'channelUsername'), \
                                           password=_testConf.get('DEFAULT', 'channelPassword'))
-        self.clientProp = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+        cls.clientProp = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'propUsername'), \
                                           password=_testConf.get('DEFAULT', 'propPassword'))
-        self.clientTag = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+        cls.clientTag = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'tagUsername'), \
-                                          password=_testConf.get('DEFAULT', 'tagPassword'))
-    
-    def tearDown(self):
-        pass
+                                          password=_testConf.get('DEFAULT', 'tagPassword'))            
     
     def testSetDeleteChannel(self):
         '''
@@ -734,9 +731,9 @@ class QueryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testConnection']
-    suite = unittest.TestLoader().loadTestsFromTestCase(OperationTest)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+#    suite = unittest.TestLoader().loadTestsFromTestCase(OperationTest)
+#    unittest.TextTestRunner(verbosity=2).run(suite)
     
 #    print sys.path
     
-#    unittest.main()
+    unittest.main()

@@ -59,7 +59,6 @@ class ErrorTest(unittest.TestCase):
             pass
         try:
             ch = Channel('chName', 'chOwner', tags='invalidProperty')
-            print 'error'
         except:
             pass
         
