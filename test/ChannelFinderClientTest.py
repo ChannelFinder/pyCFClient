@@ -620,13 +620,7 @@ class UpdateAppendTest(unittest.TestCase):
         channelNames = [ channel.Name for channel in self.channels]
         self.clientTag.update(tag=self.Tag1, channelNames=channelNames)
         self.assertTrue(len(self.client.find(tagName=self.Tag1.Name)) == 3)
-    
-    def testUpdateAppendTags2Channel(self):
-        pass
-    
-    def testUpdateAppendTags2Channels(self):
-        pass
-    
+
     def testUpdateAppendProperty2Channel(self):
         '''
         Test to update a channel with a property 
@@ -645,7 +639,25 @@ class UpdateAppendTest(unittest.TestCase):
                         self.Prop2 in chs[0].Properties ,\
                         'Failed to update the channel with a new property without disturbing the old one')
         self.client.set(channel = self.ch3)
-        pass
+       
+    def testUpdateAppendProperty2Channels(self):
+        '''
+        Update a channels with a property
+        '''
+        self.assertTrue(len(self.client.find(name=self.ch2.Name)) ==1 and \
+                         self.client.find(name=self.ch2.Name)[0].Properties == None,\
+                         'the channel already has properties')
+        self.assertTrue(len(self.client.find(name=self.ch3.Name)) ==1 and \
+                         self.client.find(name=self.ch3.Name)[0].Properties == None,\
+                         'the channel already has properties')        
+        self.clientProp.update(property=self.Prop1, channelNames=[self.ch2.Name,self.ch3.Name])
+        self.assertTrue(len(self.client.find(name=self.ch2.Name)) == 1 and \
+                        self.Prop1 in self.client.find(name=self.ch2.Name)[0].Properties, \
+                            'failed to update the channel with a new property')
+        self.assertTrue(len(self.client.find(name=self.ch3.Name)) == 1 and \
+                        self.Prop1 in self.client.find(name=self.ch3.Name)[0].Properties, \
+                            'failed to update the channel with a new property')
+
  
 #===========================================================================
 # Query Tests
