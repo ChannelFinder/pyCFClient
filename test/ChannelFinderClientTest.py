@@ -81,7 +81,7 @@ class JSONparserTest(unittest.TestCase):
 #===============================================================================
 class OperationTest(unittest.TestCase):
     
-    def setUp(self):
+    def setUpClass(self):
         '''Default Owners'''
         self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
         self.propOwner = _testConf.get('DEFAULT', 'propOwner')
@@ -99,7 +99,6 @@ class OperationTest(unittest.TestCase):
         self.clientTag = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'tagUsername'), \
                                           password=_testConf.get('DEFAULT', 'tagPassword'))
-        pass
     
     def tearDown(self):
         pass
@@ -157,8 +156,9 @@ class OperationTest(unittest.TestCase):
             self.clientCh.set(channels=testChannels)
             self.assertEqual(len(self.client.find(name='pyChannel*')), 3, \
                              'Failed to set a list of channels correctly')
-            self.assertTrue(testProp not in self.client.find(name='pyChannel1')[0].Properties, \
-                            'Failed to add pychannel1 correctly')
+            self.assertTrue(not self.client.find(name='pyChannel1')[0].Properties or \
+                            testProp not in self.client.find(name='pyChannel1')[0].Properties, \
+                            'Failed to set pychannel1 correctly')
         finally:
             for ch in testChannels:
                 self.clientCh.delete(channelName=ch.Name)
@@ -234,36 +234,36 @@ class OperationTest(unittest.TestCase):
         testProps.append(Property('pyProp1', self.propOwner))
         testProps.append(Property('pyProp2', self.propOwner))
         testProps.append(Property('pyProp3', self.propOwner))
-        self.client.set(properties=testProps)
-        for prop in testProps:
-            self.assertTrue(self.client.findProperty(propertyName=prop.Name), \
-                            'Error: property ' + prop.Name + ' was not added.')
-        for prop in testProps:
-            self.client.delete(propertyName=prop.Name)
-        for prop in testProps:
-            self.assertEqual(self.client.findProperty(propertyName=prop.Name), None)
-#            self.assertIsNone(self.client.findProperty(propertyName=prop.Name))
-        pass
+        try:
+            self.clientProp.set(properties=testProps)
+            for prop in testProps:
+                self.assertTrue(self.client.findProperty(propertyName=prop.Name), \
+                                'Error: property ' + prop.Name + ' was not added.')
+        finally:
+            for prop in testProps:
+                self.client.delete(propertyName=prop.Name)
+            for prop in testProps:
+                self.assertEqual(self.client.findProperty(propertyName=prop.Name), None)
     
     def testGetAllPropperties(self):
         testProps = []
         testProps.append(Property('pyProp1', self.propOwner))
         testProps.append(Property('pyProp2', self.propOwner))
         testProps.append(Property('pyProp3', self.propOwner))
-        self.client.set(properties=testProps)
-        allProperties = self.client.getAllProperties()
-#        self.assertTrue(len(allProperties) == (initial + 3), 'unexpected number of properties')
-        for prop in testProps:
-            self.assertTrue(prop in allProperties, 'property ' + prop.Name + ' missing')
-        # delete the Tags
-        for prop in testProps:
-            self.client.delete(propertyName=prop.Name)
-        # Check all the tags were correctly removed
-        for prop in testProps:
-            self.assertEqual(self.client.findProperty(propertyName=prop.Name), None, \
-                             'Error: property ' + prop.Name + ' was not removed')
-#            self.assertIsNone(self.client.findProperty(propertyName=prop.Name), 'Error: property ' + prop.Name + ' was not removed')
-        pass
+        try:
+            self.client.set(properties=testProps)
+            allProperties = self.client.getAllProperties()
+    #        self.assertTrue(len(allProperties) == (initial + 3), 'unexpected number of properties')
+            for prop in testProps:
+                self.assertTrue(prop in allProperties, 'property ' + prop.Name + ' missing')
+        finally:
+            # delete the Tags
+            for prop in testProps:
+                self.client.delete(propertyName=prop.Name)
+            # Check all the tags were correctly removed
+            for prop in testProps:
+                self.assertEqual(self.client.findProperty(propertyName=prop.Name), None, \
+                                 'Error: property ' + prop.Name + ' was not removed')
     
     def testSetRemoveSpecialChar(self):
         spChannel = Channel('special{}<chName:->*?', self.channelOwner)
