@@ -468,20 +468,20 @@ class UpdateOperationTest(unittest.TestCase):
                                             username=_testConf.get('DEFAULT', 'tagUsername'), \
                                             password=_testConf.get('DEFAULT', 'tagPassword'))
         ''' Test Properties and Tags '''
-        orgTag = Tag('originalTag', self.tagOwner)
-        orgProp = Property('originalProp', self.propOwner, 'originalValue')
+        self.orgTag = Tag('originalTag', self.tagOwner)
+        self.orgProp = Property('originalProp', self.propOwner, 'originalValue')
         
-        self.clientTag.set(tag=orgTag)
-        self.clientProp.set(property=orgProp)
+        self.clientTag.set(tag=self.orgTag)
+        self.clientProp.set(property=self.orgProp)
         
         self.clientCh.set(channel=Channel('originalChannelName', \
                                           self.channelOwner, \
-                                          properties=[orgProp], \
-                                          tags=[orgTag]))
+                                          properties=[self.orgProp], \
+                                          tags=[self.orgTag]))
         ch = self.client.find(name='originalChannelName')
         self.assertTrue(len(ch) == 1 and 
-                        orgProp in ch[0].Properties and \
-                        orgTag in ch[0].Tags);
+                        self.orgProp in ch[0].Properties and \
+                        self.orgTag in ch[0].Tags);
         pass
     
     def UpdateTagName(self):
@@ -529,7 +529,7 @@ class UpdateOperationTest(unittest.TestCase):
         self.assertTrue(self.client.find(name='updatedChannelName') == None)
         pass
     
-    def testUpdateChannelOwner(self):
+    def UpdateChannelOwner(self):
         ch = self.client.find(name='originalChannelName')[0]
         newChannel = Channel(ch.Name, self.tagOwner, properties=ch.Properties, tags=ch.Tags)
         self.clientCh.update(originalChannelName='originalChannelName', \
@@ -548,30 +548,31 @@ class UpdateOperationTest(unittest.TestCase):
         using the lowest lever _tagOwner_ as the newOwner
         '''
         ch = self.client.find(name='originalChannelName')[0]
-        updatedProp = Property('originalProp', self.tagOwner, 'updatedValue')
+        updatedProp = Property('originalProp', self.propOwner, 'updatedValue')
         newTag = Tag('updatedTag', self.tagOwner)
-        newProp = Property('newProp', self.tagOwner, 'newValue')
+        newProp = Property('newProp', self.propOwner, 'newValue')
         try:
             self.clientTag.set(tag=newTag)
             self.clientProp.set(property=newProp)
-            newChannel = Channel('updatedChannelName', self.tagOwner, \
+            newChannel = Channel('updatedChannelName', self.channelOwner, \
                                  properties=[updatedProp, newProp], \
                                  tags=[newTag])
             self.clientCh.update(originalChannelName='originalChannelName', \
                                channel=newChannel)
             foundChannel = self.client.find(name='updatedChannelName')[0]
             self.assertTrue(foundChannel.Name == 'updatedChannelName' and
-                            foundChannel.Owner == self.tagOwner and \
+                            foundChannel.Owner == self.channelOwner and \
                             updatedProp in foundChannel.Properties and\
                             newProp in foundChannel.Properties and \
                             newTag in foundChannel.Tags and \
-                            'originalTag' in foundChannel.getTags())
+                            self.orgTag in foundChannel.Tags)
+            
+        finally:
             #reset
             self.clientCh.update(originalChannelName='updatedChannelName', \
                                channel=ch)
-        except Exception, e:
-            print 'Exception caused ' + e.message
-        finally:
+            self.assertTrue(len(self.client.find(channelName='originalChannelName')), \
+                            'failed to reset the updated channels')
             if self.clientTag.findTag(newTag.Name):
                 self.clientTag.delete(tagName=newTag.Name)
             if self.clientProp.findProperty(newProp.Name):
@@ -735,9 +736,9 @@ class QueryTest(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testConnection']
-#    suite = unittest.TestLoader().loadTestsFromTestCase(OperationTest)
-#    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateOperationTest)
+    unittest.TextTestRunner(verbosity=2).run(suite)
     
 #    print sys.path
     
-    unittest.main()
+#    unittest.main()
