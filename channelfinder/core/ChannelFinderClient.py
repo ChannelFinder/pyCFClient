@@ -403,6 +403,17 @@ class ChannelFinderClient(object):
         # updates the channel 'existingCh' with the new provided properties and tags 
         # without affecting the other tags and properties of this channel 
         
+        update(property = Property, channelName = String)
+        >>> update(property=Property('propName', 'propOwner', 'propValue'), 
+                                    channelName='ch1')
+        # Add Property to the channel with the name 'ch1'
+        # without affecting the other channels using this property 
+        
+        >>>update(property=Property('propName', 'propOwner', 'propValue'), 
+                                    channelNames=['ch1','ch2','ch3'])
+        # Add Property to the channels with the names in the list channelNames
+        # without affecting the other channels using this property 
+        
         update(tag = Tag, channelName = String)
         >>> update(tag = Tag('myTag','tagOwner'), channelName='chName')
         # Add tag to channel with name chName
@@ -412,9 +423,7 @@ class ChannelFinderClient(object):
         >>> update(tag = Tag('tagName'), channelNames=['ch1','ch2','ch3'])
         # Add tag to channels with names in the list channeNames
         # without affecting the other channels using this tag 
-        
-        
-        
+
         update(property = Property)
         update(tag = Tag)
         
