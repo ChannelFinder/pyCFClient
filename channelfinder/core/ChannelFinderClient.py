@@ -3,6 +3,7 @@ Created on Feb 15, 2011
 
 @author: shroffk
 '''
+import re
 from channelfinder.lib.restful_lib import Connection
 from copy import copy
 from _conf import _conf
@@ -195,7 +196,10 @@ class ChannelFinderClient(object):
         simply checks the return status of the http response
         '''
         if not int(r[u'headers']['status']) <= 206:
-                raise Exception, 'HTTP Error status: ' + r[u'headers']['status'] + r[u'body']
+            match = re.search(r'<b>description</b>([\S\s]*?)</p>', r[u'body'])
+            msg  = match.group(1)
+            raise Exception, 'HTTP Error status: ' + r[u'headers']['status'] + \
+                ' Cause: ' + msg
         return r
     
     def find(self, **kwds):
