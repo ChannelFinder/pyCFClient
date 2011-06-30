@@ -470,8 +470,6 @@ class UpdateOperationTest(unittest.TestCase):
         ''' Test Properties and Tags '''
         orgTag = Tag('originalTag', self.tagOwner)
         orgProp = Property('originalProp', self.propOwner, 'originalValue')
-        newTag = Tag('newTag', self.tagOwner)
-        newProp = Property('newProperty', self.propOwner)
         
         self.clientTag.set(tag=orgTag)
         self.clientProp.set(property=orgProp)
@@ -571,9 +569,13 @@ class UpdateOperationTest(unittest.TestCase):
             #reset
             self.clientCh.update(originalChannelName='updatedChannelName', \
                                channel=ch)
+        except Exception, e:
+            print 'Exception caused ' + e.message
         finally:
-            self.clientTag.delete(tagName=newTag.Name)
-            self.clientProp.delete(propertyName=newProp.Name)
+            if self.clientTag.findTag(newTag.Name):
+                self.clientTag.delete(tagName=newTag.Name)
+            if self.clientProp.findProperty(newProp.Name):
+                self.clientProp.delete(propertyName=newProp.Name)
  
     def tearDown(self):
         self.clientCh.delete(channelName='originalChannelName')
