@@ -294,7 +294,6 @@ class OperationTest(unittest.TestCase):
         self.client.delete(channelName='\'"Name Name')
         pass
 
-
 #===============================================================================
 #  Set Operation Test
 #===============================================================================
@@ -687,6 +686,7 @@ class UpdateAppendTest(unittest.TestCase):
  
 #===========================================================================
 # Query Tests
+#===========================================================================
 
 class QueryTest(unittest.TestCase):
     
@@ -728,17 +728,60 @@ class QueryTest(unittest.TestCase):
         
         self.client.delete(tagName = tagA.Name)
         self.client.delete(tagName = tagB.Name)
-            
+    
+    def testNoneReturn(self):
+        '''
+        find for non existing entities should return None instead of a 404
+        '''
+        self.assertEqual(self.client.find(name = 'NonExistingChannelName'), None, \
+                        'Failed to return None when searching for a non existing channel')
     
 #===============================================================================
 #  ERROR tests
 #===============================================================================
+class ErrorTest(unittest.TestCase):
+    
+    @classmethod
+    def setUpClass(cls):        
+        super(ErrorTest, cls).setUpClass()
+        '''Default Owners'''
+        cls.ChannelOwner = _testConf.get('DEFAULT', 'channelOwner')
+        cls.propOwner = _testConf.get('DEFAULT', 'propOwner')
+        cls.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
+        '''Default Client'''
+        cls.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+                                          username=_testConf.get('DEFAULT', 'username'), \
+                                          password=_testConf.get('DEFAULT', 'password'))
+    
+    def testSetChannelNonExistingProps(self):
+        self.assertRaises(Exception, \
+                          self.client.set(), \
+                          channel=Channel('channelName', \
+                                          self.ChannelOwner, \
+                                          properties=[Property('nonExisitngProperty', 'owner')]))
+    
+    def testSetChannelNonExistingTags(self):
+        self.assertRaises(Exception, \
+                          self.client.set(), \
+                          channel=Channel('channelName', \
+                                          self.ChannelOwner, \
+                                          tags=[Tag('nonExisitngTag', 'owner')]))
+    
+    def testUpdateNonExistingChannel(self):
+        pass
+    
+    def testUpdateNonExistingProperty(self):
+        pass
+    
+    def testUpdateNoneExistingTag(self):
+        pass
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testConnection']
-#    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateOperationTest)
-#    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(ErrorTest)
+    unittest.TextTestRunner(verbosity=2).run(suite)
     
 #    print sys.path
     
-    unittest.main()
+ #   unittest.main()
