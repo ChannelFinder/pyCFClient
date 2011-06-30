@@ -753,19 +753,29 @@ class ErrorTest(unittest.TestCase):
                                           username=_testConf.get('DEFAULT', 'username'), \
                                           password=_testConf.get('DEFAULT', 'password'))
     
-    def testSetChannelNonExistingProps(self):
-        self.assertRaises(Exception, \
-                          self.client.set(), \
-                          channel=Channel('channelName', \
-                                          self.ChannelOwner, \
-                                          properties=[Property('nonExisitngProperty', 'owner')]))
+    def testSetChannelWithNonExistingProp(self):
+        with self.assertRaises(Exception):
+            self.client.set(channel=Channel('channelName', \
+                                            self.ChannelOwner, \
+                                            properties=[Property('nonExisitngProperty', 'owner')]))
     
-    def testSetChannelNonExistingTags(self):
-        self.assertRaises(Exception, \
-                          self.client.set(), \
-                          channel=Channel('channelName', \
-                                          self.ChannelOwner, \
-                                          tags=[Tag('nonExisitngTag', 'owner')]))
+    def testSetChannelWithNonExistingTag(self):
+        with self.assertRaises(Exception):
+            self.client.set(channel=Channel('channelName', \
+                                            self.ChannelOwner, \
+                                            tags=[Tag('nonExisitngTag', 'owner')]))
+        
+    def testUpdateChannelWithNonExistingProp(self):
+        with self.assertRaises(Exception):
+            self.client.update(channel=Channel('channelName', \
+                                               self.ChannelOwner, \
+                                               properties=[Property('nonExisitngProperty', 'owner')]))
+    
+    def testUpdateChannelWithNonExistingTag(self):
+        with self.assertRaises(Exception):
+            self.client.update(channel=Channel('channelName', \
+                                               self.ChannelOwner, \
+                                               tags=[Tag('nonExisitngTag', 'owner')]))
     
     def testUpdateNonExistingChannel(self):
         pass
@@ -784,4 +794,4 @@ if __name__ == "__main__":
     
 #    print sys.path
     
- #   unittest.main()
+#    unittest.main()

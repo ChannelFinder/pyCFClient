@@ -116,7 +116,8 @@ class ChannelFinderClient(object):
             self.__hadleSingleAddParameter(**kwds)
         elif len(kwds) == 2:
             self.__handleMultipleAddParameters(**kwds)
-        pass
+        else:
+            raise Exception, 'incorrect usage: '
     
     def __hadleSingleAddParameter(self, **kwds):
         if 'channel' in kwds :
