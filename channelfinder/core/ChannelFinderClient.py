@@ -232,14 +232,20 @@ class ChannelFinderClient(object):
         if not len(kwds) > 0:
             raise Exception, 'Incorrect usage: atleast one parameter must be specified'
         url = self.__channelsResource
-        args = {}
+        args = []
         if 'name' in kwds:
-            args['~name'] = kwds['name']
+            patterns = kwds['name'].split(',')
+            for eachPattern in patterns:
+                args.append(('~name',eachPattern))
         if 'tagName' in kwds:
-            args['~tag'] = kwds['tagName']
+            patterns = kwds['tagName'].split(',')
+            for eachPattern in patterns:
+                args.append(('~tag',eachPattern))
         if 'property' in kwds:
             for prop in kwds['property']:
-                args[prop[0]] = prop[1]
+                patterns = prop[1].split(',')
+                for eachPattern in patterns:
+                    args.append((prop[0],eachPattern))
 #        url = self.__channelsResource + self.createQueryURL(kwds)
         r = self.connection.request_get(url, args=args, headers=copy(self.__jsonheader))
         if self.__checkResponseState(r):

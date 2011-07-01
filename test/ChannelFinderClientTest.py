@@ -710,28 +710,7 @@ class QueryTest(unittest.TestCase):
     
     def testQueryChannel(self):
         pass
-    
-    def QueryChannelWithAnyTag(self):
-        '''
-        Will check if OR'd queries work
-        '''
-        tagA = Tag('tagA', self.tagOwner)
-        tagB = Tag('tagB', self.tagOwner)
-        self.client.set(tag = tagA)
-        self.client.set(tag = tagB)                        
-        self.client.set(channel = Channel('pyTestChannelA', self.ChannelOwner, tag = [tagA]))
-        self.client.set(channel = Channel('pyTestChannelB', self.ChannelOwner, tag = [tagB]))
-        self.client.set(channel = Channel('pyTestChannelAB', self.ChannelOwner, tag = [tagA,tagB]))
-        
-        channels = self.client.find(tagName = 'tagA,tagB')
-        self.assertEqual(len(channels), 3, 'failed to complete a query with ORed tagNames')
-        self.client.delete(channelName = 'pyTestChannelA')
-        self.client.delete(channelName = 'pyTestChannelB')
-        self.client.delete(channelName = 'pyTestChannelAB')
-        
-        self.client.delete(tagName = tagA.Name)
-        self.client.delete(tagName = tagB.Name)
-    
+     
     def testNoneReturn(self):
         '''
         find for non existing entities should return None instead of a 404
@@ -752,8 +731,60 @@ class QueryTest(unittest.TestCase):
         Logically AND'ed
         tagName=pattern1, pattern2 => return channels with tags matching pattern1 AND pattern2
         '''
+        tagA = Tag('tagA', self.tagOwner)
+        tagB = Tag('tagB', self.tagOwner)
+        self.client.set(tag = tagA)
+        self.client.set(tag = tagB)
+        propA = Property('propA', self.propOwner)
+        propB = Property('propB', self.propOwner)
+        self.client.set(property = propA)
+        self.client.set(property = propB)
+        self.client.set(channel = Channel('pyTestChannelA', \
+                                          self.ChannelOwner, \
+                                          tags = [tagA], \
+                                          properties = [Property('propA',self.propOwner,'1')]))
+        self.client.set(channel = Channel('pyTestChannelB', \
+                                          self.ChannelOwner, \
+                                          tags = [tagB], \
+                                          properties = [Property('propB',self.propOwner,'2')]))
+        self.client.set(channel = Channel('pyTestChannelAB', \
+                                          self.ChannelOwner, \
+                                          tags = [tagA,tagB], \
+                                          properties = [Property('propA', self.propOwner,'a'),\
+                                                        Property('propB', self.propOwner,'b')]))
+        '''Tag Queries'''
+        self.assertEqual(len(self.client.find(tagName = 'tagA')), 2, \
+                         'failed to successfully complete a query for tagA')
+        self.assertEqual(len(self.client.find(tagName = 'tagB')), 2, \
+                         'failed to successfully complete a query for tagB')
+        self.assertEqual(len(self.client.find(tagName = 'tagA,tagB')), 1, \
+                         'failed to complete a query with ORed tagNames')
+        '''Property Queries'''
+        chs = self.client.find(property=[('propA','*')])
+        self.assertEqual(len(chs), 2, \
+                         'Failed of query propA expected 2 found '+str(len(chs)))
+        chs = self.client.find(property=[('propA','1')])
+        self.assertEqual(len(chs), 1, \
+                         'Failed of query propA expected 1 found '+str(len(chs)))
+        '''conditions AND'ed'''
+        '''channels which have both propA and propB'''
+        chs = self.client.find(property=[('propA','*'),('propB','*')])
+        self.assertEqual(len(chs), 1, \
+                         'Failed of query propA expected 1 found '+str(len(chs)))
+        '''conditions OR'ed'''
+        '''channels which have propA = pattern1 OR pattern2'''
+        chs = self.client.find(property=[('propA','1'),('propA','a')])
+        self.assertEqual(len(chs), 2, \
+                         'Failed of query propA expected 2 found '+str(len(chs)))
         
-        pass
+        self.client.delete(channelName = 'pyTestChannelA')
+        self.client.delete(channelName = 'pyTestChannelB')
+        self.client.delete(channelName = 'pyTestChannelAB')
+        
+        self.client.delete(tagName = tagA.Name)
+        self.client.delete(tagName = tagB.Name)
+        self.client.delete(propertyName = propA.Name)
+        self.client.delete(propertyName = propB.Name)
     
 #===============================================================================
 #  ERROR tests
