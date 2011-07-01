@@ -760,15 +760,14 @@ class QueryTest(unittest.TestCase):
 #===============================================================================
 class ErrorTest(unittest.TestCase):
     
-    @classmethod
-    def setUpClass(cls):        
-        super(ErrorTest, cls).setUpClass()
+    def setUp(self):        
+        super(ErrorTest, self).setUpClass()
         '''Default Owners'''
-        cls.ChannelOwner = _testConf.get('DEFAULT', 'channelOwner')
-        cls.propOwner = _testConf.get('DEFAULT', 'propOwner')
-        cls.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
+        self.ChannelOwner = _testConf.get('DEFAULT', 'channelOwner')
+        self.propOwner = _testConf.get('DEFAULT', 'propOwner')
+        self.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
         '''Default Client'''
-        cls.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
+        self.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'username'), \
                                           password=_testConf.get('DEFAULT', 'password'))
     
