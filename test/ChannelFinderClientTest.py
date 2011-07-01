@@ -657,6 +657,8 @@ class UpdateAppendTest(unittest.TestCase):
         self.assertTrue(len(self.client.find(name=self.ch3.Name)) == 1 and \
                         self.Prop1 in self.client.find(name=self.ch3.Name)[0].Properties, \
                             'failed to update the channel with a new property')
+        '''Check that Value of the property is correctly added'''
+        self.Prop2.Value='val'
         self.clientProp.update(property=self.Prop2, channelName=self.ch3.Name)
         chs = self.client.find(name=self.ch3.Name)
         self.assertTrue(len(chs) == 1 and \
@@ -674,7 +676,8 @@ class UpdateAppendTest(unittest.TestCase):
                          'the channel already has properties')
         self.assertTrue(len(self.client.find(name=self.ch3.Name)) ==1 and \
                          self.client.find(name=self.ch3.Name)[0].Properties == None,\
-                         'the channel already has properties')        
+                         'the channel already has properties')
+        self.Prop1.Value='testVal'        
         self.clientProp.update(property=self.Prop1, channelNames=[self.ch2.Name,self.ch3.Name])
         self.assertTrue(len(self.client.find(name=self.ch2.Name)) == 1 and \
                         self.Prop1 in self.client.find(name=self.ch2.Name)[0].Properties, \
@@ -736,6 +739,22 @@ class QueryTest(unittest.TestCase):
         self.assertEqual(self.client.find(name = 'NonExistingChannelName'), None, \
                         'Failed to return None when searching for a non existing channel')
     
+    def testMultiValueQuery(self):
+        '''
+        add multiple search values for the same parameter
+        Expected behaviour
+        
+        Logically OR'ed
+        name=pattern1,pattern2 => return channels with name matching pattern1 OR pattern2
+        propName=valPattern1, valPattern2 => return channels with property 'propName' 
+                                             with values matching valPattern1 OR valPattern2
+        
+        Logically AND'ed
+        tagName=pattern1, pattern2 => return channels with tags matching pattern1 AND pattern2
+        '''
+        
+        pass
+    
 #===============================================================================
 #  ERROR tests
 #===============================================================================
@@ -789,9 +808,9 @@ class ErrorTest(unittest.TestCase):
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testConnection']
-    suite = unittest.TestLoader().loadTestsFromTestCase(ErrorTest)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+#    suite = unittest.TestLoader().loadTestsFromTestCase(UpdateAppendTest)
+#    unittest.TextTestRunner(verbosity=2).run(suite)
     
 #    print sys.path
     
-#    unittest.main()
+    unittest.main()

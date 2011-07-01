@@ -499,7 +499,7 @@ class ChannelFinderClient(object):
             self.__checkResponseState(response)
         elif 'property' in kwds and 'channelName' in kwds:
             property = kwds['property']
-            channels = [Channel(kwds['channelName'], self.__userName)]
+            channels = [Channel(kwds['channelName'], self.__userName, properties=[property])]
             response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
                                                     body=JSONEncoder().encode(self.encodeProperty(property, withChannels=channels)),\
                                                     headers=copy(self.__jsonheader))
@@ -508,7 +508,7 @@ class ChannelFinderClient(object):
             property = kwds['property']
             channels = []
             for eachChannel in kwds['channelNames']:
-                channels.append(Channel(eachChannel, self.__userName))
+                channels.append(Channel(eachChannel, self.__userName, properties=[property]))
             response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
                                                     body=JSONEncoder().encode(self.encodeProperty(property, withChannels=channels)),\
                                                     headers=copy(self.__jsonheader))    
