@@ -760,8 +760,7 @@ class QueryTest(unittest.TestCase):
 #===============================================================================
 class ErrorTest(unittest.TestCase):
     
-    def setUp(self):        
-        super(ErrorTest, self).setUpClass()
+    def setUp(self):
         '''Default Owners'''
         self.ChannelOwner = _testConf.get('DEFAULT', 'channelOwner')
         self.propOwner = _testConf.get('DEFAULT', 'propOwner')
