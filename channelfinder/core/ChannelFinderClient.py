@@ -225,7 +225,7 @@ class ChannelFinderClient(object):
         Searching with multiple parameters
         >>> find(name='SR:C01*', tagName = 'myTag', property=[('position','pattern1')])
         return all channels with name matching 'SR:C01*' AND 
-                            with tag = 'mytag' AND 
+                            with tagName = 'mytag' AND 
                             with property 'position' with value matching 'pattern1'
         
         
@@ -241,7 +241,7 @@ class ChannelFinderClient(object):
         will return all the channels which have properties
         _propA_ with value matching _pattern1_ AND _propB_ with value matching _pattern2_
         
-        >>> find(tag='pattern1,pattern2')
+        >>> find(tagName='pattern1,pattern2')
         will return all the channels which have the tags matching pattern1 AND pattern2
                 
         To query for the existance of a tag or property use findTag and findProperty.                  
