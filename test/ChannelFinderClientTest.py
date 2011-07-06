@@ -794,6 +794,16 @@ class QueryTest(unittest.TestCase):
         self.assertEqual(len(chs), 2, \
                          'Failed of query propA expected 2 found '+str(len(chs)))
         
+        ''' Check Find with multiple parameters '''
+        chs = self.client.find(name='pyTestChannel*', \
+                               tag=tagA.Name, \
+                               property=[('propA','*')])
+        self.assertEqual(len(chs), 2, 'expected 2 found '+str(len(chs)))
+        chs = self.client.find(name='pyTestChannel*', \
+                               tag=tagA.Name, \
+                               property=[('propA','a')])
+        self.assertEqual(len(chs), 1, 'expected 1 found '+str(len(chs)))        
+        
         self.client.delete(channelName = 'pyTestChannelA')
         self.client.delete(channelName = 'pyTestChannelB')
         self.client.delete(channelName = 'pyTestChannelAB')

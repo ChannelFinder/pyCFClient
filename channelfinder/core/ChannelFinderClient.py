@@ -222,10 +222,29 @@ class ChannelFinderClient(object):
         * for multiple char
         ? for single char
         
-        To query for the existance of a tag or property use findTag and findProperty.
+        Searching with multiple parameters
+        >>> find(name='SR:C01*', tagName = 'myTag', property=[('position','pattern1')])
+        return all channels with name matching 'SR:C01*' AND 
+                            with tag = 'mytag' AND 
+                            with property 'position' with value matching 'pattern1'
+        
+        
+        For multiValued searches
+        >>> find(name='pattern1,pattern2')
+        will return all the channels which match either pattern1 OR pattern2
+        
+        >>> find(property=[('propA','pattern1,pattern2')])
+        will return all the channels which have the property propA  and 
+        whose values match pattern1 OR pattern2
+        
+        >>> find(property=[('propA', 'pattern1'),('propB', 'pattern2')])
+        will return all the channels which have properties
+        _propA_ with value matching _pattern1_ AND _propB_ with value matching _pattern2_
+        
+        >>> find(tag='pattern1,pattern2')
+        will return all the channels which have the tags matching pattern1 AND pattern2
                 
-        TODO figure out how python/json will handle the multivalue maps
-        to specify multiple patterns simply pass a ????        
+        To query for the existance of a tag or property use findTag and findProperty.                  
         '''
         if not self.connection:
             raise Exception, 'Connection not created'
