@@ -5,7 +5,7 @@ Created on May 10, 2011
 '''
 import unittest
 from channelfinder.core.Channel import Channel, Property, Tag
-from channelfinder.core.ChannelUtil import ChannelUtil
+from channelfinder.util.ChannelUtil import ChannelUtil
 
 class Test(unittest.TestCase):
 
