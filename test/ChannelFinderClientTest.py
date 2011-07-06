@@ -685,6 +685,23 @@ class UpdateAppendTest(unittest.TestCase):
         self.assertTrue(len(self.client.find(name=self.ch3.Name)) == 1 and \
                         self.Prop1 in self.client.find(name=self.ch3.Name)[0].Properties, \
                             'failed to update the channel with a new property')
+    
+    def UserOwnerCheck(self):
+        '''
+        the _user_ belonging to cf-properties and another group(cf-asd) sets the owner = group
+        but should still be able to update the property
+        '''
+        try:
+            self.clientProp.set(property = Property('testProperty','cf-asd'))
+            self.assertTrue(Property('testProperty','cf-asd') in self.client.getAllProperties(), \
+                            'failed to add testProperty')
+            self.client.set(channel=Channel('testChannel','cf-channels'))
+            self.clientProp.update(property = Property('testProperty','cf-asd','val'), channelName = 'testChannel')
+            self.assertEqual(len(self.client.find(property=[('testProperty','*')])), 1,
+                                 'Failed to update testChannel with testProperty')
+        finally:
+            self.clientProp.delete(propertyName = 'testProperty')
+            self.client.delete(channelName = 'testChannel')
 
  
 #===========================================================================
