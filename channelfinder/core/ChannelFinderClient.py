@@ -252,19 +252,22 @@ class ChannelFinderClient(object):
             raise Exception, 'Incorrect usage: atleast one parameter must be specified'
         url = self.__channelsResource
         args = []
-        if 'name' in kwds:
-            patterns = kwds['name'].split(',')
-            for eachPattern in patterns:
-                args.append(('~name',eachPattern))
-        if 'tagName' in kwds:
-            patterns = kwds['tagName'].split(',')
-            for eachPattern in patterns:
-                args.append(('~tag',eachPattern))
-        if 'property' in kwds:
-            for prop in kwds['property']:
-                patterns = prop[1].split(',')
+        for key in kwds:
+            if key == 'name':
+                patterns = kwds[key].split(',')
                 for eachPattern in patterns:
-                    args.append((prop[0],eachPattern))
+                    args.append(('~name',eachPattern))
+            elif key == 'tagName':
+                patterns = kwds[key].split(',')
+                for eachPattern in patterns:
+                    args.append(('~tag',eachPattern))
+            elif key == 'property':
+                for prop in kwds[key]:
+                    patterns = prop[1].split(',')
+                    for eachPattern in patterns:
+                        args.append((prop[0],eachPattern))
+            else:
+                raise Exception, 'unknown find argument '+key 
 #        url = self.__channelsResource + self.createQueryURL(kwds)
         r = self.connection.request_get(url, args=args, headers=copy(self.__jsonheader))
         if self.__checkResponseState(r):

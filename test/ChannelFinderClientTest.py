@@ -570,7 +570,7 @@ class UpdateOperationTest(unittest.TestCase):
             #reset
             self.clientCh.update(originalChannelName='updatedChannelName', \
                                channel=ch)
-            self.assertTrue(len(self.client.find(channelName='originalChannelName')), \
+            self.assertTrue(len(self.client.find(name='originalChannelName')), \
                             'failed to reset the updated channels')
             if self.clientTag.findTag(newTag.Name):
                 self.clientTag.delete(tagName=newTag.Name)
@@ -796,11 +796,11 @@ class QueryTest(unittest.TestCase):
         
         ''' Check Find with multiple parameters '''
         chs = self.client.find(name='pyTestChannel*', \
-                               tag=tagA.Name, \
+                               tagName=tagA.Name, \
                                property=[('propA','*')])
         self.assertEqual(len(chs), 2, 'expected 2 found '+str(len(chs)))
         chs = self.client.find(name='pyTestChannel*', \
-                               tag=tagA.Name, \
+                               tagName=tagA.Name, \
                                property=[('propA','a')])
         self.assertEqual(len(chs), 1, 'expected 1 found '+str(len(chs)))        
         
@@ -813,6 +813,8 @@ class QueryTest(unittest.TestCase):
         self.client.delete(propertyName = propA.Name)
         self.client.delete(propertyName = propB.Name)
     
+   
+        
 #===============================================================================
 #  ERROR tests
 #===============================================================================
@@ -864,6 +866,18 @@ class ErrorTest(unittest.TestCase):
     
     def testUpdateNoneExistingTag(self):
         pass
+    
+    def testIncorrectFindArguments(self):
+        self.assertRaises(Exception, \
+                          self.client.find, \
+                          processVariable='zzz')
+        self.assertRaises(Exception, \
+                          self.client.find, \
+                          properties='zzz')
+        self.assertRaises(Exception, \
+                          self.client.find, \
+                          tag='zzz')
+
 
 
 if __name__ == "__main__":
