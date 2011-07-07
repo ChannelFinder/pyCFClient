@@ -54,6 +54,9 @@ class ChannelFinderClient(object):
             return value
         
     def getAllChannels(self):
+        '''
+        Returns a list of all the channels
+        '''
         if self.connection:
             resp = self.connection.request_get('/resources/channels', headers=copy(self.__jsonheader))
             if (resp[u'headers']['status'] != '404'):
@@ -273,26 +276,26 @@ class ChannelFinderClient(object):
         if self.__checkResponseState(r):
             return self.decodeChannels(JSONDecoder().decode(r[u'body']))
     
-    @classmethod
-    def createQueryURL(cls, parameters):
-        url = []
-        for parameterKey in parameters.keys():            
-            if parameterKey == 'name':
-                url.append('~name=' + str(parameters['name']))
-            elif parameterKey == 'tagName':
-                url.append('~tag=' + str(parameters['tagName']))
-            elif parameterKey == 'property':
-                if isinstance(parameters['property'], list):
-                    for prop in parameters['property']:                        
-                        if len(prop) == 1:
-                            url.append(str(prop[0] + '=*'))
-                        else:
-                            url.append(str(prop[0] + '=' + prop[1]))
-                else:
-                    raise Exception, 'Incorrect usage: property=[("propName","propValPattern"),("propName","propValPatter")]'                    
-            else:
-                raise Exception, 'Incorrect usage: unknow key ' + parameterKey
-        return '?' + '&'.join(url)
+#    @classmethod
+#    def createQueryURL(cls, parameters):
+#        url = []
+#        for parameterKey in parameters.keys():            
+#            if parameterKey == 'name':
+#                url.append('~name=' + str(parameters['name']))
+#            elif parameterKey == 'tagName':
+#                url.append('~tag=' + str(parameters['tagName']))
+#            elif parameterKey == 'property':
+#                if isinstance(parameters['property'], list):
+#                    for prop in parameters['property']:                        
+#                        if len(prop) == 1:
+#                            url.append(str(prop[0] + '=*'))
+#                        else:
+#                            url.append(str(prop[0] + '=' + prop[1]))
+#                else:
+#                    raise Exception, 'Incorrect usage: property=[("propName","propValPattern"),("propName","propValPatter")]'                    
+#            else:
+#                raise Exception, 'Incorrect usage: unknow key ' + parameterKey
+#        return '?' + '&'.join(url)
             
     def findTag(self, tagName):
         '''
@@ -572,11 +575,12 @@ class ChannelFinderClient(object):
     @classmethod
     def decodeChannels(cls, body):
         '''
+        decode the representation of a list of channels to a list of Channel objects 
         '''
         if not body[u'channels']:
             return None
         channels = []
-        # if List then Multiplce channels are present in the body
+        # if List then Multiple channels are present in the body
         if isinstance(body[u'channels']['channel'], list):
             for channel in body['channels']['channel']:
                 channels.append(cls.decodeChannel(channel))
@@ -587,10 +591,16 @@ class ChannelFinderClient(object):
 
     @classmethod
     def decodeChannel(self, body):
+        '''
+        decode the representation of a channel to the Channel object
+        '''
         return Channel(body[u'@name'], body[u'@owner'], properties=self.decodeProperties(body), tags=self.decodeTags(body))
     
     @classmethod
     def decodeProperties(cls, body):
+        '''
+        decode the representation of a list of properties to a list of Property object
+        '''
         ## TODO handle the case where there is a single property dict
         if body[u'properties'] and body[u'properties']['property']:
             properties = []
@@ -605,6 +615,9 @@ class ChannelFinderClient(object):
         
     @classmethod
     def decodeProperty(cls, propertyBody):
+        '''
+        decode the representation of a property to a Property object
+        '''
         if '@value' in propertyBody:
             return Property(propertyBody['@name'], propertyBody['@owner'], propertyBody['@value'])
         else:
@@ -612,6 +625,9 @@ class ChannelFinderClient(object):
     
     @classmethod
     def decodeTags(cls, body):
+        '''
+        decode the representation of a list of tags to a list of Tag objects
+        '''
         ## TODO handle the case where there is a single tag dict
         if body[u'tags'] and body[u'tags']['tag']:
             tags = []
@@ -626,12 +642,15 @@ class ChannelFinderClient(object):
     
     @classmethod
     def decodeTag(cls, tagBody):
+        '''
+        decode a representation of a tag to the Tag object
+        '''
         return Tag(tagBody['@name'], tagBody['@owner'])
     
     @classmethod    
     def encodeChannels(cls, channels):
         '''
-        encodes a list of Channel
+        encodes a list of Channels
         '''
         ret = {u'channels':{}}
         if len(channels) == 1:
@@ -645,6 +664,9 @@ class ChannelFinderClient(object):
 
     @classmethod
     def encodeChannel(cls, channel):
+        '''
+        encodes a single channel
+        '''
         d = {}
         d['@name'] = channel.Name
         d['@owner'] = channel.Owner
@@ -656,6 +678,9 @@ class ChannelFinderClient(object):
     
     @classmethod
     def encodeProperties(cls, properties):
+        '''
+        encodes a list of properties
+        '''
         d = []
         for validProperty in [ property for property in properties if issubclass(property.__class__, Property)]:
                 d.append(cls.encodeProperty(validProperty))
@@ -663,6 +688,9 @@ class ChannelFinderClient(object):
     
     @classmethod
     def encodeProperty(cls, property, withChannels=None):
+        '''
+        encodes a single property
+        '''
         if not withChannels:
             if property.Value:
                 return {'@name':str(property.Name), '@value':property.Value, '@owner':property.Owner}
@@ -675,6 +703,9 @@ class ChannelFinderClient(object):
     
     @classmethod
     def encodeTags(cls, tags):
+        '''
+        encodes a list of tags
+        '''
         d = []
         for validTag in [ tag for tag in tags if issubclass(tag.__class__, Tag)]:
             d.append(cls.encodeTag(validTag))
@@ -682,6 +713,9 @@ class ChannelFinderClient(object):
         
     @classmethod
     def encodeTag(cls, tag, withChannels=None):
+        '''
+        encodes a single tag
+        '''
         if not withChannels:
             return {'@name':tag.Name, '@owner':tag.Owner}
         else:
