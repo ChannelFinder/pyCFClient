@@ -2,6 +2,9 @@
 Created on Apr 1, 2011
 
 @author: shroffk
+
+CFUpdateIOC provides a command like client to update channelfinder
+with a list of process variables (usually the output of the dbl command).
 '''
 import os
 import re

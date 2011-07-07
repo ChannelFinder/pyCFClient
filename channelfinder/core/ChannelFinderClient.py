@@ -2,6 +2,7 @@
 Created on Feb 15, 2011
 
 @author: shroffk
+
 '''
 import re
 from channelfinder.lib.restful_lib import Connection
@@ -22,7 +23,8 @@ except :
 
 class ChannelFinderClient(object):
     '''
-    classdocs
+    The ChannelFinderClient provides a connection object to perform 
+    set, update, delete and find operations.
     '''
 
     connection = None
@@ -33,7 +35,8 @@ class ChannelFinderClient(object):
  
     def __init__(self, BaseURL=None, username=None, password=None):
         '''
-        Constructor
+        BaseURL = the url of the channelfinder service
+        username = 
         '''
         try:            
             self.__baseURL = self.__getDefaultConfig('BaseURL', BaseURL)
@@ -53,7 +56,7 @@ class ChannelFinderClient(object):
         else:
             return value
         
-    def getAllChannels(self):
+    def __getAllChannels(self):
         '''
         Returns a list of all the channels
         '''
