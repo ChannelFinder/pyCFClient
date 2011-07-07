@@ -122,14 +122,20 @@ class OperationTest(unittest.TestCase):
                         Channel('pyChannel2', self.channelOwner), \
                         Channel('pyChannel3', self.channelOwner)]
         try:
+            self.clientCh.set(channel=Channel('existingChannel',self.channelOwner))
+            self.assertTrue(len(self.client.find(name='existingChannel'))==1, \
+                            'Failed to add channel')
             self.clientCh.set(channels=testChannels)
+            self.assertTrue(len(self.client.find(name='existingChannel'))==1, \
+                            'Failed to add channels without destroying exisitng channels')
             r = self.client.find(name='pyChannel*')
-            self.assertTrue(len(r) == 3, 'ERROR: # of channels returned expected ' + str(len(r)) + ' expected 3')
+            self.assertTrue(len(r) == 3, \
+                            'ERROR: # of channels returned expected ' + str(len(r)) + ' expected 3')
         finally:
             # delete each individually
             for ch in testChannels:
                 self.clientCh.delete(channelName=str(ch.Name))
-            pass
+            self.clientCh.delete(channelName='existingChannel')
     
     
     def testSetRemoveChannelsCheck(self):
