@@ -126,34 +126,34 @@ class ChannelFinderClient(object):
         if 'channel' in kwds :
             ch = kwds['channel']
             response = self.connection.request_put(self.__channelsResource + '/' + ch.Name, \
-                                                   body=JSONEncoder().encode(self.encodeChannel(ch)), \
+                                                   body=JSONEncoder().encode(self.__encodeChannel(ch)), \
                                                    headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'channels' in kwds :
             response = self.connection.request_post(self.__channelsResource, \
-                                                   body=JSONEncoder().encode(self.encodeChannels(kwds['channels'])), \
+                                                   body=JSONEncoder().encode(self.__encodeChannels(kwds['channels'])), \
                                                    headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'tag' in kwds:
             response = self.connection.request_put(self.__tagsResource + '/' + kwds['tag'].Name, \
-                                                   body=JSONEncoder().encode(self.encodeTag(kwds['tag'])), \
+                                                   body=JSONEncoder().encode(self.__encodeTag(kwds['tag'])), \
                                                    headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'tags' in kwds:
             response = self.connection.request_post(self.__tagsResource, \
-                                                    body=JSONEncoder().encode({'tags':{'tag':self.encodeTags(kwds['tags'])}}), \
+                                                    body=JSONEncoder().encode({'tags':{'tag':self.__encodeTags(kwds['tags'])}}), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'property' in kwds:
             response = self.connection.request_put(self.__propertiesResource + '/' + kwds['property'].Name, \
-                                                   body=JSONEncoder().encode(self.encodeProperty(kwds['property'])) , \
+                                                   body=JSONEncoder().encode(self.__encodeProperty(kwds['property'])) , \
                                                    headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'properties' in kwds:
             response = self.connection.request_post(self.__propertiesResource, \
                                                     body=JSONEncoder().encode({'properties':\
                                                                                {'property':\
-                                                                                self.encodeProperties(kwds['properties'])}}) , \
+                                                                                self.__encodeProperties(kwds['properties'])}}) , \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)                                
         else:
@@ -164,7 +164,7 @@ class ChannelFinderClient(object):
         if 'tag' in kwds and 'channelName' in kwds:
             channels = [Channel(kwds['channelName'], self.__userName, tags=[kwds['tag']])]
             response = self.connection.request_put(self.__tagsResource + '/' + kwds['tag'].Name, \
-                                                    body=JSONEncoder().encode(self.encodeTag(kwds['tag'], withChannels=channels)), \
+                                                    body=JSONEncoder().encode(self.__encodeTag(kwds['tag'], withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'tag' in kwds and 'channelNames' in kwds:
@@ -172,13 +172,13 @@ class ChannelFinderClient(object):
             for eachChannel in kwds['channelNames']:
                 channels.append(Channel(eachChannel, self.__userName, tags=[kwds['tag']]))
             response = self.connection.request_put(self.__tagsResource + '/' + kwds['tag'].Name, \
-                                                    body=JSONEncoder().encode(self.encodeTag(kwds['tag'], withChannels=channels)), \
+                                                    body=JSONEncoder().encode(self.__encodeTag(kwds['tag'], withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'property' in kwds and 'channelName' in kwds:
             channels = [Channel(kwds['channelName'], self.__userName, properties=[kwds['property']])]
             response = self.connection.request_put(self.__propertiesResource + '/' + kwds['property'].Name, \
-                                                   body=JSONEncoder().encode(self.encodeProperty(kwds['property'], withChannels=channels)), \
+                                                   body=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=channels)), \
                                                    headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'property' in kwds and 'channelNames' in kwds:
@@ -187,7 +187,7 @@ class ChannelFinderClient(object):
                 channels.append(Channel(eachChannel, self.__userName, properties=[kwds['property']]))
             try:
                 response = self.connection.request_put(self.__propertiesResource + '/' + kwds['property'].Name, \
-                                                       body=JSONEncoder().encode(self.encodeProperty(kwds['property'], withChannels=channels)), \
+                                                       body=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=channels)), \
                                                        headers=copy(self.__jsonheader))
             except Exception:
                 print Exception
@@ -274,7 +274,7 @@ class ChannelFinderClient(object):
 #        url = self.__channelsResource + self.createQueryURL(kwds)
         r = self.connection.request_get(url, args=args, headers=copy(self.__jsonheader))
         if self.__checkResponseState(r):
-            return self.decodeChannels(JSONDecoder().decode(r[u'body']))
+            return self.__decodeChannels(JSONDecoder().decode(r[u'body']))
     
 #    @classmethod
 #    def createQueryURL(cls, parameters):
@@ -308,7 +308,7 @@ class ChannelFinderClient(object):
         if r[u'headers']['status'] == '404':
             return None
         elif self.__checkResponseState(r):
-            return self.decodeTag(JSONDecoder().decode(r[u'body']))
+            return self.__decodeTag(JSONDecoder().decode(r[u'body']))
         else:
             return None
                
@@ -322,7 +322,7 @@ class ChannelFinderClient(object):
         if r[u'headers']['status'] == '404':
             return None
         elif self.__checkResponseState(r):
-            return self.decodeProperty(JSONDecoder().decode(r[u'body']))
+            return self.__decodeProperty(JSONDecoder().decode(r[u'body']))
         else:
             return None
         
@@ -333,7 +333,7 @@ class ChannelFinderClient(object):
         url = self.__tagsResource
         r = self.connection.request_get(url, headers=copy(self.__jsonheader))       
         if self.__checkResponseState(r):
-            return self.decodeTags(JSONDecoder().decode(r[u'body']))
+            return self.__decodeTags(JSONDecoder().decode(r[u'body']))
     
     def getAllProperties(self):
         '''
@@ -342,7 +342,7 @@ class ChannelFinderClient(object):
         url = self.__propertiesResource
         r = self.connection.request_get(url, headers=copy(self.__jsonheader))
         if self.__checkResponseState(r):
-            return self.decodeProperties(JSONDecoder().decode(r[u'body']))
+            return self.__decodeProperties(JSONDecoder().decode(r[u'body']))
         
     def delete(self, **kwds):
         '''
@@ -494,19 +494,19 @@ class ChannelFinderClient(object):
         if 'channel' in kwds:
             ch = kwds['channel']
             response = self.connection.request_post(self.__channelsResource + '/' + ch.Name, \
-                                                    body=JSONEncoder().encode(self.encodeChannel(ch)), \
+                                                    body=JSONEncoder().encode(self.__encodeChannel(ch)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'property' in kwds:
             property = kwds['property']
             response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
-                                                    body=JSONEncoder().encode(self.encodeProperty(property)), \
+                                                    body=JSONEncoder().encode(self.__encodeProperty(property)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'tag' in kwds:
             tag = kwds['tag']
             response = self.connection.request_post(self.__tagsResource + '/' + tag.Name, \
-                                                    body=JSONEncoder().encode(self.encodeTag(tag)), \
+                                                    body=JSONEncoder().encode(self.__encodeTag(tag)), \
                                                     headers=copy(self.__jsonheader))
         else:
             raise Exception, ' unkown key '
@@ -516,7 +516,7 @@ class ChannelFinderClient(object):
             tag = kwds['tag']
             channels = [Channel(kwds['channelName'], self.__userName)]
             response = self.connection.request_post(self.__tagsResource + '/' + tag.Name, \
-                                                    body=JSONEncoder().encode(self.encodeTag(tag, withChannels=channels)), \
+                                                    body=JSONEncoder().encode(self.__encodeTag(tag, withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response) 
         elif 'tag' in kwds and 'channelNames' in kwds:
@@ -525,14 +525,14 @@ class ChannelFinderClient(object):
             for eachChannel in kwds['channelNames']:
                 channels.append(Channel(eachChannel, self.__userName))
             response = self.connection.request_post(self.__tagsResource + '/' + tag.Name, \
-                                                    body=JSONEncoder().encode(self.encodeTag(tag, withChannels=channels)), \
+                                                    body=JSONEncoder().encode(self.__encodeTag(tag, withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'property' in kwds and 'channelName' in kwds:
             property = kwds['property']
             channels = [Channel(kwds['channelName'], self.__userName, properties=[property])]
             response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
-                                                    body=JSONEncoder().encode(self.encodeProperty(property, withChannels=channels)),\
+                                                    body=JSONEncoder().encode(self.__encodeProperty(property, withChannels=channels)),\
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'property' in kwds and 'channelNames' in kwds:
@@ -541,28 +541,28 @@ class ChannelFinderClient(object):
             for eachChannel in kwds['channelNames']:
                 channels.append(Channel(eachChannel, self.__userName, properties=[property]))
             response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
-                                                    body=JSONEncoder().encode(self.encodeProperty(property, withChannels=channels)),\
+                                                    body=JSONEncoder().encode(self.__encodeProperty(property, withChannels=channels)),\
                                                     headers=copy(self.__jsonheader))    
             self.__checkResponseState(response)                         
         elif 'originalChannelName' in kwds and 'channel' in kwds:
             ch = kwds['channel']
             channelName = kwds['originalChannelName']
             response = self.connection.request_post(self.__channelsResource + '/' + channelName, \
-                                                    body=JSONEncoder().encode(self.encodeChannel(ch)) , \
+                                                    body=JSONEncoder().encode(self.__encodeChannel(ch)) , \
                                                     headers=copy(self.__jsonheader))                
             self.__checkResponseState(response)
         elif 'originalPropertyName' in kwds and 'property' in kwds:
             prop = kwds['property']
             propName = kwds['originalPropertyName']
             response = self.connection.request_post(self.__propertiesResource + '/' + propName, \
-                                                    body=JSONEncoder().encode(self.encodeProperty(prop)), \
+                                                    body=JSONEncoder().encode(self.__encodeProperty(prop)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'originalTagName' in kwds and 'tag' in kwds: 
             tag = kwds['tag']
             tagName = kwds['originalTagName']
             response = self.connection.request_post(self.__tagsResource + '/' + tagName, \
-                                                    body=JSONEncoder().encode(self.encodeTag(tag)), \
+                                                    body=JSONEncoder().encode(self.__encodeTag(tag)), \
                                                     headers=copy(self.__jsonheader))
             print response
             self.__checkResponseState(response)
@@ -573,7 +573,7 @@ class ChannelFinderClient(object):
 # Methods for encoding decoding will be make private
 #===============================================================================
     @classmethod
-    def decodeChannels(cls, body):
+    def __decodeChannels(cls, body):
         '''
         decode the representation of a list of channels to a list of Channel objects 
         '''
@@ -583,21 +583,21 @@ class ChannelFinderClient(object):
         # if List then Multiple channels are present in the body
         if isinstance(body[u'channels']['channel'], list):
             for channel in body['channels']['channel']:
-                channels.append(cls.decodeChannel(channel))
+                channels.append(cls.__decodeChannel(channel))
         # if Dict the single channel present in the body
         elif isinstance(body[u'channels']['channel'], dict):
-            channels.append(cls.decodeChannel(body[u'channels']['channel']))
+            channels.append(cls.__decodeChannel(body[u'channels']['channel']))
         return channels
 
     @classmethod
-    def decodeChannel(self, body):
+    def __decodeChannel(self, body):
         '''
         decode the representation of a channel to the Channel object
         '''
-        return Channel(body[u'@name'], body[u'@owner'], properties=self.decodeProperties(body), tags=self.decodeTags(body))
+        return Channel(body[u'@name'], body[u'@owner'], properties=self.__decodeProperties(body), tags=self.__decodeTags(body))
     
     @classmethod
-    def decodeProperties(cls, body):
+    def __decodeProperties(cls, body):
         '''
         decode the representation of a list of properties to a list of Property object
         '''
@@ -606,15 +606,15 @@ class ChannelFinderClient(object):
             properties = []
             if isinstance(body[u'properties']['property'], list):                
                 for validProperty in [ property for property in body[u'properties']['property'] if '@name' in property and '@owner' in property]:
-                        properties.append(cls.decodeProperty(validProperty))
+                        properties.append(cls.__decodeProperty(validProperty))
             elif isinstance(body[u'properties']['property'], dict):
-                properties.append(cls.decodeProperty(body[u'properties']['property']))
+                properties.append(cls.__decodeProperty(body[u'properties']['property']))
             return properties
         else:
             return None
         
     @classmethod
-    def decodeProperty(cls, propertyBody):
+    def __decodeProperty(cls, propertyBody):
         '''
         decode the representation of a property to a Property object
         '''
@@ -624,7 +624,7 @@ class ChannelFinderClient(object):
             return Property(propertyBody['@name'], propertyBody['@owner'])
     
     @classmethod
-    def decodeTags(cls, body):
+    def __decodeTags(cls, body):
         '''
         decode the representation of a list of tags to a list of Tag objects
         '''
@@ -633,37 +633,37 @@ class ChannelFinderClient(object):
             tags = []
             if isinstance(body[u'tags']['tag'], list):
                 for validTag in [ tag for tag in body[u'tags']['tag'] if '@name' in tag and '@owner' in tag]:
-                    tags.append(cls.decodeTag(validTag))
+                    tags.append(cls.__decodeTag(validTag))
             elif isinstance(body[u'tags']['tag'], dict):
-                tags.append(cls.decodeTag(body[u'tags']['tag']))
+                tags.append(cls.__decodeTag(body[u'tags']['tag']))
             return tags
         else:
             return None    
     
     @classmethod
-    def decodeTag(cls, tagBody):
+    def __decodeTag(cls, tagBody):
         '''
         decode a representation of a tag to the Tag object
         '''
         return Tag(tagBody['@name'], tagBody['@owner'])
     
     @classmethod    
-    def encodeChannels(cls, channels):
+    def __encodeChannels(cls, channels):
         '''
         encodes a list of Channels
         '''
         ret = {u'channels':{}}
         if len(channels) == 1:
-            ret[u'channels'] = {u'channel':cls.encodeChannel(channels[0])}
+            ret[u'channels'] = {u'channel':cls.__encodeChannel(channels[0])}
         elif len (channels) > 1:
             ret[u'channels'] = {u'channel':[]}
             for channel in channels:
                 if issubclass(channel.__class__, Channel):                
-                    ret[u'channels'][u'channel'].append(cls.encodeChannel(channel))
+                    ret[u'channels'][u'channel'].append(cls.__encodeChannel(channel))
         return ret
 
     @classmethod
-    def encodeChannel(cls, channel):
+    def __encodeChannel(cls, channel):
         '''
         encodes a single channel
         '''
@@ -671,23 +671,23 @@ class ChannelFinderClient(object):
         d['@name'] = channel.Name
         d['@owner'] = channel.Owner
         if channel.Properties:
-            d['properties'] = {'property':cls.encodeProperties(channel.Properties)}            
+            d['properties'] = {'property':cls.__encodeProperties(channel.Properties)}            
         if channel.Tags:
-            d['tags'] = {'tag':cls.encodeTags(channel.Tags)}
+            d['tags'] = {'tag':cls.__encodeTags(channel.Tags)}
         return d
     
     @classmethod
-    def encodeProperties(cls, properties):
+    def __encodeProperties(cls, properties):
         '''
         encodes a list of properties
         '''
         d = []
         for validProperty in [ property for property in properties if issubclass(property.__class__, Property)]:
-                d.append(cls.encodeProperty(validProperty))
+                d.append(cls.__encodeProperty(validProperty))
         return d
     
     @classmethod
-    def encodeProperty(cls, property, withChannels=None):
+    def __encodeProperty(cls, property, withChannels=None):
         '''
         encodes a single property
         '''
@@ -698,21 +698,21 @@ class ChannelFinderClient(object):
                 return {'@name':str(property.Name), '@owner':property.Owner}
         else:
             d = OrderedDict([('@name', str(property.Name)), ('@value', property.Value), ('@owner', property.Owner)])
-            d.update(cls.encodeChannels(withChannels))
+            d.update(cls.__encodeChannels(withChannels))
             return d
     
     @classmethod
-    def encodeTags(cls, tags):
+    def __encodeTags(cls, tags):
         '''
         encodes a list of tags
         '''
         d = []
         for validTag in [ tag for tag in tags if issubclass(tag.__class__, Tag)]:
-            d.append(cls.encodeTag(validTag))
+            d.append(cls.__encodeTag(validTag))
         return d
         
     @classmethod
-    def encodeTag(cls, tag, withChannels=None):
+    def __encodeTag(cls, tag, withChannels=None):
         '''
         encodes a single tag
         '''
@@ -720,7 +720,7 @@ class ChannelFinderClient(object):
             return {'@name':tag.Name, '@owner':tag.Owner}
         else:
             d = OrderedDict([('@name', tag.Name), ('@owner', tag.Owner)])
-            d.update(cls.encodeChannels(withChannels))
+            d.update(cls.__encodeChannels(withChannels))
             return d
         
 

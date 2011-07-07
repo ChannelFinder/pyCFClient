@@ -39,30 +39,30 @@ class JSONparserTest(unittest.TestCase):
         pass
 
     def testSingleChannelsParsing(self):
-        reply = ChannelFinderClient.decodeChannels(self.singleChannels)
+        reply = ChannelFinderClient()._ChannelFinderClient__decodeChannels(self.singleChannels)
         self.assertTrue(len(reply) == 1, 'Parse Error');
         self.assertTrue(len(reply[0].Properties) == len (self.singleChannels[u'channels'][u'channel'][u'properties']['property']), 'single channel peoperties not parsed correctly')
         self.assertTrue(len(reply[0].Tags) == len(self.singleChannels[u'channels'][u'channel'][u'tags']['tag']), 'tags not correctly parsed')
         pass
     
     def testMultiChannelsParsing(self):
-        reply = ChannelFinderClient.decodeChannels(self.multiChannels)
+        reply = ChannelFinderClient()._ChannelFinderClient__decodeChannels(self.multiChannels)
         self.assertTrue(len(reply) == len(self.multiChannels[u'channels'][u'channel']), 'incorrect number of channels in parsed result')
         pass
     
     def testNoChannelParsing(self):
-        reply = ChannelFinderClient.decodeChannels(self.noChannel)
+        reply = ChannelFinderClient()._ChannelFinderClient__decodeChannels(self.noChannel)
         self.assertTrue(not reply, 'failed parsing an emplty channels list')
 
     def testChannel(self):
-        reply = ChannelFinderClient.decodeChannel(self.channel)
+        reply = ChannelFinderClient()._ChannelFinderClient__decodeChannel(self.channel)
         self.assertTrue(reply.Name == self.channel[u'@name'])
         self.assertTrue(reply.Owner == self.channel[u'@owner'])
         self.assertTrue(len(reply.Properties) == len(self.channel[u'properties'][u'property']))
         self.assertTrue(len(reply.Tags) == len(self.channel[u'tags'][u'tag']))
         
     def testEncodeChannel(self):
-        encodedChannel = ChannelFinderClient.encodeChannels(\
+        encodedChannel = ChannelFinderClient()._ChannelFinderClient__encodeChannels(\
                                                             [Channel('Test_first:a<000>:0:0', 'shroffk', \
                                                                      [Property('Test_PropA', 'shroffk', '0'), \
                                                                       Property('Test_PropB', 'shroffk', '19'), \
@@ -73,7 +73,8 @@ class JSONparserTest(unittest.TestCase):
         self.assertTrue(encodedChannel[u'channels'][u'channel'] == self.channel)
         
     def testEncodeChannels(self):
-        self.assertTrue(self.multiChannels == ChannelFinderClient.encodeChannels(ChannelFinderClient.decodeChannels(self.multiChannels)))
+        self.assertTrue(self.multiChannels == \
+                        ChannelFinderClient()._ChannelFinderClient__encodeChannels(ChannelFinderClient()._ChannelFinderClient__decodeChannels(self.multiChannels)))
 
 #===============================================================================
 # 
@@ -582,6 +583,25 @@ class UpdateOperationTest(unittest.TestCase):
                 self.clientTag.delete(tagName=newTag.Name)
             if self.clientProp.findProperty(newProp.Name):
                 self.clientProp.delete(propertyName=newProp.Name)
+                
+    def testUpdateChannel2(self):
+        '''
+        Update a channels using update(channel=updatedChannel)
+        '''
+        pass
+    
+    def testUpdateProperty(self):
+        '''
+        Update a single property using update(property=updatedProperty)
+        '''
+        pass
+    
+    def testUpdateTag(self):
+        '''
+        Update a single tag using update(tag=updatedTag)
+        '''
+        pass
+ 
  
     def tearDown(self):
         self.clientCh.delete(channelName='originalChannelName')
