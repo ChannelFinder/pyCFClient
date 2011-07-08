@@ -5,8 +5,8 @@ Created on Feb 15, 2011
 '''
 import unittest
 
-from channelfinder.core.ChannelFinderClient import ChannelFinderClient
-from channelfinder.core.Channel import Channel, Property, Tag
+from channelfinder import ChannelFinderClient
+from channelfinder import Channel, Property, Tag
 
 from _testConf import _testConf
 #===============================================================================

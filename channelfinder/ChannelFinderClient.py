@@ -12,7 +12,7 @@ try:
     from json import JSONDecoder, JSONEncoder
 except ImportError: 
     from simplejson import JSONDecoder, JSONEncoder
-from Channel import Channel, Property, Tag
+from CFDataTypes import Channel, Property, Tag
 try: 
     from collections import OrderedDict
 except :

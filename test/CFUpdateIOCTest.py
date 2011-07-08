@@ -5,8 +5,8 @@ Created on Apr 5, 2011
 '''
 import unittest
 import os
-from channelfinder.core.Channel import Channel, Property
-from channelfinder.core.ChannelFinderClient import ChannelFinderClient
+from channelfinder import Channel, Property
+from channelfinder import ChannelFinderClient
 from _testConf import _testConf
 from channelfinder.cfUpdate.CFUpdateIOC import getPVNames, getArgsFromFilename, updateChannelFinder, ifNoneReturnDefault
 from time import time

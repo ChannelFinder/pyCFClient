@@ -10,10 +10,10 @@ import os
 import re
 from optparse import OptionParser
 from getpass import getpass
-from channelfinder.core.Channel import Channel, Property
-from channelfinder.core.ChannelFinderClient import ChannelFinderClient
+from channelfinder import Channel, Property
+from channelfinder import ChannelFinderClient
 from glob import glob
-from channelfinder.core._conf import _conf
+from channelfinder._conf import _conf
 
 def getArgsFromFilename(completeFilePath):
     fileName = os.path.split(os.path.normpath(completeFilePath))[1]

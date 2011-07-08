@@ -4,8 +4,8 @@ Created on May 10, 2011
 @author: shroffk
 '''
 import unittest
-from channelfinder.core.Channel import Channel, Property, Tag
-from channelfinder.util.ChannelUtil import ChannelUtil
+from channelfinder import Channel, Property, Tag
+from channelfinder.util import ChannelUtil
 
 class Test(unittest.TestCase):
 
