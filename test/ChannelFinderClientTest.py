@@ -491,32 +491,35 @@ class UpdateOperationTest(unittest.TestCase):
         pass
     
     def UpdateTagName(self):
-        self.assertTrue(self.client.findTag('originalTag') != None)
-        self.client.update(tag=Tag('updatedTagName', self.tagOwner), \
-                           originalTagName='originalTag')
-        self.assertTrue(self.client.findTag('originalTag') == None and \
-                        self.client.findTag('updatedTagName') != None)
+        newTagName = 'updatedTag'
+        self.assertTrue(self.client.findTag(self.orgTag.Name) != None)
+        self.clientTag.update(tag=Tag(newTagName, self.tagOwner), \
+                           originalTagName=self.orgTag.Name)
+        self.assertTrue(self.client.findTag(self.orgTag.Name) == None and \
+                        self.client.findTag(newTagName) != None)
         # check that renaming the Tag does not remove it from any channel
-        channelTags = self.client.find(name='originalChannelName')[0].getTags.keys()
-        self.assertTrue('originalTag' not in channelTags and \
-                        'updatedTagName' in channelTags)
-        pass
+        channelTags = self.client.find(name='originalChannelName')[0].Tags
+        self.assertTrue(self.orgTag not in channelTags and \
+                        Tag(newTagName, self.tagOwner) in channelTags)
+        self.clientTag.update(tag=self.orgTag, originalTagName = newTagName)
     
     def testUpdateTagOwner(self):
         pass
     
     # removed test till bug in the sevice is fixed - channelfinder needs to check for the existance of oldname not name
     def UpdatePropName(self):
-        self.assertTrue(self.client.findProperty('originalProp') != None)
-        updatedProp = self.client.update(property=Property('updatedProperty', self.propOwner), \
-                                         originalPropertyName='originalProp')
-        self.assertTrue(self.client.findProperty('originalProp') == None and \
-                        self.client.findProperty('updatedProperty') != None)
+        newPropName = 'updatedProperty'
+        self.assertTrue(self.client.findProperty(self.orgProp.Name) != None)
+        self.clientProp.update(property=Property(newPropName, self.propOwner), \
+                                         originalPropertyName=self.orgProp.Name)
+        self.assertTrue(self.client.findProperty(self.orgProp.Name) == None and \
+                        self.client.findProperty(newPropName) != None)
         # check to ensure that the Property is renamed and not removed from any channels
-        channelProperties = self.client.find(name='originalChannelName')[0].getProperties.keys()
-        self.assertTrue('originalProp' not in channelProperties and \
-                        'updatedProperty' in channelProperties)
-        pass
+        channelProperties = self.client.find(name='originalChannelName')[0].getProperties()
+        self.assertTrue(self.orgProp.Name not in channelProperties.keys() and \
+                        newPropName in channelProperties.keys())
+        self.clientProp.update(property=self.orgProp, originalPropertyName = newPropName)
+        
     
     def testUpdatePropOwner(self):
         pass
@@ -533,7 +536,6 @@ class UpdateOperationTest(unittest.TestCase):
                            channel=ch)
         self.assertTrue(len(self.client.find(name='originalChannelName')) == 1)
         self.assertTrue(self.client.find(name='updatedChannelName') == None)
-        pass
     
     def UpdateChannelOwner(self):
         ch = self.client.find(name='originalChannelName')[0]

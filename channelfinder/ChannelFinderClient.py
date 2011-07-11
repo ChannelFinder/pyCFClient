@@ -567,7 +567,6 @@ class ChannelFinderClient(object):
             response = self.connection.request_post(self.__tagsResource + '/' + tagName, \
                                                     body=JSONEncoder().encode(self.__encodeTag(tag)), \
                                                     headers=copy(self.__jsonheader))
-            print response
             self.__checkResponseState(response)
         else:
             raise Exception, ' unkown keys'
