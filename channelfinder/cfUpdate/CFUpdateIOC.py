@@ -159,27 +159,32 @@ def mainRun(opts, args):
             for eachMatchingFile in matchingFiles:
                 completeFilePath = os.path.abspath(eachMatchingFile)
                 fHostName, fIocName = getArgsFromFilename(completeFilePath)
-                updateChannelFinder(getPVNames(completeFilePath), \
+                pattern = __getDefaultConfig('pattern', opts.pattern)
+                updateChannelFinder(getPVNames(completeFilePath, pattern=pattern), \
                             ifNoneReturnDefault(opts.hostName, fHostName), \
                             ifNoneReturnDefault(opts.iocName, fIocName), \
-                            ifNoneReturnDefault(opts.owners,__getDefaultConfig('username', opts.username)), \
+                            ifNoneReturnDefault(opts.owner,__getDefaultConfig('username', opts.username)), \
                             service=__getDefaultConfig('BaseURL',opts.serviceURL), \
                             username=__getDefaultConfig('username',opts.username), \
                             password=__getDefaultConfig('password',opts.password))
         else:
             completeFilePath = os.path.abspath(filename)
             fHostName, fIocName = getArgsFromFilename(completeFilePath)
-            updateChannelFinder(getPVNames(completeFilePath), \
+            pattern = __getDefaultConfig('pattern', opts.pattern)
+            updateChannelFinder(getPVNames(completeFilePath, pattern=pattern), \
                             ifNoneReturnDefault(opts.hostName, fHostName), \
                             ifNoneReturnDefault(opts.iocName, fIocName), \
-                            ifNoneReturnDefault(opts.owners,__getDefaultConfig('username', opts.username)), \
+                            ifNoneReturnDefault(opts.owner,__getDefaultConfig('username', opts.username)), \
                             service=__getDefaultConfig('BaseURL',opts.serviceURL), \
                             username=__getDefaultConfig('username',opts.username), \
                             password=__getDefaultConfig('password',opts.password))
             
 def __getDefaultConfig(arg, value):
-        if value == None and _conf.has_option('DEFAULT', arg):
-            return _conf.get('DEFAULT', arg)
+        if value == None:
+            try:
+                return _conf.get('DEFAULT', arg)
+            except:
+                return None
         else:
             return value
         
@@ -188,7 +193,7 @@ def main():
     parser = OptionParser(usage=usage)
     parser.add_option('-H', '--hostname', \
                       action='store', type='string', dest='hostName', \
-                      help='the hostname')    
+                      help='the hostname')
     parser.add_option('-i', '--iocname', \
                       action='store', type='string', dest='iocName', \
                       help='the iocname')
@@ -198,7 +203,7 @@ def main():
     parser.add_option('-o', '--owner', \
                       action='store', type='string', dest='owner', \
                       help='owner if not specified username will default as owner')
-    parser.add_option('-re', '--pattern', \
+    parser.add_option('-r', '--pattern', \
                       action='store', type='string', dest='pattern', \
                       help='pattern to match valid channel names')
     parser.add_option('-u', '--username', \
