@@ -39,6 +39,26 @@ class Test(unittest.TestCase):
                         'expected 3 unique properties but found ' + str(len(allPropertyNames)))
        
         pass
+    
+    def testGetAllPropValues(self):
+        ch1 = Channel('ch1', 'chOwner',
+                          properties=[Property('location', 'propOwner', '234'),
+                                      Property('prop1', 'propOwner', 'propVal')])
+        ch2 = Channel('ch2', 'chOwner',
+                          properties=[Property('location', 'propOwner', 'SR'),
+                                      Property('prop2', 'propOwner', 'propVal')])
+        ch3 = Channel('ch3', 'chOwner',
+                          properties=[Property('location', 'propOwner', 'SR:234'),
+                                      Property('prop2', 'propOwner', 'propVal')])
+        chs = [ch1, ch2, ch3]
+        values = ChannelUtil.getAllPropValues(chs, propertyName='location')
+        self.assertTrue((ch1.Name+'(location)', '234') in values, \
+                        'Failed to find property(location), value 234 for ch1')
+        self.assertTrue((ch2.Name+'(location)', 'SR') in values, \
+                        'Failed to find property(location), value SR for ch2')
+        self.assertTrue((ch3.Name+'(location)', 'SR:234') in values, \
+                        'Failed to find property(location), value SR:234 for ch3')
+        pass
 
 
 if __name__ == "__main__":

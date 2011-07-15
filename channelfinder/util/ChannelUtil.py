@@ -49,3 +49,17 @@ class ChannelUtil(object):
             return list(uniqueNames)
         else:
             return None
+    
+    @classmethod 
+    def getAllPropValues(cls, channels, propertyName):
+        '''
+        given the list of channels return a list of tuples
+        [(channelName(propertyName), propertyValue)]
+        '''
+        ret = []
+        for ch in channels:
+            if ch.Properties:
+                match = [property for property in ch.Properties if property.Name == propertyName]
+                ret.append((ch.Name+'('+propertyName+')', match[0].Value))
+        return ret                                                 
+        
