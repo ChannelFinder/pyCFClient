@@ -168,7 +168,7 @@ class ChannelFinderClient(object):
     def __handleMultipleAddParameters(self, **kwds):
         # set a tag to a channel
         if 'tag' in kwds and 'channelName' in kwds:
-            channels = [Channel(kwds['channelName'], self.__userName, tags=[kwds['tag']])]
+            channels = [Channel(kwds['channelName'].strip(), self.__userName, tags=[kwds['tag']])]
             response = self.connection.request_put(self.__tagsResource + '/' + kwds['tag'].Name, \
                                                     body=JSONEncoder().encode(self.__encodeTag(kwds['tag'], withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))
@@ -182,7 +182,7 @@ class ChannelFinderClient(object):
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'property' in kwds and 'channelName' in kwds:
-            channels = [Channel(kwds['channelName'], self.__userName, properties=[kwds['property']])]
+            channels = [Channel(kwds['channelName'].strip(), self.__userName, properties=[kwds['property']])]
             response = self.connection.request_put(self.__propertiesResource + '/' + kwds['property'].Name, \
                                                    body=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=channels)), \
                                                    headers=copy(self.__jsonheader))
@@ -265,16 +265,16 @@ class ChannelFinderClient(object):
             if key == 'name':
                 patterns = kwds[key].split(',')
                 for eachPattern in patterns:
-                    args.append(('~name',eachPattern))
+                    args.append(('~name',eachPattern.strip()))
             elif key == 'tagName':
                 patterns = kwds[key].split(',')
                 for eachPattern in patterns:
-                    args.append(('~tag',eachPattern))
+                    args.append(('~tag',eachPattern.strip()))
             elif key == 'property':
                 for prop in kwds[key]:
                     patterns = prop[1].split(',')
                     for eachPattern in patterns:
-                        args.append((prop[0],eachPattern))
+                        args.append((prop[0],eachPattern.strip()))
             else:
                 raise Exception, 'unknown find argument '+key 
 #        url = self.__channelsResource + self.createQueryURL(kwds)
@@ -391,17 +391,17 @@ class ChannelFinderClient(object):
     
     def __handleSingleDeleteParameter(self, **kwds):
         if 'channelName' in kwds:
-            url = self.__channelsResource + '/' + kwds['channelName']
+            url = self.__channelsResource + '/' + kwds['channelName'].strip()
             response = self.connection.request_delete(url, headers=copy(self.__jsonheader))   
             self.__checkResponseState(response)
             pass
         elif 'tagName' in kwds:
-            url = self.__tagsResource + '/' + kwds['tagName']
+            url = self.__tagsResource + '/' + kwds['tagName'].strip()
             response = self.connection.request_delete(url, headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
             pass
         elif 'propertyName' in kwds:
-            url = self.__propertiesResource + '/' + kwds['propertyName']
+            url = self.__propertiesResource + '/' + kwds['propertyName'].strip()
             response = self.connection.request_delete(url, headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
             pass
@@ -410,14 +410,14 @@ class ChannelFinderClient(object):
     
     def __handleMultipleDeleteParameters(self, **kwds):
         if 'tag' in kwds and 'channelName' in kwds:
-            response = self.connection.request_delete(self.__tagsResource + '/' + kwds['tag'].Name + '/' + kwds['channelName'], \
+            response = self.connection.request_delete(self.__tagsResource + '/' + kwds['tag'].Name + '/' + kwds['channelName'].strip(), \
                                                      headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'tag' in kwds and 'channelNames' in kwds:
             # find channels with the tag
             channelsWithTag = self.find(tagName=kwds['tag'].Name)
             # delete channels from which tag is to be removed
-            channelNames = [channel.Name for channel in channelsWithTag if channel.Name not in  kwds['channelNames']]
+            channelNames = [channel.Name for channel in channelsWithTag if channel.Name not in kwds['channelNames']]
             self.set(tag=kwds['tag'], channelNames=channelNames)
         elif 'property' in kwds and 'channelName' in kwds:
             response = self.connection.request_delete(self.__propertiesResource + '/' + kwds['property'].Name + '/' + kwds['channelName'], \
@@ -520,7 +520,7 @@ class ChannelFinderClient(object):
     def __handleMultipleUpdateParameters(self, **kwds):
         if 'tag' in kwds and 'channelName' in kwds:
             tag = kwds['tag']
-            channels = [Channel(kwds['channelName'], self.__userName)]
+            channels = [Channel(kwds['channelName'].strip(), self.__userName)]
             response = self.connection.request_post(self.__tagsResource + '/' + tag.Name, \
                                                     body=JSONEncoder().encode(self.__encodeTag(tag, withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))
@@ -536,7 +536,7 @@ class ChannelFinderClient(object):
             self.__checkResponseState(response)
         elif 'property' in kwds and 'channelName' in kwds:
             property = kwds['property']
-            channels = [Channel(kwds['channelName'], self.__userName, properties=[property])]
+            channels = [Channel(kwds['channelName'].strip(), self.__userName, properties=[property])]
             response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
                                                     body=JSONEncoder().encode(self.__encodeProperty(property, withChannels=channels)),\
                                                     headers=copy(self.__jsonheader))
@@ -552,21 +552,21 @@ class ChannelFinderClient(object):
             self.__checkResponseState(response)                         
         elif 'originalChannelName' in kwds and 'channel' in kwds:
             ch = kwds['channel']
-            channelName = kwds['originalChannelName']
+            channelName = kwds['originalChannelName'].strip()
             response = self.connection.request_post(self.__channelsResource + '/' + channelName, \
                                                     body=JSONEncoder().encode(self.__encodeChannel(ch)) , \
                                                     headers=copy(self.__jsonheader))                
             self.__checkResponseState(response)
         elif 'originalPropertyName' in kwds and 'property' in kwds:
             prop = kwds['property']
-            propName = kwds['originalPropertyName']
+            propName = kwds['originalPropertyName'].strip()
             response = self.connection.request_post(self.__propertiesResource + '/' + propName, \
                                                     body=JSONEncoder().encode(self.__encodeProperty(prop)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'originalTagName' in kwds and 'tag' in kwds: 
             tag = kwds['tag']
-            tagName = kwds['originalTagName']
+            tagName = kwds['originalTagName'].strip()
             response = self.connection.request_post(self.__tagsResource + '/' + tagName, \
                                                     body=JSONEncoder().encode(self.__encodeTag(tag)), \
                                                     headers=copy(self.__jsonheader))
