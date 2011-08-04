@@ -24,8 +24,8 @@ class Channel(object):
         properties = list of properties of type Property
         tags = list of tags of type Tag
         '''
-        self.__Name = name.strip();
-        self.__Owner = owner.strip();
+        self.__Name = str(name).strip();
+        self.__Owner = str(owner).strip();
         self.Properties = properties
         self.Tags = tags
     
@@ -68,9 +68,11 @@ class Property(object):
     '''
     
     def __init__(self, name, owner, value=None):
-        self.Name = name.strip()
-        self.Owner = owner.strip()
-        self.Value = value.strip()
+        self.Name = str(name).strip()
+        self.Owner = str(owner).strip()
+        self.Value = value
+        if self.Value:
+            str(value).strip()
     
     def __cmp__(self, *arg, **kwargs):  
         if arg[0] == None:
@@ -83,8 +85,8 @@ class Tag(object):
     '''
     
     def __init__(self, name, owner):
-        self.Name = name.strip()
-        self.Owner = owner.strip()
+        self.Name = str(name).strip()
+        self.Owner = str(owner).strip()
     
     def __cmp__(self, *arg, **kwargs):
         if arg[0] == None:
