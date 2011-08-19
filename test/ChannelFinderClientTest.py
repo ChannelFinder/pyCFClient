@@ -297,12 +297,11 @@ class OperationTest(unittest.TestCase):
         self.client.delete(propertyName=spProperty.Name)
         self.assertTrue(self.client.findProperty(spProperty.Name) == None)
     
-    def testSpaceQuotes(self):
-        spChannel = Channel('\'"Name Name', self.channelOwner)
+    def testQuotes(self):
+        spChannel = Channel('\'"Name', self.channelOwner)
         self.client.set(channel=spChannel)
-        self.assertTrue(len(self.client.find(name='\'"Name Name')) == 1)
-        self.client.delete(channelName='\'"Name Name')
-        pass
+        self.assertTrue(len(self.client.find(name='\'"Name')) == 1)
+        self.client.delete(channelName='\'"Name')
 
 #===============================================================================
 #  Set Operation Test
