@@ -52,11 +52,11 @@ class Test(unittest.TestCase):
                                       Property('prop2', 'propOwner', 'propVal')])
         chs = [ch1, ch2, ch3]
         values = ChannelUtil.getAllPropValues(chs, propertyName='location')
-        self.assertTrue((ch1.Name+'(location)', '234') in values, \
+        self.assertTrue('234' in values, \
                         'Failed to find property(location), value 234 for ch1')
-        self.assertTrue((ch2.Name+'(location)', 'SR') in values, \
+        self.assertTrue('SR' in values, \
                         'Failed to find property(location), value SR for ch2')
-        self.assertTrue((ch3.Name+'(location)', 'SR:234') in values, \
+        self.assertTrue('SR:234' in values, \
                         'Failed to find property(location), value SR:234 for ch3')
         pass
 
