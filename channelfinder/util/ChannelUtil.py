@@ -51,7 +51,7 @@ class ChannelUtil(object):
             return None
     
     @classmethod 
-    def getAllPropValues(cls, channels, propertyName):
+    def getAllPropValues(cls, channels, propertyName, key=None):
         '''
         given the list of channels return a list of all values
         '''
@@ -60,5 +60,5 @@ class ChannelUtil(object):
             if ch.Properties:
                 match = [property for property in ch.Properties if property.Name == propertyName]
                 ret.append(match[0].Value)
-        return ret                                                 
+        return sorted(ret, key=key)                                             
         
