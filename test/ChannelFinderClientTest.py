@@ -388,6 +388,7 @@ class SetOperationTest(unittest.TestCase):
         testProperty = Property('pySetProp', self.propOwner)
         chName = self.testChannels[0].Name
         try:
+            testProperty.Value = 'testValue'
             self.client.set(property=testProperty, channelName=chName)
             ch = self.client.find(name=chName)[0]
             responsePropertyNames = [property.Name for property in  self.client.find(name=chName)[0].Properties]
@@ -637,8 +638,8 @@ class UpdateAppendTest(unittest.TestCase):
         
         self.Tag1 = Tag('tag1', self.tagOwner)
         self.Tag2 = Tag('tag2', self.tagOwner)
-        self.Prop1 = Property('prop1', self.propOwner)
-        self.Prop2 = Property('prop2', self.propOwner)
+        self.Prop1 = Property('prop1', self.propOwner, 'initialVal')
+        self.Prop2 = Property('prop2', self.propOwner, 'initialVal')
         self.ch1 = Channel('orgChannel1', self.ChannelOwner, tags=[self.Tag1, self.Tag2])
         self.ch2 = Channel('orgChannel2', self.ChannelOwner, tags=[self.Tag2])
         self.ch3 = Channel('orgChannel3', self.ChannelOwner)
