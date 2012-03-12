@@ -259,7 +259,6 @@ class ChannelFinderClient(object):
             raise Exception, 'Connection not created'
         if not len(kwds) > 0:
             raise Exception, 'Incorrect usage: atleast one parameter must be specified'
-        url = self.__channelsResource
         args = []
         for key in kwds:
             if key == 'name':
@@ -278,10 +277,14 @@ class ChannelFinderClient(object):
             else:
                 raise Exception, 'unknown find argument '+key 
 #        url = self.__channelsResource + self.createQueryURL(kwds)
+        return self.findByArgs(args)
+    
+    def findByArgs(self, args):
+        url = self.__channelsResource
         r = self.connection.request_get(url, args=args, headers=copy(self.__jsonheader))
         if self.__checkResponseState(r):
             return self.__decodeChannels(JSONDecoder().decode(r[u'body']))
-    
+        
 #    @classmethod
 #    def createQueryURL(cls, parameters):
 #        url = []
