@@ -52,7 +52,7 @@ def updateChannelFinder(pvNames, hostName, iocName, owner, \
                         service=None, username=None, password=None):
     '''
     pvNames = list of pvNames 
-    (None permitted will effectively remove the hostname, iocname from all channels)
+    ([] permitted will effectively remove the hostname, iocname from all channels)
     hostName = pv hostName (None not permitted)
     iocName = pv iocName (None not permitted)
     owner = the owner of the channels and properties being added, this can be different from the user
