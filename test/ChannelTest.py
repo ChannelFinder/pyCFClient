@@ -86,6 +86,17 @@ class TagTest(unittest.TestCase):
         self.assertTrue(Tag('tagA', 'tagOwner') in tagList, 'failed to find tag in list')
         self.assertTrue(Tag('tagA', 'tagOwner2') in tagList, 'failed to find tag in list')
 
+class PropertyTest(unittest.TestCase):
+    
+    def testCmpOperation(self):
+        propList = [Property('prop1', 'propOwner','prop1Value'), Property('prop2', 'propOwner')]
+        self.assertTrue(Property('prop1', 'propOwner','prop1Value') in propList, 'failed to find equivalent property')
+        self.assertTrue(Property('prop1', 'tagOwner','prop1Value') in propList,\
+                        'fail, the cmp should not take into consideration the owner')
+        self.assertFalse(Property('prop1', 'propOwner','prop2Value') in propList, \
+                         'fail, property value is required to match')
+        self.assertTrue(Property('prop2', 'tagOwner') in propList)
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
