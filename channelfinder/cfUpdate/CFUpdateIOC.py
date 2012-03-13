@@ -71,7 +71,7 @@ def updateChannelFinder(pvNames, hostName, iocName, owner, \
     except:
         raise Exception, 'Unable to create a valid webResourceClient'
     checkPropertiesExist(client, owner)
-    previousChannelsList = client.find(property=[('hostName', hostName), ('iocName', iocName)])
+    previousChannelsList = client.findByArgs([('hostName', hostName), ('iocName', iocName)])
     if previousChannelsList != None:
         for ch in previousChannelsList:
             if pvNames != None and ch.Name in pvNames:
