@@ -44,8 +44,9 @@ class ChannelUtil(object):
         if isinstance(channels, list):
             allProperties = []
             for channel in channels:
-                for propertyName in channel.getProperties().keys():
-                    allProperties.append(propertyName)
+                if channel.getProperties():
+                    for propertyName in channel.getProperties().keys():
+                        allProperties.append(propertyName)
             uniqueNames = Set(allProperties)
             return list(uniqueNames)
         else:
