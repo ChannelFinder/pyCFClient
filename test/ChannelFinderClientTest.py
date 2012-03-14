@@ -717,6 +717,23 @@ class UpdateAppendTest(unittest.TestCase):
         self.assertTrue(len(self.client.find(name=self.ch3.Name)) == 1 and \
                         self.Prop1 in self.client.find(name=self.ch3.Name)[0].Properties, \
                             'failed to update the channel with a new property')
+        
+    def UpdateRemoveProperty2Channel(self):
+        '''
+        Updating a single channel with a property value = empty string is interpreted as a delete property
+        '''
+        try:
+            self.client.set(channel=Channel( 'testChannel', self.ChannelOwner, properties = [self.Prop1]))
+            channel = self.client.find(name='testChannel')
+            self.assertTrue(len(channel) == 1 and self.Prop1.Name in channel[0].getProperties(), \
+                            'Failed to create a test channel with property prop1')
+            self.Prop1.Value = ''
+            channel[0].Properties = [self.Prop1]
+            self.client.update(channel=channel[0])
+            self.assertFalse(self.Prop1.Name in self.client.find(name='testChannel')[0].getProperties(), \
+                             'Failed to deleted property prop1 form channel testChannel')
+        finally:
+            self.client.delete(channelName='testChannel')
     
     def UserOwnerCheck(self):
         '''
