@@ -10,6 +10,7 @@ import unittest
 
 from channelfinder import ChannelFinderClient
 from channelfinder import Channel, Property, Tag
+from channelfinder.util import ChannelUtil
 
 from _testConf import _testConf
 #===============================================================================
@@ -932,6 +933,31 @@ class ErrorTest(unittest.TestCase):
                               channel=Channel('channelName', \
                                               self.ChannelOwner, \
                                               properties=[Property('existingProperty', self.propOwner)]))
+            self.assertFalse('existingProperty' in ChannelUtil.getAllProperties(self.client.find(name='channelName')), \
+                             'Failed: should not be able to update a channel with a property with value null')
+        finally:
+            self.client.delete(channelName='channelName')
+            
+    def testCreateChannelWithEmptyPropertyValue(self):
+        self.assertRaises(Exception, \
+                          self.client.set, \
+                          channel=Channel('channelName', \
+                                            self.ChannelOwner, \
+                                            properties=[Property('existingProperty', self.propOwner, '')]))
+        self.assertFalse(self.client.find(name='channelName'), \
+                         'Failed: should not be able to create a channel with a property with empty value string')
+        
+    def testUpdateChannelWithEmptyPropertyValue(self):
+        self.client.set(channel=Channel('channelName', \
+                                            self.ChannelOwner))
+        try:
+            self.assertRaises(Exception, \
+                              self.client.update, \
+                              channel=Channel('channelName', \
+                                              self.ChannelOwner, \
+                                              properties=[Property('existingProperty', self.propOwner,'')]))
+            self.assertFalse('existingProperty' in ChannelUtil.getAllProperties(self.client.find(name='channelName')), \
+                             'Failed: should not be able to update a channel with a property with empty value string')
         finally:
             self.client.delete(channelName='channelName')
         
