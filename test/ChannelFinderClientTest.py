@@ -718,7 +718,7 @@ class UpdateAppendTest(unittest.TestCase):
                         self.Prop1 in self.client.find(name=self.ch3.Name)[0].Properties, \
                             'failed to update the channel with a new property')
         
-    def UpdateRemoveProperty2Channel(self):
+    def testUpdateRemoveProperty2Channel(self):
         '''
         Updating a single channel with a property value = empty string is interpreted as a delete property
         '''
@@ -730,7 +730,7 @@ class UpdateAppendTest(unittest.TestCase):
             self.Prop1.Value = ''
             channel[0].Properties = [self.Prop1]
             self.client.update(channel=channel[0])
-            self.assertFalse(self.Prop1.Name in self.client.find(name='testChannel')[0].getProperties(), \
+            self.assertFalse(self.client.find(name='testChannel')[0].getProperties(), \
                              'Failed to deleted property prop1 form channel testChannel')
         finally:
             self.client.delete(channelName='testChannel')
@@ -964,7 +964,7 @@ class ErrorTest(unittest.TestCase):
         self.assertFalse(self.client.find(name='channelName'), \
                          'Failed: should not be able to create a channel with a property with empty value string')
         
-    def testUpdateChannelWithEmptyPropertyValue(self):
+    def UpdateChannelWithEmptyPropertyValue(self):
         self.client.set(channel=Channel('channelName', \
                                             self.ChannelOwner))
         try:

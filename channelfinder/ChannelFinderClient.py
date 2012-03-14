@@ -700,7 +700,7 @@ class ChannelFinderClient(object):
         encodes a single property
         '''
         if not withChannels:
-            if property.Value:
+            if property.Value or property.Value is '':
                 return {'@name':str(property.Name), '@value':property.Value, '@owner':property.Owner}
             else:
                 return {'@name':str(property.Name), '@owner':property.Owner}
