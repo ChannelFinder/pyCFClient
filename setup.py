@@ -14,5 +14,5 @@ setup(name='channelfinder',
       author='Kunal Shroff',
       author_email='shroffk@bnl.gov',
       packages=find_packages(),
-      scripts=['cf-update-ioc']
+      scripts=['cf-update-ioc', 'cf-monitor-test']
      )
