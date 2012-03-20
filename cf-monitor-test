@@ -60,7 +60,7 @@ def check(pvNames, hostName, iocName):
     except:
         raise Exception, 'Unable to create a valid webResourceClient'
     channels = client.find(property=[('hostName', hostName), ('iocName', iocName)])
-    if channels or len(pvNames) == len(channels):
+    if channels and len(pvNames) == len(channels):
         for channel in channels:
             if channel.Name not in pvNames:
                 raise Exception, 'Failed check for ' + channel.Name
