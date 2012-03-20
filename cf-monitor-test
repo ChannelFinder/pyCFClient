@@ -2,6 +2,20 @@
 '''
 Created on Mar 19, 2012
 
+A python script to ensure that the cf-update-ioc is working correctly.
+The script requires the setup of two files
+e.g.
+>cat nagios01.host01.dbl
+>test:cf-update-daemon{test}
+
+>cat nagios02.host02.dbl
+>test:cf-update-daemon{test}
+
+The script will touch each file, with a short delay and will check that
+Channelfinder has been appropriately updated.
+
+python cf-monitor-test /complete/path/to/daemon/dir -i initialFile -f finalFile
+
 @author: shroffk
 '''
 from channelfinder import ChannelFinderClient, Channel, Property
