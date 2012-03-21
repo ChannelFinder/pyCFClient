@@ -46,7 +46,8 @@ def getPVNames(completeFilePath, pattern=None):
     except IOError:
         return None
     finally:
-        f.close()
+        if f:
+            f.close()
 
 def updateChannelFinder(pvNames, hostName, iocName, owner, \
                         service=None, username=None, password=None):
