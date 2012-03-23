@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 print find_packages()
 
 setup(name='channelfinder',
-      version='1.0',
+      version='1.1.0',
       description='Python ChannelFinder Client Lib',
       author='Kunal Shroff',
       author_email='shroffk@bnl.gov',
