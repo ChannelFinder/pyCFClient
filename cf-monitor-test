@@ -24,6 +24,9 @@ from time import sleep
 import os
 import re
 
+SEVR = {0:'OK     ',
+        1:'Minor  ',
+        2:'Major  '}
 
 def main():    
     requiredOpts = ['initial-file', 'final-file']
@@ -51,10 +54,12 @@ def mainRun(opts, args):
         finalFile = os.path.normpath(directory + '/' + opts.finalFile)
         fHostName, fIocName = getArgsFromFilename(finalFile)
         if getPVNames(initialFile) != getPVNames(finalFile):
-            raise Exception, 'initial and final file should have the same pvs'
+#            raise Exception, 'initial and final file should have the same pvs'
+            sys.exit(1)
         pvNames = getPVNames(initialFile)
         if len(pvNames) == 0:
-            raise Exception, 'no pv\'s specified in the test file'
+#            raise Exception, 'no pv\'s specified in the test file'
+            sys.exit(1)
         '''
         Touch the initial file and check channelfinder
         '''
@@ -67,6 +72,7 @@ def mainRun(opts, args):
         touch(finalFile)
         sleep(2)
         check(pvNames, fHostName, fIocName)
+        sys.exit
 
 def check(pvNames, hostName, iocName):
     try:
@@ -77,9 +83,11 @@ def check(pvNames, hostName, iocName):
     if channels and len(pvNames) == len(channels):
         for channel in channels:
             if channel.Name not in pvNames:
-                raise Exception, 'Failed check for ' + channel.Name
+#                raise Exception, 'Failed check for ' + channel.Name
+                sys.exit(2)
     else:
-        raise Exception, 'Failed check for ' + str(pvNames) + ' with: ' + hostName + ' & ' + iocName
+#        raise Exception, 'Failed check for ' + str(pvNames) + ' with: ' + hostName + ' & ' + iocName
+        sys.exit(2)
 
 def touch(fname, times=None):
     with file(fname, 'a'):
