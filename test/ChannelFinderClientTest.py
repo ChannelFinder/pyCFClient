@@ -411,6 +411,9 @@ class SetOperationTest(unittest.TestCase):
             responseChannelNames = [channel.Name for channel in self.client.find(property=[(testProperty.Name, '*')])]
             for ch in channelNames:
                 self.assertTrue(ch in responseChannelNames, 'Error: failed to set the property to the channels')
+            self.client.delete(property=testProperty, channelNames=[channelNames[0]])
+            responseChannelNames = [channel.Name for channel in self.client.find(property=[(testProperty.Name, '*')])]
+            self.assertTrue(channelNames[0] not in responseChannelNames, 'Error: failed to delete the property from a channel')
             self.client.delete(property=testProperty, channelNames=channelNames)
             response = self.client.find(property=[(testProperty.Name, '*')])
             if response:
