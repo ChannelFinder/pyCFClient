@@ -198,6 +198,14 @@ class ChannelFinderClient(object):
             except Exception:
                 print Exception
             self.__checkResponseState(response)
+        elif 'property' in kwds and 'channels' in kwds:
+            try:
+                response = self.connection.request_put(self.__propertiesResource + '/' + kwds['property'].Name, \
+                                                       body=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=kwds['channels'])), \
+                                                       headers=copy(self.__jsonheader))
+            except Exception:
+                print Exception
+            self.__checkResponseState(response)
         else:
             raise Exception, 'Incorrect Usage: unknown keys'
     
@@ -207,7 +215,7 @@ class ChannelFinderClient(object):
         '''
         if not int(r[u'headers']['status']) <= 206:
             match = re.search(r'<b>description</b>([\S\s]*?)</p>', r[u'body'])
-            msg  = match.group(1)
+            msg = match.group(1)
             raise Exception, 'HTTP Error status: ' + r[u'headers']['status'] + \
                 ' Cause: ' + msg
         return r
@@ -264,18 +272,18 @@ class ChannelFinderClient(object):
             if key == 'name':
                 patterns = kwds[key].split(',')
                 for eachPattern in patterns:
-                    args.append(('~name',eachPattern.strip()))
+                    args.append(('~name', eachPattern.strip()))
             elif key == 'tagName':
                 patterns = kwds[key].split(',')
                 for eachPattern in patterns:
-                    args.append(('~tag',eachPattern.strip()))
+                    args.append(('~tag', eachPattern.strip()))
             elif key == 'property':
                 for prop in kwds[key]:
                     patterns = prop[1].split(',')
                     for eachPattern in patterns:
-                        args.append((prop[0],eachPattern.strip()))
+                        args.append((prop[0], eachPattern.strip()))
             else:
-                raise Exception, 'unknown find argument '+key 
+                raise Exception, 'unknown find argument ' + key 
 #        url = self.__channelsResource + self.createQueryURL(kwds)
         return self.findByArgs(args)
     
@@ -427,12 +435,9 @@ class ChannelFinderClient(object):
                                                       headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'property' in kwds and 'channelNames' in kwds:
-            channelsWithProp = [channel for channel in self.find(property=[(kwds['property'].Name, '*')]) if channel.Name in kwds['channelNames']]
-            channels = []
-            for channel in channelsWithProp:
-                updatedProperties = [property for property in channel.Properties if property.Name != kwds['property'].Name]
-                channels.append(Channel(channel.Name,channel.Owner,tags=channel.Tags,properties=updatedProperties))
-            self.set(channels = channels)        
+            channelsWithProp = self.find(property=[(kwds['property'].Name, '*')])
+            channels = [channel for channel in channelsWithProp if channel.Name not in kwds['channelNames']]
+            self.set(property=kwds['property'], channels=channels)        
         else:
             raise Exception, ' unkown keys'
 
@@ -544,7 +549,7 @@ class ChannelFinderClient(object):
             property = kwds['property']
             channels = [Channel(kwds['channelName'].strip(), self.__userName, properties=[property])]
             response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
-                                                    body=JSONEncoder().encode(self.__encodeProperty(property, withChannels=channels)),\
+                                                    body=JSONEncoder().encode(self.__encodeProperty(property, withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'property' in kwds and 'channelNames' in kwds:
@@ -553,7 +558,7 @@ class ChannelFinderClient(object):
             for eachChannel in kwds['channelNames']:
                 channels.append(Channel(eachChannel, self.__userName, properties=[property]))
             response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
-                                                    body=JSONEncoder().encode(self.__encodeProperty(property, withChannels=channels)),\
+                                                    body=JSONEncoder().encode(self.__encodeProperty(property, withChannels=channels)), \
                                                     headers=copy(self.__jsonheader))    
             self.__checkResponseState(response)                         
         elif 'originalChannelName' in kwds and 'channel' in kwds:
