@@ -22,7 +22,7 @@ class TagValidator(object):
 
 class PropertyValidator(object):
     '''
-    A simple Validator that ensures that a particular Tag is present on the channel
+    A simple Validator that ensures that a particular Property is present on the channel
     '''
 
     def __init__(self, prop):

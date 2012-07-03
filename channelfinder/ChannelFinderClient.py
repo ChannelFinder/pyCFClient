@@ -88,7 +88,7 @@ class ChannelFinderClient(object):
         >>> set(tags=[Tag('tag1','tagOwner'),Tag('tag2','tagOwner')])
         
         set(property = Property )
-        >>> set(property=Property('propertyName','propertyOwner','propertyValue'))
+        >>> set(property=Property('propertyName','propertyOwner'))
         
         set(properties = [Property])
         >>> set(properties=[Property('prop1','propOwner'),'prop2','propOwner']) 
