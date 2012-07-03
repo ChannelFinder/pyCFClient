@@ -427,9 +427,12 @@ class ChannelFinderClient(object):
                                                       headers=copy(self.__jsonheader))
             self.__checkResponseState(response)
         elif 'property' in kwds and 'channelNames' in kwds:
-            channelsWithProp = self.find(property=[(kwds['property'].Name, '*')])
-            channelNames = [channel.Name for channel in channelsWithProp if channel.Name not in kwds['channelNames']]
-            self.set(property=kwds['property'], channelNames=channelNames)        
+            channelsWithProp = [channel for channel in self.find(property=[(kwds['property'].Name, '*')]) if channel.Name in kwds['channelNames']]
+            channels = []
+            for channel in channelsWithProp:
+                updatedProperties = [property for property in channel.Properties if property.Name != kwds['property'].Name]
+                channels.append(Channel(channel.Name,channel.Owner,tags=channel.Tags,properties=updatedProperties))
+            self.set(channels = channels)        
         else:
             raise Exception, ' unkown keys'
 
