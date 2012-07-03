@@ -414,7 +414,7 @@ class SetOperationTest(unittest.TestCase):
             self.client.delete(property=testProperty, channelNames=[channelNames[0]])
             responseChannelNames = [channel.Name for channel in self.client.find(property=[(testProperty.Name, '*')])]
             self.assertTrue(channelNames[0] not in responseChannelNames, 'Error: failed to delete the property from a channel')
-            self.client.delete(property=testProperty, channelNames=channelNames)
+            self.client.delete(property=Property('pySetProp', self.propOwner), channelNames=channelNames)
             response = self.client.find(property=[(testProperty.Name, '*')])
             if response:
                 responseChannelNames = [channel.Name for channel in response]
@@ -726,7 +726,7 @@ class UpdateAppendTest(unittest.TestCase):
         Updating a single channel with a property value = empty string is interpreted as a delete property
         '''
         try:
-            self.client.set(channel=Channel( 'testChannel', self.ChannelOwner, properties = [self.Prop1]))
+            self.client.set(channel=Channel('testChannel', self.ChannelOwner, properties=[self.Prop1]))
             channel = self.client.find(name='testChannel')
             self.assertTrue(len(channel) == 1 and self.Prop1.Name in channel[0].getProperties(), \
                             'Failed to create a test channel with property prop1')
@@ -975,7 +975,7 @@ class ErrorTest(unittest.TestCase):
                               self.client.update, \
                               channel=Channel('channelName', \
                                               self.ChannelOwner, \
-                                              properties=[Property('existingProperty', self.propOwner,'')]))
+                                              properties=[Property('existingProperty', self.propOwner, '')]))
             self.assertFalse('existingProperty' in ChannelUtil.getAllProperties(self.client.find(name='channelName')), \
                              'Failed: should not be able to update a channel with a property with empty value string')
         finally:
