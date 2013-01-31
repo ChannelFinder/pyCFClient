@@ -4,15 +4,13 @@ Created on Apr 4, 2011
 @author: shroffk
 '''
 
-from setuptools import setup, find_packages
-
-print find_packages()
+from distutils.core import setup
 
 setup(name='channelfinder',
-      version='1.1.0',
+      version='2.0.0',
+      packages=['channelfinder'],
       description='Python ChannelFinder Client Lib',
       author='Kunal Shroff',
       author_email='shroffk@bnl.gov',
-      packages=find_packages(),
       scripts=['cf-update-ioc', 'cf-monitor-test']
      )
