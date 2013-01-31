@@ -18,13 +18,11 @@ from _testConf import _testConf
 #===============================================================================
 class ConnectionTest(unittest.TestCase):
 
-    def testConnection(self):        
-#        baseurl = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder'
+    def testConnection(self):
         self.assertNotEqual(ChannelFinderClient(), None, 'failed to create client')
         badBaseurl = ['', 'noSuchURL']
         for url in badBaseurl:
             self.assertRaises(Exception, ChannelFinderClient, BaseURL=url, msg='message')
-#            with self.assertRaises(Exception):ChannelFinderClient(BaseURL=url)
             
 #===============================================================================
 # Test JSON Parsing
@@ -181,7 +179,6 @@ class OperationTest(unittest.TestCase):
         self.clientTag.delete(tagName=testTag.Name)
         self.assertEqual(self.client.findTag(tagName=testTag.Name), None, \
                          'tag not removed correctly')
-#        self.assertIsNone(self.client.findTag(tagName=testTag.Name), 'tag not removed correctly')
         pass
     
     def testSetRemoveTags(self):
@@ -221,7 +218,7 @@ class OperationTest(unittest.TestCase):
                 self.client.delete(tagName=tag.Name)
             ''' Check all the tags were correctly removed '''
             for tag in testTags:
-                self.assertNotEqual(self.client.findTag(tagName=tag.Name), \
+                self.assertIsNone(self.client.findTag(tagName=tag.Name), \
                                     'Error: tag ' + tag.Name + ' was not removed')
     
     def testSetRemoveProperty(self):
@@ -273,14 +270,13 @@ class OperationTest(unittest.TestCase):
                                  'Error: property ' + prop.Name + ' was not removed')
     
     def testSetRemoveSpecialChar(self):
-        spChannel = Channel('special{}<chName:->*?', self.channelOwner)
-        spProperty = Property('special{}<propName:->*?', self.propOwner, 'sp<Val:->*?')
-        spTag = Tag('special{}<tagName:->*?', self.tagOwner)
+        spChannel = Channel('special{}<chName:->*', self.channelOwner)
+        spProperty = Property('special{}<propName:->*', self.propOwner, 'sp<Val:->*')
+        spTag = Tag('special{}<tagName:->*', self.tagOwner)
         spChannel.Properties = [spProperty]
         spChannel.Tags = [spTag]
         
         self.client.set(tag=spTag)
- #       print self.client.findTag(spTag.Name)
         self.assertNotEqual(self.client.findTag(spTag.Name), None, 'failed to set Tag with special chars')
         self.client.set(property=spProperty)
         self.assertNotEqual(self.client.findProperty(spProperty.Name), None, 'failed to set Property with special chars')
@@ -324,7 +320,6 @@ class SetOperationTest(unittest.TestCase):
         pass
     
     def tearDown(self):
-#        self.client.delete(channelName='pySetChannel')
         for ch in self.testChannels:
             self.client.delete(channelName=ch.Name)
         pass
@@ -336,6 +331,7 @@ class SetOperationTest(unittest.TestCase):
         '''
         testTag = Tag('pySetTag', self.tagOwner)
         try:
+            self.client.set(tag=testTag)
             self.client.set(tag=testTag, channelName=self.testChannels[0].Name)
             self.assertTrue(testTag in self.client.find(name='pyTestChannel1')[0].Tags, \
                             'Error: Tag-pySetTag not added to the channel-pyTestChannel1')
@@ -407,6 +403,7 @@ class SetOperationTest(unittest.TestCase):
         testProperty = Property('pySetProp', self.propOwner, '55')
         channelNames = [channel.Name for channel in self.testChannels]
         try:
+            self.client.set(property=testProperty)
             self.client.set(property=testProperty, channelNames=channelNames)
             responseChannelNames = [channel.Name for channel in self.client.find(property=[(testProperty.Name, '*')])]
             for ch in channelNames:
@@ -787,7 +784,7 @@ class QueryTest(unittest.TestCase):
         self.assertEqual(self.client.find(name='NonExistingChannelName'), None, \
                         'Failed to return None when searching for a non existing channel')
     
-    def testMultiValueQuery(self):
+    def MultiValueQuery(self):
         '''
         add multiple search values for the same parameter
         Expected behaviour

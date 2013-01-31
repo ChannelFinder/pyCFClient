@@ -8,7 +8,8 @@ Created on Feb 15, 2011
 
 '''
 import re
-from channelfinder.lib.restful_lib import Connection
+import requests
+from requests import auth
 from copy import copy
 from _conf import _conf
 try: 
@@ -16,12 +17,7 @@ try:
 except ImportError: 
     from simplejson import JSONDecoder, JSONEncoder
 from CFDataTypes import Channel, Property, Tag
-try: 
-    from collections import OrderedDict
-except :
-    from channelfinder.lib.myCollections import OrderedDict
-
-    
+from collections import OrderedDict    
 
 
 class ChannelFinderClient(object):
@@ -30,11 +26,10 @@ class ChannelFinderClient(object):
     set, update, delete and find operations.
     '''
 
-    connection = None
     __jsonheader = {'content-type':'application/json', 'accept':'application/json'}    
-    __channelsResource = 'resources/channels'
-    __propertiesResource = 'resources/properties'
-    __tagsResource = 'resources/tags'
+    __channelsResource = '/resources/channels'
+    __propertiesResource = '/resources/properties'
+    __tagsResource = '/resources/tags'
  
     def __init__(self, BaseURL=None, username=None, password=None):
         '''
@@ -45,13 +40,13 @@ class ChannelFinderClient(object):
             self.__baseURL = self.__getDefaultConfig('BaseURL', BaseURL)
             self.__userName = self.__getDefaultConfig('username', username)
             self.__password = self.__getDefaultConfig('password', password)
-#            print 'creating a connection to ', self.__baseURL, self.__userName, self.__password
-            self.connection = Connection(self.__baseURL, username=self.__userName, password=self.__password)
-            resp = self.connection.request_get('/resources/tags', headers=copy(self.__jsonheader))
-            if resp[u'headers']['status'] != '200':
-                print 'error status' + resp[u'headers']['status']
+            if username and password:
+                self.__auth = auth.HTTPBasicAuth(username, password)
+            else:
+                self.__auth = None
+            requests.get(self.__baseURL + self.__tagsResource, verify=False, headers=copy(self.__jsonheader)).raise_for_status()
         except:
-            raise
+            raise Exception, 'Failed to create client to ' + self.__baseURL
 
     def __getDefaultConfig(self, arg, value):
         if value == None and _conf.has_option('DEFAULT', arg):
@@ -64,11 +59,16 @@ class ChannelFinderClient(object):
         Returns a list of all the channels
         '''
         if self.connection:
-            resp = self.connection.request_get('/resources/channels', headers=copy(self.__jsonheader))
+            resp = requests.get(self.__baseURL + self.__channelsResource,
+                                headers=copy(self.__jsonheader),
+                                verify=False,
+                                auth=self.__auth)
+            resp.raise_for_status()
+            j = JSONDecoder().decode(resp.content.json())
+            self.decodeChannels(j)
             if (resp[u'headers']['status'] != '404'):
                 j = JSONDecoder().decode(resp[u'body'])
                 return self.decodeChannels(j)
-#        return a None if fail
         return None
 
     def set(self, **kwds):
@@ -119,8 +119,6 @@ class ChannelFinderClient(object):
         # and delete it from all other channels
         
         '''
-        if not self.connection:
-            raise Exception, 'Connection not created'
         if len(kwds) == 1:
             self.__hadleSingleAddParameter(**kwds)
         elif len(kwds) == 2:
@@ -131,37 +129,49 @@ class ChannelFinderClient(object):
     def __hadleSingleAddParameter(self, **kwds):
         if 'channel' in kwds :
             ch = kwds['channel']
-            response = self.connection.request_put(self.__channelsResource + '/' + ch.Name, \
-                                                   body=JSONEncoder().encode(self.__encodeChannel(ch)), \
-                                                   headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            r = requests.put(self.__baseURL + self.__channelsResource + '/' + ch.Name, \
+                             data=JSONEncoder().encode(self.__encodeChannel(ch)), \
+                             headers=copy(self.__jsonheader), \
+                             verify=False, \
+                             auth=self.__auth)
+            r.raise_for_status()
         elif 'channels' in kwds :
-            response = self.connection.request_post(self.__channelsResource, \
-                                                   body=JSONEncoder().encode(self.__encodeChannels(kwds['channels'])), \
-                                                   headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            r = requests.post(self.__baseURL + self.__channelsResource, \
+                              data=JSONEncoder().encode(self.__encodeChannels(kwds['channels'])), \
+                              headers=copy(self.__jsonheader), \
+                              verify=False, \
+                              auth=self.__auth)
+            r.raise_for_status()
         elif 'tag' in kwds:
-            response = self.connection.request_put(self.__tagsResource + '/' + kwds['tag'].Name, \
-                                                   body=JSONEncoder().encode(self.__encodeTag(kwds['tag'])), \
-                                                   headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            r = requests.put(self.__baseURL + self.__tagsResource + '/' + kwds['tag'].Name, \
+                             data=JSONEncoder().encode(self.__encodeTag(kwds['tag'])), \
+                             headers=copy(self.__jsonheader), \
+                             verify=False, \
+                             auth=self.__auth)
+            r.raise_for_status()
         elif 'tags' in kwds:
-            response = self.connection.request_post(self.__tagsResource, \
-                                                    body=JSONEncoder().encode({'tags':{'tag':self.__encodeTags(kwds['tags'])}}), \
-                                                    headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            r = requests.post(self.__baseURL + self.__tagsResource, \
+                             data=JSONEncoder().encode({'tags':{'tag':self.__encodeTags(kwds['tags'])}}), \
+                             headers=copy(self.__jsonheader), \
+                             verify=False, \
+                             auth=self.__auth)
+            r.raise_for_status()
         elif 'property' in kwds:
-            response = self.connection.request_put(self.__propertiesResource + '/' + kwds['property'].Name, \
-                                                   body=JSONEncoder().encode(self.__encodeProperty(kwds['property'])) , \
-                                                   headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            r = requests.put(self.__baseURL + self.__propertiesResource + '/' + kwds['property'].Name, \
+                             data=JSONEncoder().encode(self.__encodeProperty(kwds['property'])) , \
+                             headers=copy(self.__jsonheader), \
+                             verify=False, \
+                             auth=self.__auth)
+            r.raise_for_status()
         elif 'properties' in kwds:
-            response = self.connection.request_post(self.__propertiesResource, \
-                                                    body=JSONEncoder().encode({'properties':\
-                                                                               {'property':\
-                                                                                self.__encodeProperties(kwds['properties'])}}) , \
-                                                    headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)                                
+            r = requests.post(self.__baseURL + self.__propertiesResource, \
+                              data=JSONEncoder().encode({'properties':\
+                                                         {'property':\
+                                                          self.__encodeProperties(kwds['properties'])}}), \
+                              headers=copy(self.__jsonheader), \
+                              verify=False, \
+                              auth=self.__auth)
+            r.raise_for_status()                               
         else:
             raise Exception, 'Incorrect Usage: unknown key'   
     
@@ -169,43 +179,42 @@ class ChannelFinderClient(object):
         # set a tag to a channel
         if 'tag' in kwds and 'channelName' in kwds:
             channels = [Channel(kwds['channelName'].strip(), self.__userName, tags=[kwds['tag']])]
-            response = self.connection.request_put(self.__tagsResource + '/' + kwds['tag'].Name, \
-                                                    body=JSONEncoder().encode(self.__encodeTag(kwds['tag'], withChannels=channels)), \
-                                                    headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            requests.put(self.__baseURL + self.__tagsResource + '/' + kwds['tag'].Name, \
+                         data=JSONEncoder().encode(self.__encodeTag(kwds['tag'], withChannels=channels)), \
+                         headers=copy(self.__jsonheader), \
+                         verify=False, \
+                         auth=self.__auth).raise_for_status()
         elif 'tag' in kwds and 'channelNames' in kwds:
             channels = []
             for eachChannel in kwds['channelNames']:
                 channels.append(Channel(eachChannel, self.__userName, tags=[kwds['tag']]))
-            response = self.connection.request_put(self.__tagsResource + '/' + kwds['tag'].Name, \
-                                                    body=JSONEncoder().encode(self.__encodeTag(kwds['tag'], withChannels=channels)), \
-                                                    headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            requests.put(self.__baseURL + self.__tagsResource + '/' + kwds['tag'].Name, \
+                         data=JSONEncoder().encode(self.__encodeTag(kwds['tag'], withChannels=channels)), \
+                         headers=copy(self.__jsonheader), \
+                         verify=False, \
+                         auth=self.__auth).raise_for_status()
         elif 'property' in kwds and 'channelName' in kwds:
             channels = [Channel(kwds['channelName'].strip(), self.__userName, properties=[kwds['property']])]
-            response = self.connection.request_put(self.__propertiesResource + '/' + kwds['property'].Name, \
-                                                   body=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=channels)), \
-                                                   headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            requests.put(self.__baseURL + self.__propertiesResource + '/' + kwds['property'].Name, \
+                         data=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=channels)), \
+                         headers=copy(self.__jsonheader), \
+                         verify=False, \
+                         auth=self.__auth).raise_for_status()
         elif 'property' in kwds and 'channelNames' in kwds:
             channels = []
             for eachChannel in kwds['channelNames']:
                 channels.append(Channel(eachChannel, self.__userName, properties=[kwds['property']]))
-            try:
-                response = self.connection.request_put(self.__propertiesResource + '/' + kwds['property'].Name, \
-                                                       body=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=channels)), \
-                                                       headers=copy(self.__jsonheader))
-            except Exception:
-                print Exception
-            self.__checkResponseState(response)
+            requests.put(self.__baseURL + self.__propertiesResource + '/' + kwds['property'].Name, \
+                         data=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=channels)), \
+                         headers=copy(self.__jsonheader), \
+                         verify=False, \
+                         auth=self.__auth).raise_for_status()
         elif 'property' in kwds and 'channels' in kwds:
-            try:
-                response = self.connection.request_put(self.__propertiesResource + '/' + kwds['property'].Name, \
-                                                       body=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=kwds['channels'])), \
-                                                       headers=copy(self.__jsonheader))
-            except Exception:
-                print Exception
-            self.__checkResponseState(response)
+            requests.put(self.__baseURL + self.__propertiesResource + '/' + kwds['property'].Name, \
+                         data=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=kwds['channels'])), \
+                         headers=copy(self.__jsonheader), \
+                         verify=False, \
+                         auth=self.__auth).raise_for_status()
         else:
             raise Exception, 'Incorrect Usage: unknown keys'
     
@@ -263,7 +272,7 @@ class ChannelFinderClient(object):
                 
         To query for the existance of a tag or property use findTag and findProperty.                  
         '''
-        if not self.connection:
+        if not self.__baseURL:
             raise Exception, 'Connection not created'
         if not len(kwds) > 0:
             raise Exception, 'Incorrect usage: atleast one parameter must be specified'
@@ -283,83 +292,87 @@ class ChannelFinderClient(object):
                     for eachPattern in patterns:
                         args.append((prop[0], eachPattern.strip()))
             else:
-                raise Exception, 'unknown find argument ' + key 
-#        url = self.__channelsResource + self.createQueryURL(kwds)
+                raise Exception, 'unknown find argument ' + key
         return self.findByArgs(args)
     
     def findByArgs(self, args):
-        url = self.__channelsResource
-        r = self.connection.request_get(url, args=args, headers=copy(self.__jsonheader))
-        if self.__checkResponseState(r):
-            return self.__decodeChannels(JSONDecoder().decode(r[u'body']))
-        
-#    @classmethod
-#    def createQueryURL(cls, parameters):
-#        url = []
-#        for parameterKey in parameters.keys():            
-#            if parameterKey == 'name':
-#                url.append('~name=' + str(parameters['name']))
-#            elif parameterKey == 'tagName':
-#                url.append('~tag=' + str(parameters['tagName']))
-#            elif parameterKey == 'property':
-#                if isinstance(parameters['property'], list):
-#                    for prop in parameters['property']:                        
-#                        if len(prop) == 1:
-#                            url.append(str(prop[0] + '=*'))
-#                        else:
-#                            url.append(str(prop[0] + '=' + prop[1]))
-#                else:
-#                    raise Exception, 'Incorrect usage: property=[("propName","propValPattern"),("propName","propValPatter")]'                    
-#            else:
-#                raise Exception, 'Incorrect usage: unknow key ' + parameterKey
-#        return '?' + '&'.join(url)
+        url = self.__baseURL + self.__channelsResource
+        r = requests.get(url, \
+                         params=args, \
+                         headers=copy(self.__jsonheader), \
+                         verify=False, \
+                         auth=self.__auth)
+        try:
+            r.raise_for_status()
+            return self.__decodeChannels(r.json())
+        except:
+            if r.status_code == 404:
+                return None
+            else:
+                r.raise_for_status()            
             
     def findTag(self, tagName):
         '''
         Searches for the _exact_ tagName and returns a single Tag object if found
         '''
-        url = self.__tagsResource + '/' + tagName
-        r = self.connection.request_get(url, headers=copy(self.__jsonheader))
-#        JSONDecoder().decode(r[u'body'])
-#        print r
-        if r[u'headers']['status'] == '404':
-            return None
-        elif self.__checkResponseState(r):
-            return self.__decodeTag(JSONDecoder().decode(r[u'body']))
-        else:
-            return None
-               
+        url = self.__baseURL + self.__tagsResource + '/' + tagName
+        r = requests.get(url,
+                         headers=copy(self.__jsonheader),
+                         verify=False,
+                         auth=self.__auth)
+        try:
+            r.raise_for_status()
+            return self.__decodeTag(r.json())
+        except:
+            if r.status_code == 404:
+                return None
+            else:
+                r.raise_for_status()           
     
     def findProperty(self, propertyName):
         '''
         Searches for the _exact_ propertyName and return a single Property object if found
         '''
-        url = self.__propertiesResource + '/' + propertyName
-        r = self.connection.request_get(url, headers=copy(self.__jsonheader))
-        if r[u'headers']['status'] == '404':
-            return None
-        elif self.__checkResponseState(r):
-            return self.__decodeProperty(JSONDecoder().decode(r[u'body']))
-        else:
-            return None
+        url = self.__baseURL + self.__propertiesResource + '/' + propertyName
+        r = requests.get(url, headers=copy(self.__jsonheader), verify=False)
+        try:
+            r.raise_for_status()
+            return self.__decodeProperty(r.json())
+        except:
+            if r.status_code == 404:
+                return None
+            else:
+                r.raise_for_status()
         
     def getAllTags(self):
         '''
         return a list of all the Tags present - even the ones not associated w/t any channel
         '''
-        url = self.__tagsResource
-        r = self.connection.request_get(url, headers=copy(self.__jsonheader))       
-        if self.__checkResponseState(r):
-            return self.__decodeTags(JSONDecoder().decode(r[u'body']))
+        url = self.__baseURL + self.__tagsResource
+        r = requests.get(url, headers=copy(self.__jsonheader), verify=False)
+        try:
+            r.raise_for_status()
+            return self.__decodeTags(r.json())
+        except:
+            if r.status_code == 404:
+                return None
+            else:
+                r.raise_for_status()
     
     def getAllProperties(self):
         '''
         return a list of all the Properties present - even the ones not associated w/t any channel
         '''
-        url = self.__propertiesResource
-        r = self.connection.request_get(url, headers=copy(self.__jsonheader))
-        if self.__checkResponseState(r):
-            return self.__decodeProperties(JSONDecoder().decode(r[u'body']))
+        url = self.__baseURL + self.__propertiesResource
+        r = requests.get(url, headers=copy(self.__jsonheader), verify=False)
+        try:
+            r.raise_for_status()
+            return self.__decodeProperties(r.json())
+        except:
+            if r.status_code == 404:
+                return None
+            else:
+                r.raise_for_status()
         
     def delete(self, **kwds):
         '''
@@ -391,8 +404,6 @@ class ChannelFinderClient(object):
         >>> delete(property = Property('propName','propOwner') ,channelNames = ['ch1','ch2','ch3'])
         # delete the property from all the channels in the channelNames list
         '''
-        if not self.connection:
-            raise Exception, 'Connection not created'
         if len(kwds) == 1:
             self.__handleSingleDeleteParameter(**kwds)
         elif len(kwds) == 2:
@@ -402,28 +413,35 @@ class ChannelFinderClient(object):
     
     def __handleSingleDeleteParameter(self, **kwds):
         if 'channelName' in kwds:
-            url = self.__channelsResource + '/' + kwds['channelName'].strip()
-            response = self.connection.request_delete(url, headers=copy(self.__jsonheader))   
-            self.__checkResponseState(response)
+            url = self.__baseURL + self.__channelsResource + '/' + kwds['channelName'].strip()
+            requests.delete(url, \
+                            headers=copy(self.__jsonheader), \
+                            verify=False, \
+                            auth=self.__auth).raise_for_status()
             pass
         elif 'tagName' in kwds:
-            url = self.__tagsResource + '/' + kwds['tagName'].strip()
-            response = self.connection.request_delete(url, headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            url = self.__baseURL + self.__tagsResource + '/' + kwds['tagName'].strip()
+            requests.delete(url, \
+                            verify=False, \
+                            headers=copy(self.__jsonheader), \
+                            auth=self.__auth).raise_for_status()
             pass
         elif 'propertyName' in kwds:
-            url = self.__propertiesResource + '/' + kwds['propertyName'].strip()
-            response = self.connection.request_delete(url, headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            url = self.__baseURL + self.__propertiesResource + '/' + kwds['propertyName'].strip()
+            requests.delete(url, \
+                            headers=copy(self.__jsonheader), \
+                            verify=False, \
+                            auth=self.__auth).raise_for_status()
             pass
         else:
             raise Exception, ' unkown key use channelName, tagName or proprtyName'
     
     def __handleMultipleDeleteParameters(self, **kwds):
         if 'tag' in kwds and 'channelName' in kwds:
-            response = self.connection.request_delete(self.__tagsResource + '/' + kwds['tag'].Name + '/' + kwds['channelName'].strip(), \
-                                                     headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            requests.delete(self.__baseURL + self.__tagsResource + '/' + kwds['tag'].Name + '/' + kwds['channelName'].strip(), \
+                            headers=copy(self.__jsonheader), \
+                            verify=False, \
+                            auth=self.__auth).raise_for_status()
         elif 'tag' in kwds and 'channelNames' in kwds:
             # find channels with the tag
             channelsWithTag = self.find(tagName=kwds['tag'].Name)
@@ -431,9 +449,10 @@ class ChannelFinderClient(object):
             channelNames = [channel.Name for channel in channelsWithTag if channel.Name not in kwds['channelNames']]
             self.set(tag=kwds['tag'], channelNames=channelNames)
         elif 'property' in kwds and 'channelName' in kwds:
-            response = self.connection.request_delete(self.__propertiesResource + '/' + kwds['property'].Name + '/' + kwds['channelName'], \
-                                                      headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            requests.delete(self.__baseURL + self.__propertiesResource + '/' + kwds['property'].Name + '/' + kwds['channelName'], \
+                            headers=copy(self.__jsonheader), \
+                            verify=False, \
+                            auth=self.__auth).raise_for_status()
         elif 'property' in kwds and 'channelNames' in kwds:
             channelsWithProp = self.find(property=[(kwds['property'].Name, '*')])
             channels = [channel for channel in channelsWithProp if channel.Name not in kwds['channelNames']]
@@ -498,8 +517,8 @@ class ChannelFinderClient(object):
         # the channel with the old tag are also updated
         '''
         
-        if not self.connection:
-            raise Exception, 'Connection not created'
+        if not self.__baseURL:
+            raise Exception, 'Olog client not configured correctly'
         if len(kwds) == 1:
             self.__handleSingleUpdateParameter(**kwds)
         elif len(kwds) == 2:
@@ -510,21 +529,25 @@ class ChannelFinderClient(object):
     def __handleSingleUpdateParameter(self, **kwds):
         if 'channel' in kwds:
             ch = kwds['channel']
-            response = self.connection.request_post(self.__channelsResource + '/' + ch.Name, \
-                                                    body=JSONEncoder().encode(self.__encodeChannel(ch)), \
-                                                    headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            requests.post(self.__baseURL + self.__channelsResource + '/' + ch.Name, \
+                                     data=JSONEncoder().encode(self.__encodeChannel(ch)), \
+                                     headers=copy(self.__jsonheader), \
+                                     verify=False, \
+                                     auth=self.__auth).raise_for_status()
         elif 'property' in kwds:
             property = kwds['property']
-            response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
-                                                    body=JSONEncoder().encode(self.__encodeProperty(property)), \
-                                                    headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            requests.post(self.__baseURL + self.__propertiesResource + '/' + property.Name, \
+                                     data=JSONEncoder().encode(self.__encodeProperty(property)), \
+                                     headers=copy(self.__jsonheader), \
+                                     verify=False, \
+                                     auth=self.__auth).raise_for_status()            
         elif 'tag' in kwds:
             tag = kwds['tag']
-            response = self.connection.request_post(self.__tagsResource + '/' + tag.Name, \
-                                                    body=JSONEncoder().encode(self.__encodeTag(tag)), \
-                                                    headers=copy(self.__jsonheader))
+            requests.post(self.__baseURL + self.__tagsResource + '/' + tag.Name, \
+                          data=JSONEncoder().encode(self.__encodeTag(tag)), \
+                          headers=copy(self.__jsonheader), \
+                          verify=False, \
+                          auth=self.__auth).raise_for_status()
         else:
             raise Exception, ' unkown key '
         
@@ -532,56 +555,63 @@ class ChannelFinderClient(object):
         if 'tag' in kwds and 'channelName' in kwds:
             tag = kwds['tag']
             channels = [Channel(kwds['channelName'].strip(), self.__userName)]
-            response = self.connection.request_post(self.__tagsResource + '/' + tag.Name, \
-                                                    body=JSONEncoder().encode(self.__encodeTag(tag, withChannels=channels)), \
-                                                    headers=copy(self.__jsonheader))
-            self.__checkResponseState(response) 
+            requests.post(self.__baseURL + self.__tagsResource + '/' + tag.Name, \
+                          data=JSONEncoder().encode(self.__encodeTag(tag, withChannels=channels)), \
+                          headers=copy(self.__jsonheader), \
+                          verify=False, \
+                          auth=self.__auth).raise_for_status()
         elif 'tag' in kwds and 'channelNames' in kwds:
             tag = kwds['tag']
             channels = []
             for eachChannel in kwds['channelNames']:
                 channels.append(Channel(eachChannel, self.__userName))
-            response = self.connection.request_post(self.__tagsResource + '/' + tag.Name, \
-                                                    body=JSONEncoder().encode(self.__encodeTag(tag, withChannels=channels)), \
-                                                    headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            requests.post(self.__baseURL + self.__tagsResource + '/' + tag.Name, \
+                          data=JSONEncoder().encode(self.__encodeTag(tag, withChannels=channels)), \
+                          headers=copy(self.__jsonheader), \
+                          verify=False, \
+                          auth=self.__auth).raise_for_status()
         elif 'property' in kwds and 'channelName' in kwds:
             property = kwds['property']
             channels = [Channel(kwds['channelName'].strip(), self.__userName, properties=[property])]
-            response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
-                                                    body=JSONEncoder().encode(self.__encodeProperty(property, withChannels=channels)), \
-                                                    headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            requests.post(self.__baseURL + self.__propertiesResource + '/' + property.Name, \
+                          data=JSONEncoder().encode(self.__encodeProperty(property, withChannels=channels)), \
+                          headers=copy(self.__jsonheader), \
+                          verify=False, \
+                          auth=self.__auth).raise_for_status()
         elif 'property' in kwds and 'channelNames' in kwds:
             property = kwds['property']
             channels = []
             for eachChannel in kwds['channelNames']:
                 channels.append(Channel(eachChannel, self.__userName, properties=[property]))
-            response = self.connection.request_post(self.__propertiesResource + '/' + property.Name, \
-                                                    body=JSONEncoder().encode(self.__encodeProperty(property, withChannels=channels)), \
-                                                    headers=copy(self.__jsonheader))    
-            self.__checkResponseState(response)                         
+            requests.post(self.__baseURL + self.__propertiesResource + '/' + property.Name, \
+                          data=JSONEncoder().encode(self.__encodeProperty(property, withChannels=channels)), \
+                          headers=copy(self.__jsonheader), \
+                          verify=False, \
+                          auth=self.__auth).raise_for_status()          
         elif 'originalChannelName' in kwds and 'channel' in kwds:
             ch = kwds['channel']
             channelName = kwds['originalChannelName'].strip()
-            response = self.connection.request_post(self.__channelsResource + '/' + channelName, \
-                                                    body=JSONEncoder().encode(self.__encodeChannel(ch)) , \
-                                                    headers=copy(self.__jsonheader))                
-            self.__checkResponseState(response)
+            requests.post(self.__baseURL + self.__channelsResource + '/' + channelName, \
+                          data=JSONEncoder().encode(self.__encodeChannel(ch)) , \
+                          headers=copy(self.__jsonheader), \
+                          verify=False, \
+                          auth=self.__auth).raise_for_status()
         elif 'originalPropertyName' in kwds and 'property' in kwds:
             prop = kwds['property']
             propName = kwds['originalPropertyName'].strip()
-            response = self.connection.request_post(self.__propertiesResource + '/' + propName, \
-                                                    body=JSONEncoder().encode(self.__encodeProperty(prop)), \
-                                                    headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            requests.post(self.__baseURL + self.__propertiesResource + '/' + propName, \
+                          data=JSONEncoder().encode(self.__encodeProperty(prop)), \
+                          headers=copy(self.__jsonheader), \
+                          verify=False, \
+                          auth=self.__auth).raise_for_status()
         elif 'originalTagName' in kwds and 'tag' in kwds: 
             tag = kwds['tag']
             tagName = kwds['originalTagName'].strip()
-            response = self.connection.request_post(self.__tagsResource + '/' + tagName, \
-                                                    body=JSONEncoder().encode(self.__encodeTag(tag)), \
-                                                    headers=copy(self.__jsonheader))
-            self.__checkResponseState(response)
+            requests.post(self.__baseURL + self.__tagsResource + '/' + tagName, \
+                          data=JSONEncoder().encode(self.__encodeTag(tag)), \
+                          headers=copy(self.__jsonheader), \
+                          verify=False, \
+                          auth=self.__auth).raise_for_status()
         else:
             raise Exception, ' unkown keys'
 
