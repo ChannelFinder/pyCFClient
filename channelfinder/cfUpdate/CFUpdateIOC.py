@@ -49,7 +49,7 @@ def getPVNames(completeFilePath, pattern=None):
         if f:
             f.close()
 
-def updateChannelFinder(pvNames, hostName, iocName, owner, \
+def updateChannelFinder(pvNames, hostName, iocName, owner, time, \
                         service=None, username=None, password=None):
     '''
     pvNames = list of pvNames 
@@ -58,6 +58,7 @@ def updateChannelFinder(pvNames, hostName, iocName, owner, \
     iocName = pv iocName (None not permitted)
     owner = the owner of the channels and properties being added, this can be different from the user
     e.g. user = abc might create a channel with owner = group-abc
+    time = the time at which these channels are being created/modified
     [optional] if not specified the default values are used by the 
     channelfinderapi lib
     service = channelfinder service URL
@@ -76,32 +77,44 @@ def updateChannelFinder(pvNames, hostName, iocName, owner, \
     if previousChannelsList != None:
         for ch in previousChannelsList:
             if pvNames != None and ch.Name in pvNames:
+                ''''''
                 channels.append(updateChannel(ch,\
                                               owner=owner, \
                                               hostName=hostName, \
-                                              iocName=iocName))
+                                              iocName=iocName, \
+                                              pvStatus='Active', \
+                                              time=time))
                 pvNames.remove(ch.Name)
             elif pvNames == None or ch.Name not in pvNames:
-                #  orphan the channel
-                channels.append(updateChannel(ch, owner=owner))
+                '''Orphan the channel : mark as inactive, keep the old hostName and iocName'''
+                channels.append(updateChannel(ch, \
+                                              owner=owner, \
+                                              hostName=ch.getProperties()['hostName'], \
+                                              iocName=ch.getProperties()['iocName'], \
+                                              pvStatus='InActive', \
+                                              time=ch.getProperties()['time']))
     # now pvNames contains a list of pv's new on this host/ioc
     for pv in pvNames:
         ch = client.findByArgs([('~name',pv)])
         if ch == None:
-            # New channel
+            '''New channel'''
             channels.append(createChannel(pv, \
                                           chOwner=owner, \
                                           hostName=hostName, \
-                                          iocName=iocName))
+                                          iocName=iocName, \
+                                          pvStatus='Active', \
+                                          time=time))
         elif ch[0] != None:
-            # update existing channel
+            '''update existing channel: exists but with a different hostName and/or iocName'''
             channels.append(updateChannel(ch[0], \
                                           owner=owner, \
                                           hostName=hostName, \
-                                          iocName=iocName))
+                                          iocName=iocName, \
+                                          pvStatus='Active', \
+                                          time=time))
     client.set(channels=channels)
 
-def updateChannel(channel, owner, hostName=None, iocName=None):
+def updateChannel(channel, owner, hostName=None, iocName=None, pvStatus='InActive', time=None):
     '''
     Helper to update a channel object so as to not affect the existing properties
     '''
@@ -109,17 +122,21 @@ def updateChannel(channel, owner, hostName=None, iocName=None):
         # properties list devoid of hostName and iocName properties
         if channel.Properties:
             properties = [property for property in channel.Properties \
-                          if property.Name != 'hostName' and property.Name != 'iocName']
+                          if property.Name != 'hostName' and property.Name != 'iocName' and property.Name != 'pvStatus']
         else:
             properties = []
         if hostName != None:
             properties.append(Property('hostName', owner, hostName))
         if iocName != None:
             properties.append(Property('iocName', owner, iocName))
+        if pvStatus:
+            properties.append(Property('pvStatus', owner, pvStatus))
+        if time:
+            properties.append(Property('time', owner, time)) 
         channel.Properties = properties
         return channel
 
-def createChannel(chName, chOwner, hostName=None, iocName=None):
+def createChannel(chName, chOwner, hostName=None, iocName=None, pvStatus='InActive', time=None):
     '''
     Helper to create a channel object with the required properties
     '''
@@ -129,13 +146,17 @@ def createChannel(chName, chOwner, hostName=None, iocName=None):
         ch.Properties.append(Property('hostName', chOwner, hostName))
     if iocName != None:
         ch.Properties.append(Property('iocName', chOwner, iocName))
+    if pvStatus:
+        ch.Properties.append(Property('pvStatus', chOwner, pvStatus))
+    if time:
+        ch.Properties.append(Property('time', chOwner, time))
     return ch
 
 def checkPropertiesExist(client, propOwner):
     '''
     Checks if the properties used by dbUpdate are present if not it creates them
     '''
-    requiredProperties = ['hostName', 'iocName']
+    requiredProperties = ['hostName', 'iocName', 'pvStatus', 'time']
     for propName in requiredProperties:
         if client.findProperty(propName) == None:
             try:
@@ -163,10 +184,12 @@ def mainRun(opts, args):
             for eachMatchingFile in matchingFiles:
                 completeFilePath = os.path.abspath(eachMatchingFile)
                 fHostName, fIocName = getArgsFromFilename(completeFilePath)
+                ftime = os.path.getctime(completeFilePath)
                 pattern = __getDefaultConfig('pattern', opts.pattern)
                 updateChannelFinder(getPVNames(completeFilePath, pattern=pattern), \
                             ifNoneReturnDefault(opts.hostName, fHostName), \
                             ifNoneReturnDefault(opts.iocName, fIocName), \
+                            ifNoneReturnDefault(opts.time, ftime), \
                             ifNoneReturnDefault(opts.owner,__getDefaultConfig('username', opts.username)), \
                             service=__getDefaultConfig('BaseURL',opts.serviceURL), \
                             username=__getDefaultConfig('username',opts.username), \
@@ -174,10 +197,12 @@ def mainRun(opts, args):
         else:
             completeFilePath = os.path.abspath(filename)
             fHostName, fIocName = getArgsFromFilename(completeFilePath)
+            ftime = os.path.getctime(completeFilePath)
             pattern = __getDefaultConfig('pattern', opts.pattern)
             updateChannelFinder(getPVNames(completeFilePath, pattern=pattern), \
                             ifNoneReturnDefault(opts.hostName, fHostName), \
                             ifNoneReturnDefault(opts.iocName, fIocName), \
+                            ifNoneReturnDefault(opts.time, ftime), \
                             ifNoneReturnDefault(opts.owner,__getDefaultConfig('username', opts.username)), \
                             service=__getDefaultConfig('BaseURL',opts.serviceURL), \
                             username=__getDefaultConfig('username',opts.username), \
@@ -213,6 +238,9 @@ def main():
     parser.add_option('-u', '--username', \
                       action='store', type='string', dest='username', \
                       help='username')
+    parser.add_option('-t', '--time', \
+                      action='store', type='string', dest='time', \
+                      help='time')
     parser.add_option('-p', '--password', \
                       action='callback', callback=getPassword, \
                       dest='password', \
