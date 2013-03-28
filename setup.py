@@ -12,5 +12,6 @@ setup(name='channelfinder',
       description='Python ChannelFinder Client Lib',
       author='Kunal Shroff',
       author_email='shroffk@bnl.gov',
-      scripts=['cf-update-ioc', 'cf-monitor-test']
+      scripts=['cf-update-ioc', 'cf-monitor-test'],
+      install_requires = ['requests']
      )
