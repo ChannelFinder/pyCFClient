@@ -49,7 +49,7 @@ def getPVNames(completeFilePath, pattern=None):
         if f:
             f.close()
 
-def updateChannelFinder(pvNames, hostName, iocName, owner, time, \
+def updateChannelFinder(pvNames, hostName, iocName, time, owner, \
                         service=None, username=None, password=None):
     '''
     pvNames = list of pvNames 
