@@ -24,6 +24,8 @@ class ChannelFinderClient(object):
     '''
     The ChannelFinderClient provides a connection object to perform 
     set, update, delete and find operations.
+    
+    TODO: Fix pydocs
     '''
 
     __jsonheader = {'content-type':'application/json', 'accept':'application/json'}    
