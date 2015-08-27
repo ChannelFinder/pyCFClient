@@ -623,7 +623,7 @@ class ChannelFinderClient(object):
     @classmethod
     def __decodeChannels(cls, body):
         '''
-        decode the representation of a list of channels to a list of Channel objects 
+        decode the representation of a list of channels to a list of dictionary representations of channels
         '''
         if not body[u'channels']:
             return None
@@ -640,14 +640,14 @@ class ChannelFinderClient(object):
     @classmethod
     def __decodeChannel(self, body):
         '''
-        decode the representation of a channel to the Channel object
+        decode the representation of a channel to a dictionary representation of a channel
         '''
         return {"name":body[u'@name'], "owner":body[u'@owner'], "properties":self.__decodeProperties(body), "tags":self.__decodeTags(body)}
     
     @classmethod
     def __decodeProperties(cls, body):
         '''
-        decode the representation of a list of properties to a list of Property object
+        decode the representation of a list of properties to a list of dictionary representations of properties
         '''
         ## TODO handle the case where there is a single property dict
         if body[u'properties'] and body[u'properties']['property']:
@@ -664,7 +664,7 @@ class ChannelFinderClient(object):
     @classmethod
     def __decodeProperty(cls, propertyBody):
         '''
-        decode the representation of a property to a Property object
+        decode the representation of a property to the dictionary representation of a property
         '''
         if '@value' in propertyBody:
             return {"name":propertyBody['@name'], "owner":propertyBody['@owner'], "value":propertyBody['@value']}
@@ -674,7 +674,7 @@ class ChannelFinderClient(object):
     @classmethod
     def __decodeTags(cls, body):
         '''
-        decode the representation of a list of tags to a list of Tag objects
+        decode the representation of a list of tags to a list of dictionary representations of tags
         '''
         ## TODO handle the case where there is a single tag dict
         if body[u'tags'] and body[u'tags']['tag']:
@@ -691,7 +691,7 @@ class ChannelFinderClient(object):
     @classmethod
     def __decodeTag(cls, tagBody):
         '''
-        decode a representation of a tag to the Tag object
+        decode the representation of a tag to the dictionary representation of a tag
         '''
         return {"name":tagBody['@name'], "owner":tagBody['@owner']}
     
