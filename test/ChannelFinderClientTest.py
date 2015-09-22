@@ -58,19 +58,19 @@ class JSONparserTest(unittest.TestCase):
 
     def testChannel(self):
         reply = ChannelFinderClient()._ChannelFinderClient__decodeChannel(self.channel)
-        self.assertTrue(reply.Name == self.channel[u'@name'])
-        self.assertTrue(reply.Owner == self.channel[u'@owner'])
-        self.assertTrue(len(reply.Properties) == len(self.channel[u'properties'][u'property']))
-        self.assertTrue(len(reply.Tags) == len(self.channel[u'tags'][u'tag']))
+        self.assertTrue(reply['name'] == self.channel[u'@name'])
+        self.assertTrue(reply['owner'] == self.channel[u'@owner'])
+        self.assertTrue(len(reply['properties']) == len(self.channel[u'properties'][u'property']))
+        self.assertTrue(len(reply['tags']) == len(self.channel[u'tags'][u'tag']))
         
     def testEncodeChannel(self):
         encodedChannel = ChannelFinderClient()._ChannelFinderClient__encodeChannels(\
-                                                            [Channel('Test_first:a<000>:0:0', 'shroffk', \
-                                                                     [Property('Test_PropA', 'shroffk', '0'), \
-                                                                      Property('Test_PropB', 'shroffk', '19'), \
-                                                                      Property('Test_PropC', 'shroffk', 'ALL')], \
-                                                                      [Tag('Test_TagA', 'shroffk'), \
-                                                                       Tag('Test_TagB', 'shroffk')])])
+                                                            [{'name':'Test_first:a<000>:0:0', 'owner':'shroffk', \
+                                                                     'properties':[{'name':'Test_PropA', 'owner':'shroffk', 'value':'0'}, \
+                                                                      {'name':'Test_PropB', 'owner':'shroffk', 'value':'19'}, \
+                                                                      {'name':'Test_PropC', 'owner':'shroffk', 'value':'ALL'}], \
+                                                                      'tags':[{'name':'Test_TagA', 'owner':'shroffk'}, \
+                                                                       {'name':'Test_TagB', 'owner':'shroffk'}]}])
 #        print encodedChannel[u'channels'][u'channel']
         self.assertTrue(encodedChannel[u'channels'][u'channel'] == self.channel)
         
@@ -879,7 +879,7 @@ class ErrorTest(unittest.TestCase):
                                           username=_testConf.get('DEFAULT', 'username'), \
                                           password=_testConf.get('DEFAULT', 'password'))
         
-        self.client.set(property=Property('existingProperty', self.propOwner))
+        self.client.set(property={'name':'existingProperty','owner': self.propOwner})
         
     def tearDown(self):
         self.client.delete(propertyName='existingProperty')
@@ -887,30 +887,30 @@ class ErrorTest(unittest.TestCase):
     def testSetChannelWithNonExistingProp(self):
         self.assertRaises(Exception, \
                           self.client.set, \
-                          channel=Channel('channelName', \
-                                            self.ChannelOwner, \
-                                            properties=[Property('nonExisitngProperty', 'owner')]))
+                          channel={'name':'channelName', \
+                                            'owner':self.ChannelOwner, \
+                                            'properties':[{'name':'nonExisitngProperty', 'owner':'owner'}]})
     
     def testSetChannelWithNonExistingTag(self):
         self.assertRaises(Exception, \
                           self.client.set, \
-                          channel=Channel('channelName', \
-                                          self.ChannelOwner, \
-                                          tags=[Tag('nonExisitngTag', 'owner')]))
+                          channel={'name':'channelName', \
+                                          'owner':self.ChannelOwner, \
+                                          'tags':[{'name':'nonExisitngTag', 'owner':'owner'}]})
         
     def testUpdateChannelWithNonExistingProp(self):
         self.assertRaises(Exception, \
                           self.client.update, \
-                          channel=Channel('channelName', \
-                                          self.ChannelOwner, \
-                                          properties=[Property('nonExisitngProperty', 'owner')]))
+                          channel={'name':'channelName', \
+                                          'owner':self.ChannelOwner, \
+                                          'properties':[{'name':'nonExisitngProperty', 'owner':'owner'}]})
     
     def testUpdateChannelWithNonExistingTag(self):
         self.assertRaises(Exception,
                           self.client.update,
-                          channel=Channel('channelName', \
-                                          self.ChannelOwner, \
-                                          tags=[Tag('nonExisitngTag', 'owner')]))
+                          channel={'name':'channelName', \
+                                          'owner':self.ChannelOwner, \
+                                          'tags':[{'name':'nonExisitngTag', 'owner':'owner'}]})
     
     def testUpdateNonExistingChannel(self):
         pass
@@ -935,22 +935,23 @@ class ErrorTest(unittest.TestCase):
     def testCreateChannelWithNullPropertyValue(self):
         self.assertRaises(Exception, \
                           self.client.set, \
-                          channel=Channel('channelName', \
-                                            self.ChannelOwner, \
-                                            properties=[Property('existingProperty', self.propOwner)]))
+                          channel={'name':'channelName', \
+                                            'owner':self.ChannelOwner, \
+                                            'properties':[{'name':'existingProperty', 'owner':self.propOwner}]})
         self.assertFalse(self.client.find(name='channelName'), \
                          'Failed: should not be able to create a channel with a property with value null')
         
     def testUpdateChannelWithNullPropertyValue(self):
-        self.client.set(channel=Channel('channelName', \
-                                            self.ChannelOwner))
+        self.client.set(channel={'name':'channelName', \
+                                            "owner":self.ChannelOwner})
         try:
             self.assertRaises(Exception, \
                               self.client.update, \
-                              channel=Channel('channelName', \
-                                              self.ChannelOwner, \
-                                              properties=[Property('existingProperty', self.propOwner)]))
-            self.assertFalse('existingProperty' in ChannelUtil.getAllProperties(self.client.find(name='channelName')), \
+                              channel={'name':'channelName', \
+                                              "owner":self.ChannelOwner, \
+                                              "properties":[{"name":'existingProperty', "owner":self.propOwner}]})
+            print "client: " + str(self.client.find(name='channelName')[0])
+            self.assertFalse('existingProperty' in self.client.find(name='channelName')[0]['properties'], \
                              'Failed: should not be able to update a channel with a property with value null')
         finally:
             self.client.delete(channelName='channelName')
@@ -958,21 +959,21 @@ class ErrorTest(unittest.TestCase):
     def testCreateChannelWithEmptyPropertyValue(self):
         self.assertRaises(Exception, \
                           self.client.set, \
-                          channel=Channel('channelName', \
-                                            self.ChannelOwner, \
-                                            properties=[Property('existingProperty', self.propOwner, '')]))
+                          channel={'name':'channelName', \
+                                            'owner':self.ChannelOwner, \
+                                            'properties':[{'name':'existingProperty', 'owner':self.propOwner, 'value':''}]})
         self.assertFalse(self.client.find(name='channelName'), \
                          'Failed: should not be able to create a channel with a property with empty value string')
         
     def UpdateChannelWithEmptyPropertyValue(self):
-        self.client.set(channel=Channel('channelName', \
-                                            self.ChannelOwner))
+        self.client.set(channel={'name':'channelName', \
+                                            'owner':self.ChannelOwner})
         try:
             self.assertRaises(Exception, \
                               self.client.update, \
-                              channel=Channel('channelName', \
-                                              self.ChannelOwner, \
-                                              properties=[Property('existingProperty', self.propOwner, '')]))
+                              channel={'name':'channelName', \
+                                              'owner':self.ChannelOwner, \
+                                              'properties':[{'name':'existingProperty', 'owner':self.propOwner, 'value':''}]})
             self.assertFalse('existingProperty' in ChannelUtil.getAllProperties(self.client.find(name='channelName')), \
                              'Failed: should not be able to update a channel with a property with empty value string')
         finally:
