@@ -65,12 +65,12 @@ class JSONparserTest(unittest.TestCase):
         
     def testEncodeChannel(self):
         encodedChannel = ChannelFinderClient()._ChannelFinderClient__encodeChannels(\
-                                                            [{u'name':'Test_first:a<000>:0:0', u'owner':'shroffk', \
-                                                                     u'properties':[{u'name':'Test_PropA', u'owner':'shroffk', u'value':'0'}, \
-                                                                      {u'name':'Test_PropB', u'owner':'shroffk', u'value':'19'}, \
-                                                                      {u'name':'Test_PropC', u'owner':'shroffk', u'value':'ALL'}], \
-                                                                      u'tags':[{u'name':'Test_TagA', u'owner':'shroffk'}, \
-                                                                       {u'name':'Test_TagB', u'owner':'shroffk'}]}])
+                                                            [{u'name':u'Test_first:a<000>:0:0', u'owner':u'shroffk', \
+                                                                     u'properties':[{u'name':u'Test_PropA', u'owner':u'shroffk', u'value':u'0'}, \
+                                                                      {u'name':u'Test_PropB', u'owner':u'shroffk', u'value':u'19'}, \
+                                                                      {u'name':u'Test_PropC', u'owner':u'shroffk', u'value':u'ALL'}], \
+                                                                      u'tags':[{u'name':u'Test_TagA', u'owner':u'shroffk'}, \
+                                                                       {u'name':u'Test_TagB', u'owner':u'shroffk'}]}])
 #        print encodedChannel[u'channels'][u'channel']
         print "TEST "+ str(encodedChannel[u'channels'][u'channel']) + "  ==  " + str(self.channel)
         self.assertTrue(encodedChannel[u'channels'][u'channel'] == self.channel)
@@ -203,6 +203,7 @@ class OperationTest(unittest.TestCase):
                                  'Error: tag ' + tag[u'name'] + ' was not removed')
     
     def testGetAllTags(self):
+        print "testGetAllTags"
         testTags = []
         testTags.append({u'name':u'pyTag1', u'owner':self.tagOwner})
         testTags.append({u'name':u'pyTag2', u'owner':self.tagOwner})
@@ -210,7 +211,9 @@ class OperationTest(unittest.TestCase):
         try:
             self.clientTag.set(tags=testTags)
             allTags = self.client.getAllTags();
+            print "all tags " + str(allTags)
             ''' this test introduces a race condition '''
+            print "getalltest"
             for tag in testTags:
                 self.assertTrue(tag in allTags, 'tag ' + tag[u'name'] + ' missing')
         finally:
@@ -952,6 +955,7 @@ class ErrorTest(unittest.TestCase):
                                               u'owner':self.ChannelOwner, \
                                               u'properties':[{u'name':u'existingProperty', u'owner':self.propOwner}]})
             print "client: " + str(self.client.find(name='channelName')[0])
+            #should this \/ be if client.find... == None ???
             self.assertFalse('existingProperty' in self.client.find(name=u'channelName')[0][u'properties'], \
                              'Failed: should not be able to update a channel with a property with value null')
         finally:
