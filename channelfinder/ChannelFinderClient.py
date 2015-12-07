@@ -62,23 +62,6 @@ class ChannelFinderClient(object):
             return _conf.get('DEFAULT', arg)
         else:
             return value
-        
-    def __getAllChannels(self):
-        '''
-        Returns a list of all the channels
-        '''
-        if self.connection:
-            resp = self.__session.get(self.__baseURL + self.__channelsResource,
-                                headers=copy(self.__jsonheader),
-                                verify=False,
-                                auth=self.__auth)
-            resp.raise_for_status()
-            j = JSONDecoder().decode(resp.content.json())
-            self.decodeChannels(j)
-            if (resp[u'headers']['status'] != '404'):
-                j = JSONDecoder().decode(resp[u'body'])
-                return self.decodeChannels(j)
-        return None
 
     def set(self, **kwds):
         '''
