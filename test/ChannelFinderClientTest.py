@@ -446,13 +446,13 @@ class OperationChannelTest(unittest.TestCase):
             self.assertTrue(self.client.findTag(spTag[u'name']) == None)
             self.client.delete(propertyName=spProperty[u'name'])
             self.assertTrue(self.client.findProperty(spProperty[u'name']) == None)
-'''    
+    
     def testQuotes(self):
         spChannel = {u'name':u'\'"Name', u'owner':self.channelOwner}
         self.client.set(channel=spChannel)
         self.assertTrue(len(self.client.find(name=u'\'"Name')) == 1)
         self.client.delete(channelName=u'\'"Name')
-'''
+
 #===============================================================================
 #  Set Operation Test
 #===============================================================================
@@ -861,11 +861,11 @@ class QueryTest(unittest.TestCase):
     def testQueryChannel(self):
         pass
      
-    def testNoneReturn(self):
+    def testEmptyReturn(self):
         '''
         find for non existing entities should return None instead of a 404
         '''
-        self.assertEquals(len(self.client.find(name=u'NonExistingChannelName')['channels']), 0,\
+        self.assertEquals(len(self.client.find(name=u'NonExistingChannelName')), 0,\
                         'Failed to return None when searching for a non existing channel')
     
     def MultiValueQuery(self):
