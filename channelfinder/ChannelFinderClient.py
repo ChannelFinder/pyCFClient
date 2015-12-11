@@ -140,7 +140,7 @@ class ChannelFinderClient(object):
             r.raise_for_status()
         elif 'tags' in kwds:
             data = JSONEncoder().encode(kwds['tags'])
-            r = self.__session.post(self.__baseURL + self.__tagsResource, \
+            r = self.__session.put(self.__baseURL + self.__tagsResource, \
                              data=data, \
                              headers=copy(self.__jsonheader), \
                              verify=False, \
@@ -167,18 +167,22 @@ class ChannelFinderClient(object):
     def __handleMultipleAddParameters(self, **kwds):
         # set a tag to a channel
         if 'tag' in kwds and 'channelName' in kwds:
-            channels = [{u'name':kwds['channelName'].strip(), u'owner':self.__userName, u'tags':[kwds['tag']]}]
+            channels = [{u'name':kwds['channelName'].strip(), u'owner':self.__userName}]
+            kwds['tag']['channels'] = channels
+            data = kwds['tag']
             self.__session.put(self.__baseURL + self.__tagsResource + '/' + kwds['tag'][u'name'], \
-                         data=JSONEncoder().encode(kwds['tag'], withChannels=channels), \
+                         data=JSONEncoder().encode(data), \
                          headers=copy(self.__jsonheader), \
                          verify=False, \
                          auth=self.__auth).raise_for_status()
         elif 'tag' in kwds and 'channelNames' in kwds:
             channels = []
             for eachChannel in kwds['channelNames']:
-                channels.append({u'name':eachChannel, u'owner':self.__userName, u'tags':[kwds['tag']]})
+                channels.append({u'name':eachChannel, u'owner':self.__userName})
+            kwds['tag']['channels'] = channels
+            data = kwds['tag']
             self.__session.put(self.__baseURL + self.__tagsResource + '/' + kwds['tag'][u'name'], \
-                         data=JSONEncoder().encode(self.__encodeTag(kwds['tag'], withChannels=channels)), \
+                         data=JSONEncoder().encode(data), \
                          headers=copy(self.__jsonheader), \
                          verify=False, \
                          auth=self.__auth).raise_for_status()
@@ -435,6 +439,7 @@ class ChannelFinderClient(object):
             # find channels with the tag
             channelsWithTag = self.find(tagName=kwds['tag'][u'name'])
             # delete channels from which tag is to be removed
+            
             channelNames = [channel[u'name'] for channel in channelsWithTag if channel[u'name'] not in kwds['channelNames']]
             self.set(tag=kwds['tag'], channelNames=channelNames)
         elif 'property' in kwds and 'channelName' in kwds:
@@ -518,25 +523,35 @@ class ChannelFinderClient(object):
     def __handleSingleUpdateParameter(self, **kwds):
         if 'channel' in kwds:
             ch = kwds['channel']
-            self.__session.post(self.__baseURL + self.__channelsResource + '/' + ch[u'name'], \
+            r = self.__session.post(self.__baseURL + self.__channelsResource + '/' + ch[u'name'], \
                                      data=JSONEncoder().encode(self.__encodeChannel(ch)), \
                                      headers=copy(self.__jsonheader), \
                                      verify=False, \
-                                     auth=self.__auth).raise_for_status()
+                                     auth=self.__auth)
+            r.raise_for_status()
         elif 'property' in kwds:
             property = kwds['property']
-            self.__session.post(self.__baseURL + self.__propertiesResource + '/' + property[u'name'], \
+            r = self.__session.post(self.__baseURL + self.__propertiesResource + '/' + property[u'name'], \
                                      data=JSONEncoder().encode(self.__encodeProperty(property)), \
                                      headers=copy(self.__jsonheader), \
                                      verify=False, \
-                                     auth=self.__auth).raise_for_status()            
+                                     auth=self.__auth)
+            r.raise_for_status()
         elif 'tag' in kwds:
             tag = kwds['tag']
-            self.__session.post(self.__baseURL + self.__tagsResource + '/' + tag[u'name'], \
-                          data=JSONEncoder().encode(self.__encodeTag(tag)), \
+            r = self.__session.post(self.__baseURL + self.__tagsResource + '/' + tag[u'name'], \
+                          data=JSONEncoder().encode(tag), \
                           headers=copy(self.__jsonheader), \
                           verify=False, \
-                          auth=self.__auth).raise_for_status()
+                          auth=self.__auth)
+            r.raise_for_status()
+        elif 'tags' in kwds:
+            r = self.__session.post(self.__baseURL + self.__tagsResource, \
+                          data=JSONEncoder().encode(kwds['tags']), \
+                          headers=copy(self.__jsonheader), \
+                          verify=False, \
+                          auth=self.__auth)
+            r.raise_for_status()
         else:
             raise Exception, ' unkown key '
         

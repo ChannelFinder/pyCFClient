@@ -144,27 +144,6 @@ class OperationTagTest(unittest.TestCase):
                 self.assertEqual(self.client.findTag(tagName='pyTag1'), None, \
                                  'Error: tag ' + tag[u'name'] + ' was not removed')
 
-    def testUpdateTag(self):
-        '''Test the updating of a tag'''
-        initialTag = {'name':'initialTestTag', 'owner':self.tagOwner}
-        updatedTag = {'name':'updatedTestTag', 'owner':self.tagOwner}
-        try:
-            '''Create initial tag'''
-            self.clientTag.set(tag=initialTag)
-            self.assertIsNotNone(self.client.findTag(initialTag['name']), 'failed to create a test tag')
-            '''Update tag'''
-            self.clientTag.update(tag = updatedTag, originalTagName = initialTag['name'])
-            self.assertEqual(self.client.findTag(updatedTag['name']), updatedTag, 'Failed to updated initial tag to new tag')
-            self.assertIsNone(self.client.findTag(initialTag['name']), 'Initially created tag still present')
-        finally:
-            '''cleanup'''
-            if self.client.findTag(updatedTag['name']):
-                self.client.delete(tagName=updatedTag['name'])
-                self.assertIsNone(self.client.findTag(updatedTag['name']), 'failed to delete the test tag:'+updatedTag['name'])
-            if self.client.findTag(initialTag['name']):
-                self.client.delete(tagName=initialTag['name'])
-                self.assertIsNone(self.client.findTag(initialTag['name']), 'failed to delete the test tag:'+initialTag['name'])
-
     def testSetRemoveTag2Channel(self):
         '''
         Set Tag to channel removing it from all other channels
@@ -175,17 +154,17 @@ class OperationTagTest(unittest.TestCase):
             self.client.set(tag=testTag)
             self.client.set(tag=testTag, channelName=self.testChannels[0][u'name'])
             
-            self.assertTrue(testTag in self.client.find(name='pyTestChannel1')[0][u'tags'], \
+            self.assertTrue(checkTagOnChannel(self.client, 'pyTestChannel1', testTag) , \
                             'Error: Tag-pySetTag not added to the channel-pyTestChannel1')
             
             self.client.set(tag=testTag, channelName=self.testChannels[1][u'name'])
             # check if the tag has been added to the new channel and removed from the old channel
-            self.assertTrue(self.__checkTagExists(self.testChannels[1][u'name'], testTag) and 
-                            not self.__checkTagExists(self.testChannels[0][u'name'], testTag), \
+            self.assertTrue(checkTagOnChannel(self.client, self.testChannels[1][u'name'], testTag) and 
+                            not checkTagOnChannel(self.client, self.testChannels[0][u'name'], testTag), \
                             'Error: Tag-pySetTag not added to the channel-pyTestChannel2')
             
             self.client.delete(tag=testTag, channelName=self.testChannels[1][u'name'])
-            self.assertTrue(not self.__checkTagExists(self.testChannels[1][u'name'], testTag), \
+            self.assertTrue(not checkTagOnChannel(self.client, self.testChannels[1][u'name'], testTag), \
                               'Error: Failed to delete the tag-pySetTag from channel-pyTestChannel1')
         finally:
             self.client.delete(tagName=testTag[u'name'])
@@ -193,6 +172,9 @@ class OperationTagTest(unittest.TestCase):
     # TODO set a check for removing the tag from a subset of channels which have that tag
     
     def testSetRemoveTag2Channels(self):
+        '''
+        Set tags to a set of channels and remove it from all other channels
+        '''
         testTag = {u'name':u'pySetTag', u'owner':self.tagOwner}
         # the list comprehension is used to construct a list of all the channel names
         channelNames = [channel[u'name'] for channel in self.testChannels]
@@ -209,6 +191,57 @@ class OperationTagTest(unittest.TestCase):
                     self.assertFalse(ch in responseChannelNames, 'Error: tag-pySetTag not removed from channel ' + ch)
         finally:
             self.client.delete(tagName=testTag[u'name'])
+
+    def testUpdateTag(self):
+        '''
+        Add a tag to a group of channels without removing it from existing channels
+        '''
+        tag = {'name':'initialTestTag', 'owner':self.tagOwner}
+        tag['channels'] = [self.testChannels[0]]
+        try:
+            '''Create initial tag'''
+            self.clientTag.set(tag=tag)
+            self.assertIsNotNone(self.client.findTag(tag['name']), 'failed to create a test tag')
+            '''Update tag with new channels'''
+            tag['channels'] = [self.testChannels[1], self.testChannels[2]]
+            self.clientTag.update(tag = tag)
+            
+            for channel in self.testChannels:
+                self.assertTrue(checkTagOnChannel(self.client, channel['name'], tag), 'Failed to updated tag')
+        finally:
+            '''cleanup'''
+            self.client.delete(tagName=tag['name'])
+            self.assertIsNone(self.client.findTag(tag['name']), 'failed to delete the test tag:'+tag['name'])
+
+    def testUpdateTags(self):
+        '''
+        Add tags to a group of channels without removing it from existing channels
+        '''
+        tag1 = {'name':'pyTestTag1', 'owner':self.tagOwner}
+        tag1['channels'] = [self.testChannels[0]]
+        tag2 = {'name':'pyTestTag2', 'owner':self.tagOwner}
+        tag2['channels'] = [self.testChannels[0]]
+        
+        try:
+            '''Create initial tags which are set on the pyTestChannel1'''
+            self.clientTag.set(tags=[tag1,tag2])
+            self.assertIsNotNone(self.client.findTag(tag1['name']), 'failed to create a test tag: pyTestTag1')
+            self.assertIsNotNone(self.client.findTag(tag1['name']), 'failed to create a test tag: pyTestTag2')
+            '''Update tags with new channels'''
+            tag1['channels'] = [self.testChannels[1], self.testChannels[2]]
+            tag2['channels'] = [self.testChannels[1], self.testChannels[2]]
+            self.clientTag.update(tags = [tag1, tag2])
+            '''Check that the all channels have been updated with the tags'''
+            for channel in self.testChannels:
+                self.assertTrue(checkTagOnChannel(self.client, channel['name'], tag1) and \
+                                checkTagOnChannel(self.client, channel['name'], tag2), \
+                                'Failed to updated tags')
+        finally:
+            '''cleanup''' 
+            self.client.delete(tagName=tag1['name'])
+            self.client.delete(tagName=tag2['name'])
+            self.assertIsNone(self.client.findTag(tag1['name']), 'failed to delete the test tag:'+tag1['name'])
+            self.assertIsNone(self.client.findTag(tag2['name']), 'failed to delete the test tag:'+tag2['name'])
 
     def testGetAllTags(self):
         '''Test setting multiple tags and listing all tags'''
@@ -476,19 +509,7 @@ class SetOperationTest(unittest.TestCase):
         for ch in self.testChannels:
             self.client.delete(channelName=ch[u'name'])
         pass
-    '''
 
-       '''
-    def __checkTagExists(self, channelName, tag):
-        '''
-        utility method which return true is channelName contains tag
-        '''
-        ch = self.client.find(name=channelName)[0]
-        if ch[u'tags'] != None and tag in ch[u'tags']:
-            return True
-        else:
-            return False
-    
     '''
     def testSetRemoveProperty2Channel(self):
         ''''''
@@ -1090,6 +1111,16 @@ def checkPropInList(allProps, props):
     for prop in props:
         [ found.append(prop) for p in allProps if p['name'] == prop['name'] and p['owner'] == prop['owner'] ]
     return props == found
+
+def checkTagOnChannel(client, channelName, tag):
+    '''
+    utility method which return true is channelName contains tag
+    '''
+    ch = client.find(name=channelName)[0]
+    if ch[u'tags'] != None and checkTagInList(ch[u'tags'], [tag]):
+        return True
+    else:
+        return False
 
 def getDefaultTestConfig(arg):
     if _testConf.has_option('DEFAULT', arg):
