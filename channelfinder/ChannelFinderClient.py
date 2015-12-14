@@ -186,25 +186,11 @@ class ChannelFinderClient(object):
                          headers=copy(self.__jsonheader), \
                          verify=False, \
                          auth=self.__auth).raise_for_status()
-        elif 'property' in kwds and 'channelName' in kwds:
-            channels = [{u'name':kwds['channelName'].strip(), u'owner':self.__userName, u'properties':[kwds['property']]}]
-            self.__session.put(self.__baseURL + self.__propertiesResource + '/' + kwds['property'][u'name'], \
-                         data=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=channels)), \
-                         headers=copy(self.__jsonheader), \
-                         verify=False, \
-                         auth=self.__auth).raise_for_status()
-        elif 'property' in kwds and 'channelNames' in kwds:
-            channels = []
-            for eachChannel in kwds['channelNames']:
-                channels.append({u'name':eachChannel, u'owner':self.__userName, u'properties':[kwds['property']]})
-            self.__session.put(self.__baseURL + self.__propertiesResource + '/' + kwds['property'][u'name'], \
-                         data=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=channels)), \
-                         headers=copy(self.__jsonheader), \
-                         verify=False, \
-                         auth=self.__auth).raise_for_status()
         elif 'property' in kwds and 'channels' in kwds:
+            data = kwds['property']
+            data['property']['channels'] = kwds['channels']
             self.__session.put(self.__baseURL + self.__propertiesResource + '/' + kwds['property'][u'name'], \
-                         data=JSONEncoder().encode(self.__encodeProperty(kwds['property'], withChannels=kwds['channels'])), \
+                         data=JSONEncoder().encode(data), \
                          headers=copy(self.__jsonheader), \
                          verify=False, \
                          auth=self.__auth).raise_for_status()
@@ -524,7 +510,7 @@ class ChannelFinderClient(object):
         if 'channel' in kwds:
             ch = kwds['channel']
             r = self.__session.post(self.__baseURL + self.__channelsResource + '/' + ch[u'name'], \
-                                     data=JSONEncoder().encode(self.__encodeChannel(ch)), \
+                                     data=JSONEncoder().encode(ch), \
                                      headers=copy(self.__jsonheader), \
                                      verify=False, \
                                      auth=self.__auth)
@@ -532,7 +518,7 @@ class ChannelFinderClient(object):
         elif 'property' in kwds:
             property = kwds['property']
             r = self.__session.post(self.__baseURL + self.__propertiesResource + '/' + property[u'name'], \
-                                     data=JSONEncoder().encode(self.__encodeProperty(property)), \
+                                     data=JSONEncoder().encode(property), \
                                      headers=copy(self.__jsonheader), \
                                      verify=False, \
                                      auth=self.__auth)
