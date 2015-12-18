@@ -155,7 +155,7 @@ class ChannelFinderClient(object):
             r.raise_for_status()
         elif 'properties' in kwds: ############################ u'property' may be incorrect
             data = JSONEncoder().encode(kwds['properties'])
-            r = self.__session.post(self.__baseURL + self.__propertiesResource, \
+            r = self.__session.put(self.__baseURL + self.__propertiesResource, \
                               data=data, \
                               headers=copy(self.__jsonheader), \
                               verify=False, \
