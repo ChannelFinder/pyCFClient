@@ -13,7 +13,6 @@ import os
 import re
 from optparse import OptionParser
 from getpass import getpass
-from channelfinder import Channel, Property
 from channelfinder import ChannelFinderClient
 from glob import glob
 from channelfinder._conf import _conf
@@ -73,7 +72,7 @@ def updateChannelFinder(pvNames, hostName, iocName, time, owner, \
     except:
         raise Exception, 'Unable to create a valid webResourceClient'
     checkPropertiesExist(client, owner)
-    previousChannelsList = client.findByArgs([('hostName', hostName), ('iocName', iocName)])
+    previousChannelsList = client.findByArgs([(u'hostName', hostName), (u'iocName', iocName)])
     if previousChannelsList != None:
         for ch in previousChannelsList:
             if pvNames != None and ch.Name in pvNames:
@@ -82,17 +81,17 @@ def updateChannelFinder(pvNames, hostName, iocName, time, owner, \
                                               owner=owner, \
                                               hostName=hostName, \
                                               iocName=iocName, \
-                                              pvStatus='Active', \
+                                              pvStatus=u'Active', \
                                               time=time))
                 pvNames.remove(ch.Name)
             elif pvNames == None or ch.Name not in pvNames:
                 '''Orphan the channel : mark as inactive, keep the old hostName and iocName'''
                 channels.append(updateChannel(ch, \
                                               owner=owner, \
-                                              hostName=ch.getProperties()['hostName'], \
-                                              iocName=ch.getProperties()['iocName'], \
-                                              pvStatus='InActive', \
-                                              time=ch.getProperties()['time']))
+                                              hostName=ch.getProperties()[u'hostName'], \
+                                              iocName=ch.getProperties()[u'iocName'], \
+                                              pvStatus=u'InActive', \
+                                              time=ch.getProperties()[u'time']))
     # now pvNames contains a list of pv's new on this host/ioc
     for pv in pvNames:
         ch = client.findByArgs([('~name',pv)])
@@ -102,7 +101,7 @@ def updateChannelFinder(pvNames, hostName, iocName, time, owner, \
                                           chOwner=owner, \
                                           hostName=hostName, \
                                           iocName=iocName, \
-                                          pvStatus='Active', \
+                                          pvStatus=u'Active', \
                                           time=time))
         elif ch[0] != None:
             '''update existing channel: exists but with a different hostName and/or iocName'''
@@ -110,7 +109,7 @@ def updateChannelFinder(pvNames, hostName, iocName, time, owner, \
                                           owner=owner, \
                                           hostName=hostName, \
                                           iocName=iocName, \
-                                          pvStatus='Active', \
+                                          pvStatus=u'Active', \
                                           time=time))
     client.set(channels=channels)
 
@@ -118,49 +117,48 @@ def updateChannel(channel, owner, hostName=None, iocName=None, pvStatus='InActiv
     '''
     Helper to update a channel object so as to not affect the existing properties
     '''
-    if isinstance(channel, Channel):
-        # properties list devoid of hostName and iocName properties
-        if channel.Properties:
-            properties = [property for property in channel.Properties \
-                          if property.Name != 'hostName' and property.Name != 'iocName' and property.Name != 'pvStatus']
-        else:
-            properties = []
-        if hostName != None:
-            properties.append(Property('hostName', owner, hostName))
-        if iocName != None:
-            properties.append(Property('iocName', owner, iocName))
-        if pvStatus:
-            properties.append(Property('pvStatus', owner, pvStatus))
-        if time:
-            properties.append(Property('time', owner, time)) 
-        channel.Properties = properties
-        return channel
+    
+    # properties list devoid of hostName and iocName properties
+    if channel[u'properties']:
+        properties = [property for property in channel[u'properties'] \
+                    if property[u'name'] != u'hostName' and property[u'name'] != u'iocName' and property[u'name'] != u'pvStatus']
+    else:
+        properties = []
+    if hostName != None:
+        properties.append({u'name' : u'hostName', u'owner':owner, u'value' : hostName})
+    if iocName != None:
+        properties.append({u'name' : u'iocName', u'owner':owner, u'value' : iocName})
+    if pvStatus:
+        properties.append({u'name' : u'pvStatus', u'owner':owner, u'value' : pvStatus})
+    if time:
+        properties.append({u'name' : u'time', u'owner':owner, u'value' : time}) 
+    channel[u'properties'] = properties
+    return channel
 
-def createChannel(chName, chOwner, hostName=None, iocName=None, pvStatus='InActive', time=None):
+def createChannel(chName, chOwner, hostName=None, iocName=None, pvStatus=u'InActive', time=None):
     '''
     Helper to create a channel object with the required properties
     '''
-    ch = Channel(chName, chOwner)
-    ch.Properties = []
+    ch = {u'name' : chName, u'owner' : chOwner, u'properties' : []}
     if hostName != None:
-        ch.Properties.append(Property('hostName', chOwner, hostName))
+        ch[u'properties'].append({u'name' : u'hostName', u'owner':chOwner, u'value' : hostName})
     if iocName != None:
-        ch.Properties.append(Property('iocName', chOwner, iocName))
+        ch[u'properties'].append({u'name' : u'iocName', u'owner':chOwner, u'value' : iocName})
     if pvStatus:
-        ch.Properties.append(Property('pvStatus', chOwner, pvStatus))
+        ch[u'properties'].append({u'name' : u'pvStatus', u'owner':chOwner, u'value' : pvStatus})
     if time:
-        ch.Properties.append(Property('time', chOwner, time))
+        ch[u'properties'].append({u'name' : u'time', u'owner':chOwner, u'value' : time}) 
     return ch
 
 def checkPropertiesExist(client, propOwner):
     '''
     Checks if the properties used by dbUpdate are present if not it creates them
     '''
-    requiredProperties = ['hostName', 'iocName', 'pvStatus', 'time']
+    requiredProperties = [u'hostName', u'iocName', u'pvStatus', u'time']
     for propName in requiredProperties:
         if client.findProperty(propName) == None:
             try:
-                client.set(property=Property(propName, propOwner))
+                client.set(property={u'name' : propName, u'owner' : propOwner})
             except Exception as e:
                 print 'Failed to create the property',propName
                 print 'CAUSE:',e.message
