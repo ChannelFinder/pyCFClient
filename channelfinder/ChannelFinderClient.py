@@ -125,7 +125,7 @@ class ChannelFinderClient(object):
                              auth=self.__auth)
             r.raise_for_status()
         elif 'channels' in kwds :
-            r = self.__session.post(self.__baseURL + self.__channelsResource, \
+            r = self.__session.put(self.__baseURL + self.__channelsResource, \
                               data=JSONEncoder().encode(kwds['channels']), \
                               headers=copy(self.__jsonheader), \
                               verify=False, \
