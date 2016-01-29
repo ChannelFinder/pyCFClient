@@ -2,7 +2,6 @@
 SEE cf-property-manager.cfg for example configuration file
 '''
 from channelfinder import ChannelFinderClient
-from channelfinder import Channel, Property, Tag
 from channelfinder.util import ChannelUtil
 from optparse import OptionParser
 from getpass import getpass
@@ -23,7 +22,7 @@ expression_list = []
 username = "cf-update" #Defaults reinforced inside mainRun()
 password = "1234"
 channel_list=[]
-SERVICE_URL='https://webdev.cs.nsls2.local:8181/ChannelFinder'
+SERVICE_URL='https://localhost:8181/ChannelFinder'
 client = None
 exclusion_expression = ""
 
@@ -103,12 +102,12 @@ def applyExpression():
                         value = clean(result.group())
                         if(verbose):  print  "FOUND: "+value +" in "+ channel_name
                         if value != "":
-                            prop_list.append(Property(expression[1],username,value))
+                            prop_list.append({u'name' : expression[1], u'owner' : username, u'value' : value})
                         else:
                             if(verbose): print "MISSING IN " + line
                 if verbose: print "UPDATE "+channel_name
                 try:
-                    client.update(channel =Channel(name=channel_name, owner=username,properties=prop_list ))
+                    client.update(channel = {u'name' : channel_name, u'owner':username,u'properties':prop_list })
                 except Exception as e:
                     print 'Failed to update: '+channel_name+" \n--Cause:"+ e.message
 
@@ -118,7 +117,7 @@ def updateProperty(result, property_name,channel_name):
     Creates or updates properties defined in configuration file for any channel object passed.
     '''
     if(verbose): print "ADD "+result+" TO "+property_name+ " IN " +channel_name
-    client.set(property=Property(property_name,username,result),channelName=channel_name)
+    client.set(property={u'name':property_name, u'owner' : username, u'value':result},channelName=channel_name)
 
 
 def addChannel(result, property_name, channel_name):
