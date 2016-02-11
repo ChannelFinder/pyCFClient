@@ -15,7 +15,7 @@ password=MyPassword
 def __loadConfig():
     import os.path
     import ConfigParser
-    dflt={'BaseURL':'http://localhost:8080/ChannelFinder',
+    dflt={'BaseURL':'https://localhost:9191/ChannelFinder',
           'username' : 'cf-update',
           'password' : '1234',
           'owner' : 'cf-update',
@@ -30,7 +30,6 @@ def __loadConfig():
           'tagPassword' : '1234'
         }
     cf=ConfigParser.SafeConfigParser(defaults=dflt)
-#    print os.path.normpath(os.path.expanduser('~/channelfinderapi.conf'))
     cf.read([
         '/etc/channelfinderapi.conf',
         os.path.expanduser('~/channelfinderapi.conf'),
