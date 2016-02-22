@@ -1,5 +1,5 @@
 import unittest
-import CFPropertyManager
+from channelfinder.cfPropertyManager import CFPropertyManager
 import re
 import os
 class CFPropertyManagerTest(unittest.TestCase):

@@ -8,7 +8,6 @@ Created on Apr 5, 2011
 '''
 import unittest
 import os
-from channelfinder import Channel, Property, Tag
 from channelfinder import ChannelFinderClient
 from _testConf import _testConf
 from channelfinder.cfUpdate.CFUpdateIOC import getPVNames, getArgsFromFilename, updateChannelFinder, ifNoneReturnDefault
@@ -78,7 +77,7 @@ class Test(unittest.TestCase):
                             service=self.baseURL , \
                             username=self.username, \
                             password=self.password)
-        channels = client.find(property=[('hostName', hostName1), ('iocName', iocName1), ('time', t1)])
+        channels = client.findProperty(hostName1, iocName1, t1)
         self.assertTrue(len(channels) == 2, 'failed to create the channels with appropriate properties')
         t2 = str(time())
         hostName2 = 'update-test-hostname' + t2
@@ -108,7 +107,7 @@ class Test(unittest.TestCase):
         '''
         This is to check that existing properties of channels are not affected.
         '''
-        unaffectedProperty = Property('unaffectedProperty', self.owner, 'unchanged')
+        unaffectedProperty = {u'name':u'unaffectedProperty', u'owner':self.owner, u'value':u'unchanged'}
         # create default client
         client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password)
         client.set(property=unaffectedProperty)
@@ -119,7 +118,7 @@ class Test(unittest.TestCase):
         iocName1 = 'update-test-iocName' + t1
         # New Channels added
         client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password);
-        client.set(channel=Channel('cf-update-pv1', 'cf-update', properties=[unaffectedProperty]))
+        client.set(channel={u'name':u'cf-update-pv1', u'owner':u'cf-update', u'properties':[unaffectedProperty]})
         updateChannelFinder(['cf-update-pv1', 'cf-update-pv2'], \
                             hostName1, \
                             iocName1, \
@@ -154,15 +153,15 @@ class Test(unittest.TestCase):
         the channel is removed
         in all cases the existing unaffected* property and tag should remain with the channel               
         '''
-        unaffectedProperty = Property('unaffectedProperty', self.owner, 'unchanged')
-        unaffectedTag = Tag('unaffectedTag', self.owner)
+        unaffectedProperty = {u'name':u'unaffectedProperty', u'owner':self.owner, u'value':u'unchanged'}
+        unaffectedTag = {u'name':u'unaffectedTag', u'owner':self.owner}
         # create default client
         client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password)
         client.set(property=unaffectedProperty)
         client.set(tag=unaffectedTag)
         
-        client.set(channel=Channel('cf-update-pv1', 'cf-update', properties=[unaffectedProperty], tags=[unaffectedTag]))     
-        client.set(channel=Channel('cf-update-pv2', 'cf-update', properties=[unaffectedProperty], tags=[unaffectedTag]))
+        client.set(channel={u'name':u'cf-update-pv1', u'owner':u'cf-update', u'properties':[unaffectedProperty], u'tags':[unaffectedTag]})     
+        client.set(channel={u'name':u'cf-update-pv2', u'owner':u'cf-update', u'properties':[unaffectedProperty], u'tags':[unaffectedTag]})
         
         # Case1:
         hostName = 'initialHost'
@@ -177,7 +176,7 @@ class Test(unittest.TestCase):
                             password=self.password)
         channels = client.find(name='cf-update-pv*')
         for channel in channels:
-            self.assertTrue(unaffectedProperty in channel.Properties and unaffectedTag in channel.Tags)
+            self.assertTrue(unaffectedProperty in channel['properties'] and unaffectedTag in channel['tags'])
             self.assertTrue(channel.getProperties()['hostName'] == hostName and \
                             channel.getProperties()['iocName'] == iocName and \
                             channel.getProperties()['pvStatus'] == 'Active', \
@@ -194,7 +193,7 @@ class Test(unittest.TestCase):
                             password=self.password)
         channels = client.find(name='cf-update-pv*')
         for channel in channels:
-            self.assertTrue(unaffectedProperty in channel.Properties and unaffectedTag in channel.Tags)
+            self.assertTrue(unaffectedProperty in channel['properties'] and unaffectedTag in channel['tags'])
             self.assertTrue(channel.getProperties()['hostName'] == hostName and \
                             channel.getProperties()['iocName'] == iocName and \
                             channel.getProperties()['pvStatus'] == 'Active', \
@@ -212,7 +211,7 @@ class Test(unittest.TestCase):
                             password=self.password)
         channels = client.find(name='cf-update-pv*')
         for channel in channels:
-            self.assertTrue(unaffectedProperty in channel.Properties and unaffectedTag in channel.Tags)
+            self.assertTrue(unaffectedProperty in channel['properties'] and unaffectedTag in channel['tags'])
             self.assertTrue(channel.getProperties()['hostName'] == hostName and \
                             channel.getProperties()['iocName'] == iocName and \
                             channel.getProperties()['pvStatus'] == 'Active', 'Failed to update channels with the correct hostName and/or iocName')
@@ -229,7 +228,7 @@ class Test(unittest.TestCase):
                             password=self.password)
         channels = client.find(name='cf-update-pv*')
         for channel in channels:
-            self.assertTrue(unaffectedProperty in channel.Properties and unaffectedTag in channel.Tags)
+            self.assertTrue(unaffectedProperty in channel['properties'] and unaffectedTag in channel['tags'])
             self.assertTrue(channel.getProperties()['hostName'] == hostName and \
                             channel.getProperties()['iocName'] == iocName and \
                             channel.getProperties()['pvStatus'] == 'InActive', \
@@ -256,6 +255,7 @@ class Test(unittest.TestCase):
         IOC turned on with ch1 only
         IOC turned on with ch1, ch2
         '''
+        client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password)
         try:
             updateChannelFinder(['ch1', 'ch2'], \
                                 'testHost', \
@@ -264,7 +264,6 @@ class Test(unittest.TestCase):
                                 time=time(), \
                                 service=self.baseURL, \
                                 username=self.username, password=self.password)
-            client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password)
             chs = client.find(property=[('hostName', 'testHost'), ('iocName', 'testIOC'), ('pvStatus', 'Active')])
             self.assertEqual(len(chs), 2, 'Expected 2 positive matches but found ' + str(len(chs)))
             updateChannelFinder(['ch1'], \
@@ -301,6 +300,7 @@ class Test(unittest.TestCase):
         ch1 on host1, ioc1; ch2 on host2, ioc2 (case2)
         ch1, ch2 on host1, ioc1 (reset)
         '''
+        client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password)
         try:
             updateChannelFinder(['ch1', 'ch2'], \
                                 'host1', \
@@ -309,7 +309,6 @@ class Test(unittest.TestCase):
                                 time=time(),\
                                 service=self.baseURL, \
                                 username=self.username, password=self.password)
-            client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password)
             chs = client.find(property=[('hostName', 'host1'), ('iocName', 'ioc1')])
             self.assertEqual(len(chs), 2, 'Expected 2 positive matches but found ' + str(len(chs)))
             '''CASE1'''
