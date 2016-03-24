@@ -11,7 +11,7 @@ import re
 import requests
 import ssl
 from requests.adapters import HTTPAdapter
-from urllib3 import PoolManager
+from requests.packages.urllib3.poolmanager import PoolManager
 from requests import auth
 from copy import copy
 from _conf import _conf
@@ -49,7 +49,7 @@ class ChannelFinderClient(object):
             else:
                 self.__auth = None
             self.__session = requests.Session()
-            self.__session.mount('https://localhost:8181/ChannelFinder/', Ssl3HttpAdapter())
+            self.__session.mount(BaseURL, Ssl3HttpAdapter())
             self.__session.get(self.__baseURL, verify=False, headers=copy(self.__jsonheader)).raise_for_status()
  
         except:
