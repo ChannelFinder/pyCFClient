@@ -11,7 +11,7 @@ import re
 import requests
 import ssl
 from requests.adapters import HTTPAdapter
-from urllib3 import PoolManager
+from requests.packages.urllib3.poolmanager import PoolManager
 from requests import auth
 from copy import copy
 from _conf import _conf
