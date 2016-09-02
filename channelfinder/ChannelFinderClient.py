@@ -590,7 +590,7 @@ class ChannelFinderClient(object):
             prop = kwds['property']
             propName = kwds['originalPropertyName'].strip()
             self.__session.post(self.__baseURL + self.__propertiesResource + '/' + propName,
-                          data=JSONEncoder().encode(property),
+                          data=JSONEncoder().encode(prop),
                           headers=copy(self.__jsonheader),
                           verify=False,
                           auth=self.__auth).raise_for_status()
@@ -603,7 +603,7 @@ class ChannelFinderClient(object):
                           verify=False,
                           auth=self.__auth).raise_for_status()
         else:
-            raise Exception, ' unkown keys'
+            raise Exception, ' unknown keys'
 
 
 
