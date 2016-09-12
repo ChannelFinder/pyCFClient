@@ -77,7 +77,7 @@ class JSONparserTest(unittest.TestCase):
 #        print encodedChannel[u'channels'][u'channel']
         print "TEST "+ str(encodedChannel[u'channels'][u'channel']) + "  ==  " + str(self.channel)
         self.assertTrue(encodedChannel[u'channels'][u'channel'] == self.channel)
-        
+
     def testEncodeChannels(self):
         self.assertTrue(self.multiChannels == \
                         ChannelFinderClient()._ChannelFinderClient__encodeChannels(ChannelFinderClient()._ChannelFinderClient__decodeChannels(self.multiChannels)))
@@ -168,24 +168,24 @@ class OperationTagTest(unittest.TestCase):
         try:
             self.client.set(tag=testTag)
             self.client.set(tag=testTag, channelName=self.testChannels[0][u'name'])
-            
+
             self.assertTrue(checkTagOnChannel(self.client, 'pyTestChannel1', testTag) , \
                             'Error: Tag-pySetTag not added to the channel-pyTestChannel1')
-            
+
             self.client.set(tag=testTag, channelName=self.testChannels[1][u'name'])
             # check if the tag has been added to the new channel and removed from the old channel
-            self.assertTrue(checkTagOnChannel(self.client, self.testChannels[1][u'name'], testTag) and 
+            self.assertTrue(checkTagOnChannel(self.client, self.testChannels[1][u'name'], testTag) and
                             not checkTagOnChannel(self.client, self.testChannels[0][u'name'], testTag), \
                             'Error: Tag-pySetTag not added to the channel-pyTestChannel2')
-            
+
             self.client.delete(tag=testTag, channelName=self.testChannels[1][u'name'])
             self.assertTrue(not checkTagOnChannel(self.client, self.testChannels[1][u'name'], testTag), \
                               'Error: Failed to delete the tag-pySetTag from channel-pyTestChannel1')
         finally:
             self.client.delete(tagName=testTag[u'name'])
-    
+
     # TODO set a check for removing the tag from a subset of channels which have that tag
-    
+
     def testSetRemoveTag2Channels(self):
         '''
         Set tags to a set of channels and remove it from all other channels
@@ -220,7 +220,7 @@ class OperationTagTest(unittest.TestCase):
             '''Update tag with new channels'''
             tag['channels'] = [self.testChannels[1], self.testChannels[2]]
             self.clientTag.update(tag=tag)
-            
+
             for channel in self.testChannels:
                 self.assertTrue(checkTagOnChannel(self.client, channel['name'], tag), 'Failed to updated tag')
         finally:
@@ -236,7 +236,7 @@ class OperationTagTest(unittest.TestCase):
         tag1['channels'] = [self.testChannels[0]]
         tag2 = {'name':'pyTestTag2', 'owner':self.tagOwner}
         tag2['channels'] = [self.testChannels[0]]
-        
+
         try:
             '''Create initial tags which are set on the pyTestChannel1'''
             self.clientTag.set(tags=[tag1,tag2])
@@ -252,7 +252,7 @@ class OperationTagTest(unittest.TestCase):
                                 checkTagOnChannel(self.client, channel['name'], tag2), \
                                 'Failed to updated tags')
         finally:
-            '''cleanup''' 
+            '''cleanup'''
             self.client.delete(tagName=tag1['name'])
             self.client.delete(tagName=tag2['name'])
             self.assertIsNone(self.client.findTag(tag1['name']), 'failed to delete the test tag:'+tag1['name'])
@@ -282,7 +282,7 @@ class OperationTagTest(unittest.TestCase):
 #===============================================================================
 
 class OperationPropertyTest(unittest.TestCase):
-    
+
     def setUp(self):
         '''Default Owners'''
         self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
@@ -395,22 +395,22 @@ class OperationPropertyTest(unittest.TestCase):
             self.client.set(property=testProperty)
             self.assertTrue(checkPropertyOnChannel(self.client, ch0[u'name'], testProperty) , \
                             'Error: Property - setTestProp not added to the channel-pyTestChannel1')
-            
+
             ch1 = self.testChannels[1]
             ch1['properties'] = [ {'name':'setTestProp', 'owner':self.propOwner, 'value':'testValue2'} ]
             testProperty['channels'] = [ch1]
             self.client.set(property=testProperty)
             '''check if the property has been added to the new channel and removed from the old channel'''
-            self.assertTrue(checkPropertyOnChannel(self.client, ch1[u'name'], testProperty) and 
+            self.assertTrue(checkPropertyOnChannel(self.client, ch1[u'name'], testProperty) and
                             not checkPropertyOnChannel(self.client, ch0[u'name'], testProperty), \
                             'Error: Tag-pySetTag not added to the channel-pyTestChannel2')
             '''delete the property and ensure it is removed from the associated channel'''
-            self.client.delete(propertyName=testProperty['name'])
+            self.client.delete(propertyName=testProperty[u'name'])
             self.assertTrue(not checkPropertyOnChannel(self.client, ch0[u'name'], testProperty) and \
                             not checkPropertyOnChannel(self.client, ch1[u'name'], testProperty) , \
                               'Error: Failed to delete the tag-pySetTag from channel-pyTestChannel1')
-        finally:
-            self.client.delete(tagName=testProperty[u'name'])
+        except:  # Delete operation causes an error if performed twice, IE: the first delete succeeded
+            self.client.delete(propertyName=testProperty[u'name'])
 
     def testGetAllPropperties(self):
         '''Test setting multiple properties and listing all tags'''
@@ -431,10 +431,10 @@ class OperationPropertyTest(unittest.TestCase):
                 self.assertEqual(self.client.findProperty(propertyName=prop[u'name']), None, \
                                  'Error: property ' + prop[u'name'] + ' was not removed')
 #===============================================================================
-# 
+#
 #===============================================================================
 class OperationChannelTest(unittest.TestCase):
-    
+
     def setUp(self):
         '''Default Owners'''
         self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
@@ -465,7 +465,7 @@ class OperationChannelTest(unittest.TestCase):
             self.assertTrue(len(result) == 1, 'incorrect number of channels returned')
             self.assertTrue(result[0][u'name'] == u'pyTestChannelName', 'incorrect channel returned')
         finally:
-            self.clientCh.delete(channelName=testChannel[u'name']) 
+            self.clientCh.delete(channelName=testChannel[u'name'])
             result = self.client.find(name=u'pyTestChannelName')
             self.assertFalse(result, 'incorrect number of channels returned')
 
@@ -509,7 +509,7 @@ class OperationChannelTest(unittest.TestCase):
             # delete each individually
             for ch in testChannels:
                 self.clientCh.delete(channelName=str(ch[u'name']))
-    
+
     def testSetChannelsWithProperties(self):
         '''
         This method creates a set of channels and then updates the property values
@@ -521,10 +521,10 @@ class OperationChannelTest(unittest.TestCase):
         ch2 = {u'name':u'orgChannel2', u'owner':self.channelOwner, u'properties':[prop1, prop2]}
         ch3 = {u'name':u'orgChannel3', u'owner':self.channelOwner, u'properties':[prop1]}
         channels = [ch1, ch2, ch3]
-        
+
         self.client.set(property=prop1)
         self.client.set(property=prop2)
-        
+
         self.client.set(channels=channels)
         chs = self.client.find(property=[(u'originalProp1', u'originalVal'), \
                                          (u'originalProp2', u'originalVal')])
@@ -541,20 +541,20 @@ class OperationChannelTest(unittest.TestCase):
         self.client.delete(propertyName=prop1[u'name'])
         self.client.delete(propertyName=prop2[u'name'])
         pass
-    
+
     def testDestructiveSetRemoveChannels(self):
         '''
         This test will check that a POST in the channels resources is destructive
         '''
         testProp = {u'name':u'testProp', u'owner' : self.propOwner}
-        try:            
+        try:
             self.clientProp.set(property=testProp)
             testProp[u'value'] = 'original'
             testChannels = [{u'name':u'pyChannel1', u'owner':self.channelOwner, u'properties':[testProp]}, \
                             {u'name':u'pyChannel2', u'owner':self.channelOwner}, \
-                            {u'name':u'pyChannel3', u'owner':self.channelOwner}] 
+                            {u'name':u'pyChannel3', u'owner':self.channelOwner}]
             self.clientCh.set(channel=testChannels[0])
-            
+
             self.assertEqual(len(self.client.find(name=u'pyChannel*')), 1, \
                              'Failed to set a single channel correctly')
             result = self.client.find(name=u'pyChannel1')[0]
@@ -578,7 +578,7 @@ class OperationChannelTest(unittest.TestCase):
         spTag = {u'name':u'special{}<tagName:->*', u'owner':self.tagOwner}
         spChannel[u'properties'] = [spProperty]
         spChannel[u'tags'] = [spTag]
-        
+
         try:
             self.client.set(tag=spTag)
             self.assertNotEqual(self.client.findTag(spTag[u'name']), None, 'failed to set Tag with special chars')
@@ -628,7 +628,7 @@ class OperationChannelTest(unittest.TestCase):
             self.client.set(tag=testTag2)
             testChannel = {u'name':u'pyTestChannelName1', u'owner': self.channelOwner, u'properties':[testProp2], u'tags':[testTag2]}
             self.clientCh.update(channel=testChannel)
-            
+
             result = self.client.find(name=u'pyTestChannelName1')
             self.assertTrue(len(result) == 1, 'incorrect number of channels returned')
             self.assertTrue(result[0][u'name'] == u'pyTestChannelName1', 'incorrect channel returned')
@@ -646,14 +646,14 @@ class OperationChannelTest(unittest.TestCase):
 #===============================================================================
 # Update Opertation Tests
 #===============================================================================
-'''
+
 class UpdateOperationTest(unittest.TestCase):
     def setUp(self):
-        ''''''Default set of Owners''''''
+        '''Default set of Owners'''
         self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
         self.propOwner = _testConf.get('DEFAULT', 'propOwner')
         self.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
-        ''''''Default set of clients''''''
+        '''Default set of clients'''
         self.client = ChannelFinderClient()
         self.clientCh = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                             username=_testConf.get('DEFAULT', 'channelUsername'), \
@@ -664,23 +664,23 @@ class UpdateOperationTest(unittest.TestCase):
         self.clientTag = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                             username=_testConf.get('DEFAULT', 'tagUsername'), \
                                             password=_testConf.get('DEFAULT', 'tagPassword'))
-        '''''' Test Properties and Tags ''''''
+        ''' Test Properties and Tags '''
         self.orgTag = {u'name':u'originalTag', u'owner': self.tagOwner}
         self.orgProp = {u'name':u'originalProp', u'owner':self.propOwner, u'value':u'originalValue'}
-        
+
         self.clientTag.set(tag=self.orgTag)
         self.clientProp.set(property=self.orgProp)
-        
+
         self.clientCh.set(channel={u'name':u'originalChannelName', \
                                           u'owner':self.channelOwner, \
                                           u'properties':[self.orgProp], \
                                           u'tags':[self.orgTag]})
         ch = self.client.find(name=u'originalChannelName')
-        self.assertTrue(len(ch) == 1 and 
+        self.assertTrue(len(ch) == 1 and
                         self.orgProp in ch[0][u'properties'] and \
                         self.orgTag in ch[0][u'tags']);
         pass
-    
+
     def UpdateTagName(self):
         newTagName = 'updatedTag'
         self.assertTrue(self.client.findTag(self.orgTag[u'name']) != None)
@@ -693,10 +693,10 @@ class UpdateOperationTest(unittest.TestCase):
         self.assertTrue(self.orgTag not in channelTags and \
                         {u'name':newTagName, u'owner':self.tagOwner} in channelTags)
         self.clientTag.update(tag=self.orgTag, originalTagName=newTagName)
-    
+
     def testUpdateTagOwner(self):
         pass
-    
+
     # removed test till bug in the sevice is fixed - channelfinder needs to check for the existance of oldname not name
     def UpdatePropName(self):
         newPropName = u'updatedProperty'
@@ -710,14 +710,14 @@ class UpdateOperationTest(unittest.TestCase):
         self.assertTrue(self.orgProp[u'name'] not in channelProperties.keys() and \
                         newPropName in channelProperties.keys())
         self.clientProp.update(property=self.orgProp, originalPropertyName=newPropName)
-        
-    
+
+
     def testUpdatePropOwner(self):
         pass
-    
+
     def testUpdateChannelName(self):
         ch = self.client.find(name=u'originalChannelName')[0]
-        newChannel = {u'name':u'updatedChannelName', u'owner':ch.Owner, u'properties': ch[u'properties'], u'tags':ch[u'tags']}
+        newChannel = {u'name':u'updatedChannelName', u'owner': ch[u'owner'], u'properties': ch[u'properties'], u'tags': ch[u'tags']}
         self.clientCh.update(originalChannelName=u'originalChannelName', \
                            channel=newChannel)
         self.assertTrue(self.client.find(name=u'originalChannelName') == None)
@@ -727,25 +727,25 @@ class UpdateOperationTest(unittest.TestCase):
                            channel=ch)
         self.assertTrue(len(self.client.find(name=u'originalChannelName')) == 1)
         self.assertTrue(self.client.find(name=u'updatedChannelName') == None)
-    
+
     def UpdateChannelOwner(self):
         ch = self.client.find(name='originalChannelName')[0]
         newChannel = {u'name':ch[u'name'], u'owner':self.tagOwner, u'properties': ch[u'properties'], u'tags':ch[u'tags']}
         self.clientCh.update(originalChannelName=u'originalChannelName', \
                            channel=newChannel)
-        self.assertTrue(self.client.find(name=u'originalChannelName')[0].Owner == self.tagOwner)                             
+        self.assertTrue(self.client.find(name=u'originalChannelName')[0].Owner == self.tagOwner)
         pass
-    
+
     def testUpdateChannel(self):
-        ''''''
+        '''
         the test updates the channel name and owner
         it also updates an existing property
         and adds a new property and tag
         leaving an existing tag untouched
-        
+
         TODO
         using the lowest lever _tagOwner_ as the newOwner
-        ''''''
+        '''
         ch = self.client.find(name=u'originalChannelName')[0]
         updatedProp = {u'name':u'originalProp', u'owner':self.propOwner, u'value':u'updatedValue'}
         newTag = {u'name':u'updatedTag', u'owner':self.tagOwner}
@@ -765,7 +765,7 @@ class UpdateOperationTest(unittest.TestCase):
                             newProp in foundChannel[u'properties'] and \
                             newTag in foundChannel[u'tags'] and \
                             self.orgTag in foundChannel[u'tags'])
-            
+
         finally:
             #reset
             self.clientCh.update(originalChannelName='updatedChannelName', \
@@ -776,26 +776,26 @@ class UpdateOperationTest(unittest.TestCase):
                 self.clientTag.delete(tagName=newTag[u'name'])
             if self.clientProp.findProperty(newProp[u'name']):
                 self.clientProp.delete(propertyName=newProp[u'name'])
-                       
+
     def testUpdateChannel2(self):
-        ''''''
+        '''
         Update a channels using update(channel=updatedChannel)
-        ''''''
+        '''
         pass
-    
+
     def testUpdateProperty(self):
-        ''''''
+        '''
         Update a single property using update(property=updatedProperty)
-        ''''''
+        '''
         pass
-    
+
     def testUpdateTag(self):
-        ''''''
+        '''
         Update a single tag using update(tag=updatedTag)
-        ''''''
+        '''
         pass
- 
- 
+
+
     def tearDown(self):
         self.clientCh.delete(channelName=u'originalChannelName')
         self.clientTag.delete(tagName=u'originalTag')
@@ -807,13 +807,13 @@ class UpdateOperationTest(unittest.TestCase):
 #===============================================================================
 '''
 class UpdateAppendTest(unittest.TestCase):
-    
+
     def setUp(self):
-        ''''''Default Owners''''''
+        '''Default Owners'''
         self.ChannelOwner = _testConf.get('DEFAULT', 'channelOwner')
         self.propOwner = _testConf.get('DEFAULT', 'propOwner')
         self.tagOwner = _testConf.get('DEFAULT', 'tagOwner')
-        ''''''Default Client'''''' 
+        '''Default Client'''
         self.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'username'), \
                                           password=_testConf.get('DEFAULT', 'password'))
@@ -823,7 +823,7 @@ class UpdateAppendTest(unittest.TestCase):
         self.clientTag = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'tagUsername'), \
                                           password=_testConf.get('DEFAULT', 'tagPassword'))
-        
+
         self.Tag1 = {u'name':u'tag1', u'owner':self.tagOwner}
         self.Tag2 = {u'name':u'tag2', u'owner':self.tagOwner}
         self.Prop1 = {u'name':u'prop1', u'owner':self.propOwner, u'value':u'initialVal'}
@@ -837,9 +837,9 @@ class UpdateAppendTest(unittest.TestCase):
         self.client.set(channels=self.channels)
         # originally 1 channel has tag Tag1 and 2 channels have tag Tag2
         self.assertTrue(len(self.client.find(tagName=self.Tag1[u'name'])) == 1)
-        self.assertTrue(len(self.client.find(tagName=self.Tag2[u'name'])) == 2)     
+        self.assertTrue(len(self.client.find(tagName=self.Tag2[u'name'])) == 2)
         pass
-    
+
     def tearDown(self):
         self.clientTag.delete(tagName=self.Tag1[u'name'])
         self.clientTag.delete(tagName=self.Tag2[u'name'])
@@ -849,26 +849,26 @@ class UpdateAppendTest(unittest.TestCase):
             self.client.delete(channelName=channel[u'name'])
         self.assertTrue(self.client.find(name=u'orgChannel?') == None)
         pass
-    
+
     def testUpdateAppendTag2Channel(self):
-        ''''''
+        '''
         Add tag to channel3 without removing it from the first 2 channels
-        ''''''
+        '''
         self.clientTag.update(tag=self.Tag2, channelName=self.ch3[u'name'])
         self.assertTrue(len(self.client.find(tagName=self.Tag2[u'name'])) == 3)
-    
+
     def testUpdateAppendTag2Channels(self):
-        ''''''
+        '''
         Add tag to channels 2-3 without removing it from channel 1
-        ''''''
+        '''
         channelNames = [ channel[u'name'] for channel in self.channels]
         self.clientTag.update(tag=self.Tag1, channelNames=channelNames)
         self.assertTrue(len(self.client.find(tagName=self.Tag1[u'name'])) == 3)
 
     def testUpdateAppendProperty2Channel(self):
-        ''''''
-        Test to update a channel with a property 
-        ''''''
+        '''
+        Test to update a channel with a property
+        '''
         self.assertTrue(len(self.client.find(name=self.ch3[u'name'])) == 1 and \
                          self.client.find(name=self.ch3[u'name'])[0][u'properties'] == None, \
                          'the channel already has properties')
@@ -876,7 +876,7 @@ class UpdateAppendTest(unittest.TestCase):
         self.assertTrue(len(self.client.find(name=self.ch3[u'name'])) == 1 and \
                         self.Prop1 in self.client.find(name=self.ch3[u'name'])[0][u'properties'], \
                             'failed to update the channel with a new property')
-        ''''''Check that Value of the property is correctly added''''''
+        '''Check that Value of the property is correctly added'''
         self.Prop2[u'value'] = 'val'
         self.clientProp.update(property=self.Prop2, channelName=self.ch3[u'name'])
         chs = self.client.find(name=self.ch3[u'name'])
@@ -885,18 +885,18 @@ class UpdateAppendTest(unittest.TestCase):
                         self.Prop2 in chs[0][u'properties'] , \
                         'Failed to update the channel with a new property without disturbing the old one')
         self.client.set(channel=self.ch3)
-       
+
     def testUpdateAppendProperty2Channels(self):
-        ''''''
+        '''
         Update a channels with a property
-        ''''''
+        '''
         self.assertTrue(len(self.client.find(name=self.ch2[u'name'])) == 1 and \
                          self.client.find(name=self.ch2[u'name'])[0][u'properties'] == None, \
                          'the channel already has properties')
         self.assertTrue(len(self.client.find(name=self.ch3[u'name'])) == 1 and \
                          self.client.find(name=self.ch3[u'name'])[0][u'properties'] == None, \
                          'the channel already has properties')
-        self.Prop1[u'value'] = 'testVal'        
+        self.Prop1[u'value'] = 'testVal'
         self.clientProp.update(property=self.Prop1, channelNames=[self.ch2[u'name'], self.ch3[u'name']])
         self.assertTrue(len(self.client.find(name=self.ch2[u'name'])) == 1 and \
                         self.Prop1 in self.client.find(name=self.ch2[u'name'])[0][u'properties'], \
@@ -904,11 +904,11 @@ class UpdateAppendTest(unittest.TestCase):
         self.assertTrue(len(self.client.find(name=self.ch3[u'name'])) == 1 and \
                         self.Prop1 in self.client.find(name=self.ch3[u'name'])[0][u'properties'], \
                             'failed to update the channel with a new property')
-        
+
     def testUpdateRemoveProperty2Channel(self):
-        ''''''
+        '''
         Updating a single channel with a property value = empty string is interpreted as a delete property
-        ''''''
+        '''
         try:
             self.client.set(channel={u'name':u'testChannel', u'owner':self.ChannelOwner, u'properties':[self.Prop1]})
             channel = self.client.find(name=u'testChannel')
@@ -921,12 +921,12 @@ class UpdateAppendTest(unittest.TestCase):
                              'Failed to deleted property prop1 form channel testChannel')
         finally:
             self.client.delete(channelName=u'testChannel')
-    
+
     def UserOwnerCheck(self):
-        ''''''
+        '''
         the _user_ belonging to cf-properties and another group(cf-asd) sets the owner = group
         but should still be able to update the property
-        ''''''
+        '''
         try:
             self.clientProp.set(property={u'name':u'testProperty', u'owner':'cf-asd'})
             self.assertTrue({u'name':u'testProperty', u'owner':u'cf-asd'} in self.client.getAllProperties(), \
@@ -939,14 +939,14 @@ class UpdateAppendTest(unittest.TestCase):
             self.clientProp.delete(propertyName=u'testProperty')
             self.client.delete(channelName=u'testChannel')
 
- '''
+
 #===========================================================================
 # Query Tests
 #===========================================================================
 
 class QueryTest(unittest.TestCase):
-    
-    def setUp(self):        
+
+    def setUp(self):
         '''Default Owners'''
         self.ChannelOwner = _testConf.get('DEFAULT', 'channelOwner')
         self.propOwner = _testConf.get('DEFAULT', 'propOwner')
@@ -960,27 +960,27 @@ class QueryTest(unittest.TestCase):
 
     def tearDown(self):
         pass
-    
+
     def testQueryChannel(self):
         pass
-     
+
     def testEmptyReturn(self):
         '''
         find for non existing entities should return None instead of a 404
         '''
         self.assertEquals(len(self.client.find(name=u'NonExistingChannelName')), 0,\
                         'Failed to return None when searching for a non existing channel')
-    
+
     def MultiValueQuery(self):
         '''
         add multiple search values for the same parameter
         Expected behaviour
-        
+
         Logically OR'ed
         name=pattern1,pattern2 => return channels with name matching pattern1 OR pattern2
-        propName=valPattern1, valPattern2 => return channels with property 'propName' 
+        propName=valPattern1, valPattern2 => return channels with property 'propName'
                                              with values matching valPattern1 OR valPattern2
-        
+
         Logically AND'ed
         tagName=pattern1, pattern2 => return channels with tags matching pattern1 AND pattern2
         '''
@@ -1029,7 +1029,7 @@ class QueryTest(unittest.TestCase):
         chs = self.client.find(property=[(u'propA', '1'), (u'propA', 'a')])
         self.assertEqual(len(chs), 2, \
                          'Failed of query propA expected 2 found ' + str(len(chs)))
-        
+
         ''' Check Find with multiple parameters '''
         chs = self.client.find(name=u'pyTestChannel*', \
                                tagName=tagA[u'name'], \
@@ -1038,24 +1038,24 @@ class QueryTest(unittest.TestCase):
         chs = self.client.find(name=u'pyTestChannel*', \
                                tagName=tagA[u'name'], \
                                property=[('propA', 'a')])
-        self.assertEqual(len(chs), 1, u'expected 1 found ' + str(len(chs)))        
-        
+        self.assertEqual(len(chs), 1, u'expected 1 found ' + str(len(chs)))
+
         self.client.delete(channelName=u'pyTestChannelA')
         self.client.delete(channelName=u'pyTestChannelB')
         self.client.delete(channelName=u'pyTestChannelAB')
-        
+
         self.client.delete(tagName=tagA[u'name'])
         self.client.delete(tagName=tagB[u'name'])
         self.client.delete(propertyName=propA[u'name'])
         self.client.delete(propertyName=propB[u'name'])
-    
-   
-        
+
+
+
 #===============================================================================
 #  ERROR tests
 #===============================================================================
 class ErrorTest(unittest.TestCase):
-    
+
     def setUp(self):
         '''Default Owners'''
         self.ChannelOwner = _testConf.get('DEFAULT', 'channelOwner')
@@ -1065,49 +1065,49 @@ class ErrorTest(unittest.TestCase):
         self.client = ChannelFinderClient(BaseURL=_testConf.get('DEFAULT', 'BaseURL'), \
                                           username=_testConf.get('DEFAULT', 'username'), \
                                           password=_testConf.get('DEFAULT', 'password'))
-        
+
         self.client.set(property={u'name':'existingProperty',u'owner': self.propOwner})
-        
+
     def tearDown(self):
         self.client.delete(propertyName='existingProperty')
-    
+
     def testSetChannelWithNonExistingProp(self):
         self.assertRaises(Exception, \
                           self.client.set, \
                           channel={u'name':u'channelName', \
                                             u'owner':self.ChannelOwner, \
                                             u'properties':[{u'name':u'nonExisitngProperty', u'owner':u'owner'}]})
-    
+
     def testSetChannelWithNonExistingTag(self):
         self.assertRaises(Exception, \
                           self.client.set, \
                           channel={u'name':'channelName', \
                                           u'owner':self.ChannelOwner, \
                                           u'tags':[{u'name':u'nonExisitngTag', u'owner':u'owner'}]})
-        
+
     def testUpdateChannelWithNonExistingProp(self):
         self.assertRaises(Exception, \
                           self.client.update, \
                           channel={u'name':u'channelName', \
                                           u'owner':self.ChannelOwner, \
                                           u'properties':[{u'name':u'nonExisitngProperty', u'owner':u'owner'}]})
-    
+
     def testUpdateChannelWithNonExistingTag(self):
         self.assertRaises(Exception,
                           self.client.update,
                           channel={u'name':u'channelName', \
                                           u'owner':self.ChannelOwner, \
                                           u'tags':[{u'name':'nonExisitngTag', u'owner':u'owner'}]})
-    
+
     def testUpdateNonExistingChannel(self):
         pass
-    
+
     def testUpdateNonExistingProperty(self):
         pass
-    
+
     def testUpdateNoneExistingTag(self):
         pass
-    
+
     def testIncorrectFindArguments(self):
         self.assertRaises(Exception, \
                           self.client.find, \
@@ -1118,7 +1118,7 @@ class ErrorTest(unittest.TestCase):
         self.assertRaises(Exception, \
                           self.client.find, \
                           tag='zzz')
-        
+
     def testCreateChannelWithNullPropertyValue(self):
         self.assertRaises(Exception, \
                           self.client.set, \
@@ -1127,7 +1127,7 @@ class ErrorTest(unittest.TestCase):
                                             u'properties':[{u'name':u'existingProperty', u'owner':self.propOwner}]})
         self.assertFalse(self.client.find(name=u'channelName'), \
                          'Failed: should not be able to create a channel with a property with value null')
-        
+
     def testUpdateChannelWithNullPropertyValue(self):
         self.client.set(channel={u'name':u'channelName', \
                                             u'owner':self.ChannelOwner})
@@ -1143,7 +1143,7 @@ class ErrorTest(unittest.TestCase):
                              'Failed: should not be able to update a channel with a property with value null')
         finally:
             self.client.delete(channelName=u'channelName')
-            
+
     def testCreateChannelWithEmptyPropertyValue(self):
         self.assertRaises(Exception, \
                           self.client.set, \
@@ -1152,7 +1152,7 @@ class ErrorTest(unittest.TestCase):
                                             u'properties':[{u'name':u'existingProperty', u'owner':self.propOwner, u'value':''}]})
         self.assertFalse(self.client.find(name=u'channelName'), \
                          'Failed: should not be able to create a channel with a property with empty value string')
-        
+
     def UpdateChannelWithEmptyPropertyValue(self):
         self.client.set(channel={u'name':u'channelName', \
                                             u'owner':self.ChannelOwner})

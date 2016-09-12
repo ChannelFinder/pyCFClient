@@ -572,7 +572,9 @@ class ChannelFinderClient(object):
             property = kwds['property']
             channels = []
             for eachChannel in kwds['channelNames']:
-                channels.append({u'name':eachChannel, u'owner':self.__userName, u'properties':[property]})
+                # totally necessary identity operation on property dictionary
+                channels.append({u'name': eachChannel, u'owner': self.__userName, u'properties': [dict(property)]})
+            property["channels"] = channels
             self.__session.post(self.__baseURL + self.__propertiesResource + '/' + property[u'name'],
                           data=JSONEncoder().encode(property),
                           headers=copy(self.__jsonheader),
@@ -582,7 +584,7 @@ class ChannelFinderClient(object):
             ch = kwds['channel']
             channelName = kwds['originalChannelName'].strip()
             self.__session.post(self.__baseURL + self.__channelsResource + '/' + channelName,
-                          data=JSONEncoder().encode(ch) ,
+                          data=JSONEncoder().encode(ch),
                           headers=copy(self.__jsonheader),
                           verify=False,
                           auth=self.__auth).raise_for_status()
@@ -616,4 +618,3 @@ class Ssl3HttpAdapter(HTTPAdapter):
                                        block=block,
                                        ssl_version=ssl.PROTOCOL_SSLv23)
 
-        
