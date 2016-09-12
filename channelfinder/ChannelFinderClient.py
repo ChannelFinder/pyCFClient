@@ -543,38 +543,48 @@ class ChannelFinderClient(object):
 
     def __handleMultipleUpdateParameters(self, **kwds):
         if 'tag' in kwds and 'channelName' in kwds:
-            tag = kwds['tag']
-            channels = [{u'name':kwds['channelName'].strip(), u'owner':self.__userName}]
+            # identity operation performed to prevent side-effects
+            tag = dict(kwds['tag'])
+            channels = [{u'name': kwds['channelName'].strip(), u'owner': self.__userName, u'tags': [tag]}]
+            tag = dict(tag)
+            tag[u'channels'] = channels
             self.__session.post(self.__baseURL + self.__tagsResource + '/' + tag[u'name'],
                           data=JSONEncoder().encode(tag),
                           headers=copy(self.__jsonheader),
                           verify=False,
                           auth=self.__auth).raise_for_status()
         elif 'tag' in kwds and 'channelNames' in kwds:
-            tag = kwds['tag']
+            # identity operation performed to prevent side-effects
+            tag = dict(kwds['tag'])
             channels = []
             for eachChannel in kwds['channelNames']:
-                channels.append({u'name':eachChannel, u'owner':self.__userName})
-            self.__session.post(self.__baseURL + self.__tagsResource + '/' + tag['name'],
+                channels.append({u'name': eachChannel, u'owner': self.__userName, u'tags': [tag]})
+            tag = dict(tag)
+            tag[u'channels'] = channels
+            self.__session.post(self.__baseURL + self.__tagsResource + '/' + tag[u'name'],
                           data=JSONEncoder().encode(tag),
                           headers=copy(self.__jsonheader),
                           verify=False,
                           auth=self.__auth).raise_for_status()
         elif 'property' in kwds and 'channelName' in kwds:
-            property = kwds['property']
-            channels = [{u'name':kwds['channelName'].strip(), u'owner':self.__userName, u'properties':[property]}]
+            # identity operation performed to prevent side-effects
+            property = dict(kwds['property'])
+            channels = [{u'name': kwds['channelName'].strip(), u'owner': self.__userName, u'properties': [property]}]
+            property = dict(property)
+            property[u'channels'] = channels
             self.__session.post(self.__baseURL + self.__propertiesResource + '/' + property[u'name'],
                           data=JSONEncoder().encode(property),
                           headers=copy(self.__jsonheader),
                           verify=False,
                           auth=self.__auth).raise_for_status()
         elif 'property' in kwds and 'channelNames' in kwds:
-            property = kwds['property']
+            # identity operation performed to prevent side-effects
+            property = dict(kwds['property'])
             channels = []
             for eachChannel in kwds['channelNames']:
-                # totally necessary identity operation on property dictionary
-                channels.append({u'name': eachChannel, u'owner': self.__userName, u'properties': [dict(property)]})
-            property["channels"] = channels
+                channels.append({u'name': eachChannel.strip(), u'owner': self.__userName, u'properties': [property]})
+            property = dict(property)
+            property[u'channels'] = channels
             self.__session.post(self.__baseURL + self.__propertiesResource + '/' + property[u'name'],
                           data=JSONEncoder().encode(property),
                           headers=copy(self.__jsonheader),

@@ -404,13 +404,12 @@ class OperationPropertyTest(unittest.TestCase):
             self.assertTrue(checkPropertyOnChannel(self.client, ch1[u'name'], testProperty) and
                             not checkPropertyOnChannel(self.client, ch0[u'name'], testProperty), \
                             'Error: Tag-pySetTag not added to the channel-pyTestChannel2')
+        finally:  # Delete operation causes an error if performed twice, IE: the first delete succeeded
             '''delete the property and ensure it is removed from the associated channel'''
             self.client.delete(propertyName=testProperty[u'name'])
             self.assertTrue(not checkPropertyOnChannel(self.client, ch0[u'name'], testProperty) and \
-                            not checkPropertyOnChannel(self.client, ch1[u'name'], testProperty) , \
-                              'Error: Failed to delete the tag-pySetTag from channel-pyTestChannel1')
-        except:  # Delete operation causes an error if performed twice, IE: the first delete succeeded
-            self.client.delete(propertyName=testProperty[u'name'])
+                            not checkPropertyOnChannel(self.client, ch1[u'name'], testProperty), \
+                            'Error: Failed to delete the tag-pySetTag from channel-pyTestChannel1')
 
     def testGetAllPropperties(self):
         '''Test setting multiple properties and listing all tags'''
@@ -720,20 +719,20 @@ class UpdateOperationTest(unittest.TestCase):
         newChannel = {u'name':u'updatedChannelName', u'owner': ch[u'owner'], u'properties': ch[u'properties'], u'tags': ch[u'tags']}
         self.clientCh.update(originalChannelName=u'originalChannelName', \
                            channel=newChannel)
-        self.assertTrue(self.client.find(name=u'originalChannelName') == None)
+        self.assertTrue(self.client.find(name=u'originalChannelName') == [])
         self.assertTrue(len(self.client.find(name=u'updatedChannelName')) == 1)
         # reset the channel back
         self.clientCh.update(originalChannelName=u'updatedChannelName', \
                            channel=ch)
         self.assertTrue(len(self.client.find(name=u'originalChannelName')) == 1)
-        self.assertTrue(self.client.find(name=u'updatedChannelName') == None)
+        self.assertTrue(self.client.find(name=u'updatedChannelName') == [])
 
     def UpdateChannelOwner(self):
         ch = self.client.find(name='originalChannelName')[0]
         newChannel = {u'name':ch[u'name'], u'owner':self.tagOwner, u'properties': ch[u'properties'], u'tags':ch[u'tags']}
         self.clientCh.update(originalChannelName=u'originalChannelName', \
                            channel=newChannel)
-        self.assertTrue(self.client.find(name=u'originalChannelName')[0].Owner == self.tagOwner)
+        self.assertTrue(self.client.find(name=u'originalChannelName')[0][u'owner'] == self.tagOwner)
         pass
 
     def testUpdateChannel(self):
@@ -760,7 +759,7 @@ class UpdateOperationTest(unittest.TestCase):
                                channel=newChannel)
             foundChannel = self.client.find(name=u'updatedChannelName')[0]
             self.assertTrue(foundChannel[u'name'] == u'updatedChannelName' and
-                            foundChannel.Owner == self.channelOwner and \
+                            foundChannel[u'owner'] == self.channelOwner and \
                             updatedProp in foundChannel[u'properties'] and\
                             newProp in foundChannel[u'properties'] and \
                             newTag in foundChannel[u'tags'] and \
@@ -847,7 +846,7 @@ class UpdateAppendTest(unittest.TestCase):
         self.clientProp.delete(propertyName=self.Prop2[u'name'])
         for channel in self.channels:
             self.client.delete(channelName=channel[u'name'])
-        self.assertTrue(self.client.find(name=u'orgChannel?') == None)
+        self.assertTrue(self.client.find(name=u'orgChannel?') == [])
         pass
 
     def testUpdateAppendTag2Channel(self):
@@ -869,20 +868,20 @@ class UpdateAppendTest(unittest.TestCase):
         '''
         Test to update a channel with a property
         '''
-        self.assertTrue(len(self.client.find(name=self.ch3[u'name'])) == 1 and \
-                         self.client.find(name=self.ch3[u'name'])[0][u'properties'] == None, \
+        self.assertTrue(len(self.client.find(name=self.ch3[u'name'])) == 1 and
+                         self.client.find(name=self.ch3[u'name'])[0][u'properties'] == [],
                          'the channel already has properties')
         self.clientProp.update(property=self.Prop1, channelName=self.ch3[u'name'])
-        self.assertTrue(len(self.client.find(name=self.ch3[u'name'])) == 1 and \
-                        self.Prop1 in self.client.find(name=self.ch3[u'name'])[0][u'properties'], \
+        self.assertTrue(len(self.client.find(name=self.ch3[u'name'])) == 1 and
+                        self.Prop1 in self.client.find(name=self.ch3[u'name'])[0][u'properties'],
                             'failed to update the channel with a new property')
         '''Check that Value of the property is correctly added'''
         self.Prop2[u'value'] = 'val'
         self.clientProp.update(property=self.Prop2, channelName=self.ch3[u'name'])
         chs = self.client.find(name=self.ch3[u'name'])
-        self.assertTrue(len(chs) == 1 and \
-                        self.Prop1 in chs[0][u'properties'] and \
-                        self.Prop2 in chs[0][u'properties'] , \
+        self.assertTrue(len(chs) == 1 and
+                        self.Prop1 in chs[0][u'properties'] and
+                        self.Prop2 in chs[0][u'properties'],
                         'Failed to update the channel with a new property without disturbing the old one')
         self.client.set(channel=self.ch3)
 
@@ -890,19 +889,19 @@ class UpdateAppendTest(unittest.TestCase):
         '''
         Update a channels with a property
         '''
-        self.assertTrue(len(self.client.find(name=self.ch2[u'name'])) == 1 and \
-                         self.client.find(name=self.ch2[u'name'])[0][u'properties'] == None, \
+        self.assertTrue(len(self.client.find(name=self.ch2[u'name'])) == 1 and
+                         self.client.find(name=self.ch2[u'name'])[0][u'properties'] == [],
                          'the channel already has properties')
-        self.assertTrue(len(self.client.find(name=self.ch3[u'name'])) == 1 and \
-                         self.client.find(name=self.ch3[u'name'])[0][u'properties'] == None, \
+        self.assertTrue(len(self.client.find(name=self.ch3[u'name'])) == 1 and
+                         self.client.find(name=self.ch3[u'name'])[0][u'properties'] == [],
                          'the channel already has properties')
         self.Prop1[u'value'] = 'testVal'
         self.clientProp.update(property=self.Prop1, channelNames=[self.ch2[u'name'], self.ch3[u'name']])
-        self.assertTrue(len(self.client.find(name=self.ch2[u'name'])) == 1 and \
-                        self.Prop1 in self.client.find(name=self.ch2[u'name'])[0][u'properties'], \
+        self.assertTrue(len(self.client.find(name=self.ch2[u'name'])) == 1 and
+                        self.Prop1 in self.client.find(name=self.ch2[u'name'])[0][u'properties'],
                             'failed to update the channel with a new property')
-        self.assertTrue(len(self.client.find(name=self.ch3[u'name'])) == 1 and \
-                        self.Prop1 in self.client.find(name=self.ch3[u'name'])[0][u'properties'], \
+        self.assertTrue(len(self.client.find(name=self.ch3[u'name'])) == 1 and
+                        self.Prop1 in self.client.find(name=self.ch3[u'name'])[0][u'properties'],
                             'failed to update the channel with a new property')
 
     def testUpdateRemoveProperty2Channel(self):
@@ -912,12 +911,12 @@ class UpdateAppendTest(unittest.TestCase):
         try:
             self.client.set(channel={u'name':u'testChannel', u'owner':self.ChannelOwner, u'properties':[self.Prop1]})
             channel = self.client.find(name=u'testChannel')
-            self.assertTrue(len(channel) == 1 and self.Prop1[u'name'] in channel[0][u'properties'], \
+            self.assertTrue(len(channel) == 1 and self.Prop1 in channel[0][u'properties'],
                             'Failed to create a test channel with property prop1')
             self.Prop1[u'value'] = ''
             channel[0][u'properties'] = [self.Prop1]
             self.client.update(channel=channel[0])
-            self.assertFalse(self.client.find(name=u'testChannel')[0][u'properties'], \
+            self.assertFalse(self.client.find(name=u'testChannel')[0][u'properties'],
                              'Failed to deleted property prop1 form channel testChannel')
         finally:
             self.client.delete(channelName=u'testChannel')
