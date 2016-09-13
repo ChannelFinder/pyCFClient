@@ -909,7 +909,7 @@ class UpdateAppendTest(unittest.TestCase):
         '''
         Add tag to channels 2-3 without removing it from channel 1
         '''
-        channelNames = [ channel[u'name'] for channel in self.channels]
+        channelNames = [channel[u'name'] for channel in self.channels]
         self.clientTag.update(tag=self.Tag1, channelNames=channelNames)
         self.assertTrue(len(self.client.find(tagName=self.Tag1[u'name'])) == 3)
 
