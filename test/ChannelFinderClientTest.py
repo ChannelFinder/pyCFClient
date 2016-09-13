@@ -694,6 +694,7 @@ class UpdateOperationTest(unittest.TestCase):
         self.clientTag.update(tag=self.orgTag, originalTagName=newTagName)
 
     def testUpdateTagOwner(self):
+        '''Test implemented in testUpdateTag'''
         pass
 
     # removed test till bug in the sevice is fixed - channelfinder needs to check for the existance of oldname not name
@@ -780,20 +781,68 @@ class UpdateOperationTest(unittest.TestCase):
         '''
         Update a channels using update(channel=updatedChannel)
         '''
-        pass
+        ch = self.client.find(name=u'originalChannelName')
+        self.assertTrue(len(ch) == 1 and
+                        self.orgProp in ch[0][u'properties'] and
+                        self.orgTag in ch[0][u'tags'])
+        updated_prop = {u'name': u'originalProp',
+                        u'owner': self.propOwner,
+                        u'value': u'newPropValue'}
+        self.clientCh.update(channel={u'name': u'originalChannelName',
+                                      u'owner': u'newOwner',
+                                      u'properties': [updated_prop],
+                                      u'tags': []})
+        ch = self.client.find(name=u'originalChannelName')
+        self.assertTrue(len(ch) == 1 and
+                        updated_prop in ch[0][u'properties'] and
+                        self.orgTag in ch[0][u'tags'] and
+                        ch[0][u'owner'] == u'newOwner')
+
 
     def testUpdateProperty(self):
         '''
         Update a single property using update(property=updatedProperty)
+        Updates existing channels with new property owner, without altering original value.
         '''
-        pass
+        prop = self.client.findProperty(propertyName=u'originalProp')
+        self.assertDictEqual(prop, {u'owner': u'cf-update',
+                                    u'channels': [],
+                                    u'name': u'originalProp',
+                                    u'value': None})
+
+        updatedProperty = dict(prop)
+        updatedProperty[u'owner'] = u'newOwner'
+        self.clientProp.update(property=updatedProperty)
+        '''Check property owner'''
+        prop = self.client.findProperty(propertyName=u'originalProp')
+        self.assertDictEqual(prop, {u'owner': u'newOwner',
+                                    u'channels': [],
+                                    u'name': u'originalProp',
+                                    u'value': None})
+        '''Check existing channel'''
+        ch = self.client.find(name=u'originalChannelName')
+        self.assertTrue({u'owner': u'newOwner',
+                         u'name': u'originalProp',
+                         u'value': u'originalValue'} in ch[0][u'properties'])
 
     def testUpdateTag(self):
         '''
         Update a single tag using update(tag=updatedTag)
+        Updates owner in all associated channels.
         '''
-        pass
+        tag = self.client.findTag(tagName=u'originalTag')
+        self.assertDictEqual(tag, {u'owner': u'cf-update', u'channels': [], u'name': u'originalTag'})
 
+        updatedTag = dict(tag)
+        updatedTag[u'owner'] = u'newOwner'
+        self.clientTag.update(tag=updatedTag)
+        '''Check tag owner'''
+        tag = self.client.findTag(tagName=u'originalTag')
+        self.assertDictEqual(tag, {u'owner': u'newOwner', u'channels': [], u'name': u'originalTag'})
+        '''Checks existing channel'''
+        ch = self.client.find(name=u'originalChannelName')
+        self.assertTrue({u'owner': u'newOwner',
+                         u'name': u'originalTag'} in ch[0][u'tags'])
 
     def tearDown(self):
         self.clientCh.delete(channelName=u'originalChannelName')
@@ -904,6 +953,7 @@ class UpdateAppendTest(unittest.TestCase):
                         self.Prop1 in self.client.find(name=self.ch3[u'name'])[0][u'properties'],
                             'failed to update the channel with a new property')
 
+    @unittest.skip("Skipping test for unimplemented functionality.")
     def testUpdateRemoveProperty2Channel(self):
         '''
         Updating a single channel with a property value = empty string is interpreted as a delete property

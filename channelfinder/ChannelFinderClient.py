@@ -67,9 +67,14 @@ class ChannelFinderClient(object):
         The operation creates a new entry if none exists and destructively replaces existing entries.
         set(channel = Channel)
         >>> set(channel={'name':'channelName', 'owner':'channelOwner'})
-        
+        >>> set(channel={'name':'channelName',
+                         'owner':'channelOwner',
+                         'tags':[{'name':'tagName1', 'owner':'tagOwner'}, ...],
+                         'properties':[{'name':'propName1', 'owner':'propOwner', 'value':'propValue1'}, ...]})
+
         set(channels = [Channel])
         >>> set(channels=[{'name':'chName1','owner':'chOwner'},{'name':'chName2','owner':'chOwner'}])
+        >>> set(channels=[{'name':'chName1','owner':'chOwner', 'tags':[...], 'properties':[...]}, {...}])
         
         set(tag = Tag)
         >>> set(tag={'name':'tagName','owner':'tagOwner'})
@@ -97,15 +102,10 @@ class ChannelFinderClient(object):
         # and add it to the channels with the names specified in channelNames
         # and delete it from all other channels
         
-        set(property=Property, channelName=String)
-        >>> set(property={'name':'propName','owner':'propOwner','value':'propValue'}, channelName='channelName')
-        # will create/replace the specified Property 
-        # and add it to the channel with the name = channelName
-        
         set(property=Property, channelNames=[String])
-        >>> set(property={'name':'propName','owner':'propOwner','value':'propValue'}, channelNames=[String])
+        >>> set(property={'name':'propName','owner':'propOwner','value':'propValue'}, channels=[...])
         # will create/replace the specified Property
-        # and add it to the channels with the names specified in channelNames
+        # and add it to the channels with the names specified in channels
         # and delete it from all other channels
         
         '''
