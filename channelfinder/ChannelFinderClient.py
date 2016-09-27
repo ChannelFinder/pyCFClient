@@ -49,7 +49,7 @@ class ChannelFinderClient(object):
             else:
                 self.__auth = None
             self.__session = requests.Session()
-            self.__session.mount(BaseURL, Ssl3HttpAdapter())
+            self.__session.mount(self.__baseURL, Ssl3HttpAdapter())
             self.__session.get(self.__baseURL, verify=False, headers=copy(self.__jsonheader)).raise_for_status()
  
         except:
