@@ -547,12 +547,13 @@ class OperationChannelTest(unittest.TestCase):
         This test will check that a POST in the channels resources is destructive
         '''
         testProp = {u'name':u'testProp', u'owner' : self.propOwner}
+        testChannels = [{u'name':u'pyChannel1', u'owner':self.channelOwner, u'properties':[testProp]}, \
+                            {u'name':u'pyChannel2', u'owner':self.channelOwner}, \
+                            {u'name':u'pyChannel3', u'owner':self.channelOwner}] 
         try:            
             self.clientProp.set(property=testProp)
             testProp[u'value'] = 'original'
-            testChannels = [{u'name':u'pyChannel1', u'owner':self.channelOwner, u'properties':[testProp]}, \
-                            {u'name':u'pyChannel2', u'owner':self.channelOwner}, \
-                            {u'name':u'pyChannel3', u'owner':self.channelOwner}] 
+            
             self.clientCh.set(channel=testChannels[0])
             
             self.assertEqual(len(self.client.find(name=u'pyChannel*')), 1, \

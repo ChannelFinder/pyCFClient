@@ -14,4 +14,16 @@
 	<natures>
 		<nature>org.python.pydev.pythonNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>test/prepare_graph.py</name>
+			<type>1</type>
+			<location>C:/Users/Michael/Downloads/prepare_graph.py</location>
+		</link>
+		<link>
+			<name>test/query_embedded.py</name>
+			<type>1</type>
+			<location>C:/Users/Michael/Downloads/query_embedded.py</location>
+		</link>
+	</linkedResources>
 </projectDescription>
