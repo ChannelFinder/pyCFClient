@@ -37,10 +37,10 @@ def getPVNames(completeFilePath, pattern=None):
     try:
         f = open(completeFilePath)
         pvNames = f.read().splitlines()
-        pvNames=map(lambda x: x.strip(), pvNames)
-        pvNames=filter(lambda x: len(x)>0, pvNames)
+        pvNames = map(lambda x: x.strip(), pvNames)
+        pvNames = filter(lambda x: len(x)>0, pvNames)
         if pattern:
-            pvNames=[ re.match(pattern,pvName).group() for pvName in pvNames if re.match(pattern, pvName) ]
+            pvNames = [re.match(pattern, pvName).group() for pvName in pvNames if re.match(pattern, pvName)]
         return pvNames
     except IOError:
         return None
@@ -48,7 +48,7 @@ def getPVNames(completeFilePath, pattern=None):
         if f:
             f.close()
 
-def updateChannelFinder(pvNames, hostName, iocName, time, owner, \
+def updateChannelFinder(pvNames, hostName, iocName, time, owner,
                         service=None, username=None, password=None):
     '''
     pvNames = list of pvNames 
@@ -77,50 +77,50 @@ def updateChannelFinder(pvNames, hostName, iocName, time, owner, \
         for ch in previousChannelsList:
             if pvNames != None and ch.Name in pvNames:
                 ''''''
-                channels.append(updateChannel(ch,\
-                                              owner=owner, \
-                                              hostName=hostName, \
-                                              iocName=iocName, \
-                                              pvStatus=u'Active', \
+                channels.append(updateChannel(ch,
+                                              owner=owner,
+                                              hostName=hostName,
+                                              iocName=iocName,
+                                              pvStatus=u'Active',
                                               time=time))
                 pvNames.remove(ch.Name)
             elif pvNames == None or ch.Name not in pvNames:
                 '''Orphan the channel : mark as inactive, keep the old hostName and iocName'''
-                channels.append(updateChannel(ch, \
-                                              owner=owner, \
-                                              hostName=ch.getProperties()[u'hostName'], \
-                                              iocName=ch.getProperties()[u'iocName'], \
-                                              pvStatus=u'InActive', \
+                channels.append(updateChannel(ch,
+                                              owner=owner,
+                                              hostName=ch.getProperties()[u'hostName'],
+                                              iocName=ch.getProperties()[u'iocName'],
+                                              pvStatus=u'Inactive',
                                               time=ch.getProperties()[u'time']))
     # now pvNames contains a list of pv's new on this host/ioc
     for pv in pvNames:
         ch = client.findByArgs([('~name',pv)])
         if ch == None:
             '''New channel'''
-            channels.append(createChannel(pv, \
-                                          chOwner=owner, \
-                                          hostName=hostName, \
-                                          iocName=iocName, \
-                                          pvStatus=u'Active', \
+            channels.append(createChannel(pv,
+                                          chOwner=owner,
+                                          hostName=hostName,
+                                          iocName=iocName,
+                                          pvStatus=u'Active',
                                           time=time))
         elif ch[0] != None:
             '''update existing channel: exists but with a different hostName and/or iocName'''
-            channels.append(updateChannel(ch[0], \
-                                          owner=owner, \
-                                          hostName=hostName, \
-                                          iocName=iocName, \
-                                          pvStatus=u'Active', \
+            channels.append(updateChannel(ch[0],
+                                          owner=owner,
+                                          hostName=hostName,
+                                          iocName=iocName,
+                                          pvStatus=u'Active',
                                           time=time))
     client.set(channels=channels)
 
-def updateChannel(channel, owner, hostName=None, iocName=None, pvStatus='InActive', time=None):
+def updateChannel(channel, owner, hostName=None, iocName=None, pvStatus='Inactive', time=None):
     '''
     Helper to update a channel object so as to not affect the existing properties
     '''
     
     # properties list devoid of hostName and iocName properties
     if channel[u'properties']:
-        properties = [property for property in channel[u'properties'] \
+        properties = [property for property in channel[u'properties']
                     if property[u'name'] != u'hostName' and property[u'name'] != u'iocName' and property[u'name'] != u'pvStatus']
     else:
         properties = []
@@ -135,7 +135,7 @@ def updateChannel(channel, owner, hostName=None, iocName=None, pvStatus='InActiv
     channel[u'properties'] = properties
     return channel
 
-def createChannel(chName, chOwner, hostName=None, iocName=None, pvStatus=u'InActive', time=None):
+def createChannel(chName, chOwner, hostName=None, iocName=None, pvStatus=u'Inactive', time=None):
     '''
     Helper to create a channel object with the required properties
     '''
@@ -184,26 +184,26 @@ def mainRun(opts, args):
                 fHostName, fIocName = getArgsFromFilename(completeFilePath)
                 ftime = os.path.getctime(completeFilePath)
                 pattern = __getDefaultConfig('pattern', opts.pattern)
-                updateChannelFinder(getPVNames(completeFilePath, pattern=pattern), \
-                            ifNoneReturnDefault(opts.hostName, fHostName), \
-                            ifNoneReturnDefault(opts.iocName, fIocName), \
-                            ifNoneReturnDefault(opts.time, ftime), \
-                            ifNoneReturnDefault(opts.owner,__getDefaultConfig('username', opts.username)), \
-                            service=__getDefaultConfig('BaseURL',opts.serviceURL), \
-                            username=__getDefaultConfig('username',opts.username), \
+                updateChannelFinder(getPVNames(completeFilePath, pattern=pattern),
+                            ifNoneReturnDefault(opts.hostName, fHostName),
+                            ifNoneReturnDefault(opts.iocName, fIocName),
+                            ifNoneReturnDefault(opts.time, ftime),
+                            ifNoneReturnDefault(opts.owner,__getDefaultConfig('username', opts.username)),
+                            service=__getDefaultConfig('BaseURL',opts.serviceURL),
+                            username=__getDefaultConfig('username',opts.username),
                             password=__getDefaultConfig('password',opts.password))
         else:
             completeFilePath = os.path.abspath(filename)
             fHostName, fIocName = getArgsFromFilename(completeFilePath)
             ftime = os.path.getctime(completeFilePath)
             pattern = __getDefaultConfig('pattern', opts.pattern)
-            updateChannelFinder(getPVNames(completeFilePath, pattern=pattern), \
-                            ifNoneReturnDefault(opts.hostName, fHostName), \
-                            ifNoneReturnDefault(opts.iocName, fIocName), \
-                            ifNoneReturnDefault(opts.time, ftime), \
-                            ifNoneReturnDefault(opts.owner,__getDefaultConfig('username', opts.username)), \
-                            service=__getDefaultConfig('BaseURL',opts.serviceURL), \
-                            username=__getDefaultConfig('username',opts.username), \
+            updateChannelFinder(getPVNames(completeFilePath, pattern=pattern),
+                            ifNoneReturnDefault(opts.hostName, fHostName),
+                            ifNoneReturnDefault(opts.iocName, fIocName),
+                            ifNoneReturnDefault(opts.time, ftime),
+                            ifNoneReturnDefault(opts.owner,__getDefaultConfig('username', opts.username)),
+                            service=__getDefaultConfig('BaseURL',opts.serviceURL),
+                            username=__getDefaultConfig('username',opts.username),
                             password=__getDefaultConfig('password',opts.password))
             
 def __getDefaultConfig(arg, value):
@@ -218,30 +218,30 @@ def __getDefaultConfig(arg, value):
 def main():
     usage = "usage: %prog [options] filename"
     parser = OptionParser(usage=usage)
-    parser.add_option('-H', '--hostname', \
-                      action='store', type='string', dest='hostName', \
+    parser.add_option('-H', '--hostname',
+                      action='store', type='string', dest='hostName',
                       help='the hostname')
-    parser.add_option('-i', '--iocname', \
-                      action='store', type='string', dest='iocName', \
+    parser.add_option('-i', '--iocname',
+                      action='store', type='string', dest='iocName',
                       help='the iocname')
-    parser.add_option('-s', '--service', \
-                      action='store', type='string', dest='serviceURL', \
+    parser.add_option('-s', '--service',
+                      action='store', type='string', dest='serviceURL',
                       help='the service URL')
-    parser.add_option('-o', '--owner', \
-                      action='store', type='string', dest='owner', \
+    parser.add_option('-o', '--owner',
+                      action='store', type='string', dest='owner',
                       help='owner if not specified username will default as owner')
-    parser.add_option('-r', '--pattern', \
-                      action='store', type='string', dest='pattern', \
+    parser.add_option('-r', '--pattern',
+                      action='store', type='string', dest='pattern',
                       help='pattern to match valid channel names')
-    parser.add_option('-u', '--username', \
-                      action='store', type='string', dest='username', \
+    parser.add_option('-u', '--username',
+                      action='store', type='string', dest='username',
                       help='username')
-    parser.add_option('-t', '--time', \
-                      action='store', type='string', dest='time', \
+    parser.add_option('-t', '--time',
+                      action='store', type='string', dest='time',
                       help='time')
-    parser.add_option('-p', '--password', \
-                      action='callback', callback=getPassword, \
-                      dest='password', \
+    parser.add_option('-p', '--password',
+                      action='callback', callback=getPassword,
+                      dest='password',
                       help='prompt user for password')
     opts, args = parser.parse_args()
     if len(args) == 0 or args == None:
