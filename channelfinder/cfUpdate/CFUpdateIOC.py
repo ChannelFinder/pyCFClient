@@ -75,7 +75,7 @@ def updateChannelFinder(pvNames, hostName, iocName, time, owner,
     previousChannelsList = client.findByArgs([(u'hostName', hostName), (u'iocName', iocName)])
     if previousChannelsList != None:
         for ch in previousChannelsList:
-            if pvNames != None and ch.Name in pvNames:
+            if pvNames != None and ch['name'] in pvNames:
                 ''''''
                 channels.append(updateChannel(ch,
                                               owner=owner,
@@ -83,19 +83,21 @@ def updateChannelFinder(pvNames, hostName, iocName, time, owner,
                                               iocName=iocName,
                                               pvStatus=u'Active',
                                               time=time))
-                pvNames.remove(ch.Name)
-            elif pvNames == None or ch.Name not in pvNames:
+                pvNames.remove(ch['name'])
+            elif pvNames == None or ch['name'] not in pvNames:
                 '''Orphan the channel : mark as inactive, keep the old hostName and iocName'''
+                oldHostName = [ prop[u'value'] for prop in ch[u'properties'] if prop[u'name'] == u'hostName'][0]
+                oldIocName = [ prop[u'value'] for prop in ch[u'properties'] if prop[u'name'] == u'iocName'][0]
                 channels.append(updateChannel(ch,
                                               owner=owner,
-                                              hostName=ch.getProperties()[u'hostName'],
-                                              iocName=ch.getProperties()[u'iocName'],
+                                              hostName=oldHostName,
+                                              iocName=oldIocName,
                                               pvStatus=u'Inactive',
-                                              time=ch.getProperties()[u'time']))
+                                              time=time))
     # now pvNames contains a list of pv's new on this host/ioc
     for pv in pvNames:
         ch = client.findByArgs([('~name',pv)])
-        if ch == None:
+        if not ch:
             '''New channel'''
             channels.append(createChannel(pv,
                                           chOwner=owner,

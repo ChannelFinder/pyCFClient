@@ -2,12 +2,10 @@
 SEE cf-property-manager.cfg for example configuration file
 '''
 from channelfinder import ChannelFinderClient
-from channelfinder.util import ChannelUtil
 from optparse import OptionParser
 from getpass import getpass
 import re
-import time
-import sys
+from channelfinder._conf import _conf
 
 global username, client, exclusion_expression, password, SERVICE_URL, quiet, verbose
 
@@ -104,7 +102,7 @@ def applyExpression():
                         if value != "":
                             prop_list.append({u'name' : expression[1], u'owner' : username, u'value' : value})
                         else:
-                            if(verbose): print "MISSING IN " + line
+                            if(verbose): print "MISSING " + expression[1] + "IN " + channel_name
                 if verbose: print "UPDATE "+channel_name
                 try:
                     client.update(channel = {u'name' : channel_name, u'owner':username,u'properties':prop_list })

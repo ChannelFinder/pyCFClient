@@ -805,7 +805,7 @@ class UpdateOperationTest(unittest.TestCase):
         Updates existing channels with new property owner, without altering original value.
         '''
         prop = self.client.findProperty(propertyName=u'originalProp')
-        self.assertDictEqual(prop, {u'owner': u'cf-update',
+        self.assertDictEqual(prop, {u'owner': self.propOwner,
                                     u'channels': [],
                                     u'name': u'originalProp',
                                     u'value': None})
@@ -831,7 +831,7 @@ class UpdateOperationTest(unittest.TestCase):
         Updates owner in all associated channels.
         '''
         tag = self.client.findTag(tagName=u'originalTag')
-        self.assertDictEqual(tag, {u'owner': u'cf-update', u'channels': [], u'name': u'originalTag'})
+        self.assertDictEqual(tag, {u'owner': self.tagOwner, u'channels': [], u'name': u'originalTag'})
 
         updatedTag = dict(tag)
         updatedTag[u'owner'] = u'newOwner'

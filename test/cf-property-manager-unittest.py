@@ -2,6 +2,8 @@ import unittest
 from channelfinder.cfPropertyManager import CFPropertyManager
 import re
 import os
+from _testConf import _testConf
+
 class CFPropertyManagerTest(unittest.TestCase):
 
     cfglines = []
@@ -21,6 +23,9 @@ class CFPropertyManagerTest(unittest.TestCase):
         '''
         Tests accessibility of cfg file, does not check format
         '''
+        CFPropertyManager.SERVICE_URL=_testConf.get('DEFAULT', 'BaseURL')
+        CFPropertyManager.username=_testConf.get('DEFAULT', 'username')
+        CFPropertyManager.password=_testConf.get('DEFAULT', 'password')
         CFPropertyManager.startClient()
         fo = open("cf-property-manager-test-dbl", "w+")
         fo.write("UT:RF-Cu:1{LD}Time:ShtDwn-I");
@@ -54,6 +59,10 @@ class CFPropertyManagerTest(unittest.TestCase):
         '''
         Tests validity of regular expression.
         '''
+        fo = open("cf-property-manager-test-cfg", "w+")
+        fo.write("devName=[{][^:}][^:}]*\ndevType=[:][^{]*?[:}](?!.*[{])\nIGNORE=.*WtrSkid.*");
+        fo.close()
+        cfglines = CFPropertyManager.readConfiguration("cf-property-manager-test-cfg")
         for properties in cfglines:
             expression=None
             print properties[0] + " = " + properties[1]
@@ -71,6 +80,9 @@ class CFPropertyManagerTest(unittest.TestCase):
         Tests accessibility of cfg file, does not check format
         '''
         global cfglines
+        CFPropertyManager.SERVICE_URL=_testConf.get('DEFAULT', 'BaseURL')
+        CFPropertyManager.username=_testConf.get('DEFAULT', 'username')
+        CFPropertyManager.password=_testConf.get('DEFAULT', 'password')
         CFPropertyManager.startClient()
         fo = open("cf-property-manager-test-cfg", "w+")
         fo.write("devName=[{][^:}][^:}]*\ndevType=[:][^{]*?[:}](?!.*[{])\nIGNORE=.*WtrSkid.*");
