@@ -235,8 +235,10 @@ class ChannelFinderClient(object):
 
 
         For multiValued searches
-        >>> find(name='pattern1,pattern2')
+        >>> find(name='pattern1|pattern2')
         will return all the channels which match either pattern1 OR pattern2
+        >>> find(name='pattern1,pattern2')
+        will return all the channels which match either pattern1 AND pattern2
 
         >>> find(property=[('propA','pattern1,pattern2')])
         will return all the channels which have the property propA  and
