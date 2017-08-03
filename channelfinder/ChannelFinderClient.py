@@ -110,13 +110,13 @@ class ChannelFinderClient(object):
         
         '''
         if len(kwds) == 1:
-            self.__hadleSingleAddParameter(**kwds)
+            self.__handleSingleAddParameter(**kwds)
         elif len(kwds) == 2:
             self.__handleMultipleAddParameters(**kwds)
         else:
             raise Exception, 'incorrect usage: '
     
-    def __hadleSingleAddParameter(self, **kwds):
+    def __handleSingleAddParameter(self, **kwds):
         if 'channel' in kwds :
             r = self.__session.put(self.__baseURL + self.__channelsResource + '/' + kwds['channel'][u'name'],
                              data=JSONEncoder().encode(kwds['channel']),
@@ -251,6 +251,13 @@ class ChannelFinderClient(object):
         >>> find(tagName='pattern1,pattern2')
         will return all the channels which have the tags matching pattern1 AND pattern2
 
+        >>> find(size=5)
+        will return the first 5 channels
+
+        Basic rule for *size* and *ifrom* parameters:
+        (n >= 1, m >= 0)
+        >>> assert find(size=n, ifrom=m) == find(size=n+m)[-n:]
+
         To query for the existance of a tag or property use findTag and findProperty.
         '''
         if not self.__baseURL:
@@ -272,6 +279,10 @@ class ChannelFinderClient(object):
                     patterns = prop[1].split(',')
                     for eachPattern in patterns:
                         args.append((prop[0], eachPattern.strip()))
+            elif key == 'size':
+                args.append(('~size', '{0:d}'.format(int(kwds[key]))))
+            elif key == 'ifrom':
+                args.append(('~from', '{0:d}'.format(int(kwds[key]))))
             else:
                 raise Exception, 'unknown find argument ' + key
         return self.findByArgs(args)
