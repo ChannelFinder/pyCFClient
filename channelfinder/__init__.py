@@ -1,2 +1,2 @@
-from CFDataTypes import *
-from ChannelFinderClient import *
+from .CFDataTypes import *
+from .ChannelFinderClient import *

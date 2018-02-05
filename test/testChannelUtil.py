@@ -10,6 +10,10 @@ import unittest
 from channelfinder import Channel, Property, Tag
 from channelfinder.util import ChannelUtil
 
+import requests
+requests.packages.urllib3.disable_warnings()
+
+
 class Test(unittest.TestCase):
 
 

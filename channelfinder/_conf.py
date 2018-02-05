@@ -12,12 +12,22 @@ username=MyUserName
 password=MyPassword
 """
 
+
+import sys
+import os.path
+
+if (sys.version_info > (3, 0)):
+    # Python 3 code in this block
+    from configparser import ConfigParser
+else:
+    # Python 2 code in this block
+    from ConfigParser import SafeConfigParser as ConfigParser
+
+
 def __loadConfig():
-    import os.path
-    import ConfigParser
-    dflt={'BaseURL':'http://localhost:8080/ChannelFinder'
+    dflt={'BaseURL':'http://barkeria-vm:8080/ChannelFinder'
         }
-    cf=ConfigParser.SafeConfigParser(defaults=dflt)
+    cf=ConfigParser(defaults=dflt)
 #    print os.path.normpath(os.path.expanduser('~/channelfinderapi.conf'))
     cf.read([
         '/etc/channelfinderapi.conf',

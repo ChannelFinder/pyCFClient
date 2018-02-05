@@ -13,6 +13,11 @@ from channelfinder import ChannelFinderClient
 from channelfinder.util import ChannelUtil
 from collections import Counter
 from _testConf import _testConf
+
+import requests
+requests.packages.urllib3.disable_warnings()
+
+
 #===============================================================================
 # 
 #===============================================================================
@@ -1186,7 +1191,7 @@ class ErrorTest(unittest.TestCase):
                               channel={u'name':u'channelName', \
                                               u'owner':self.ChannelOwner, \
                                               u'properties':[{u'name':u'existingProperty', u'owner':self.propOwner}]})
-            print "client: " + str(self.client.find(name='channelName')[0])
+            print("client: " + str(self.client.find(name='channelName')[0]))
             #should this \/ be if client.find... == None ???
             self.assertFalse('existingProperty' in self.client.find(name=u'channelName')[0][u'properties'], \
                              'Failed: should not be able to update a channel with a property with value null')

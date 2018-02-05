@@ -7,6 +7,15 @@ Created on Feb 11, 2011
 @author: shroffk
 '''
 
+import sys
+
+if (sys.version_info > (3, 0)):
+    # cmp function is gone in Python 3.
+
+    def cmp(a, b):
+        return (a > b) - (a < b)
+
+
 class Channel(object):
     '''
     A Channel object consists of a unique name, an owner and an optional list
@@ -24,8 +33,8 @@ class Channel(object):
         properties = list of properties of type Property
         tags = list of tags of type Tag
         '''
-        self.__Name = str(name).strip();
-        self.__Owner = str(owner).strip();
+        self.__Name = str(name).strip()
+        self.__Owner = str(owner).strip()
         self.Properties = properties
         self.Tags = tags
     
