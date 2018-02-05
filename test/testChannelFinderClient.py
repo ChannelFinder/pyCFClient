@@ -14,8 +14,8 @@ from channelfinder.util import ChannelUtil
 from collections import Counter
 from _testConf import _testConf
 
-import requests
-requests.packages.urllib3.disable_warnings()
+import urllib3
+urllib3.disable_warnings()
 
 
 #===============================================================================
