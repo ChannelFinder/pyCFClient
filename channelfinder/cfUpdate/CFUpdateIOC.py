@@ -19,7 +19,7 @@ from getpass import getpass
 from glob import glob
 
 from channelfinder import ChannelFinderClient
-from channelfinder._conf import _conf
+from channelfinder._conf import basecfg
 
 def getArgsFromFilename(completeFilePath):
     fileName = os.path.split(os.path.normpath(completeFilePath))[1]
@@ -213,9 +213,9 @@ def mainRun(opts, args):
                             password=__getDefaultConfig('password',opts.password))
             
 def __getDefaultConfig(arg, value):
-        if value == None:
+        if value is None:
             try:
-                return _conf.get('DEFAULT', arg)
+                return basecfg.get('DEFAULT', arg)
             except:
                 return None
         else:

@@ -35,4 +35,4 @@ def __loadConfig():
         'channelfinderapi.conf'
     ])
     return cf
-_conf=__loadConfig()
+basecfg=__loadConfig()

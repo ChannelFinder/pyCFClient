@@ -153,7 +153,7 @@ class OperationTagTest(unittest.TestCase):
             self.clientTag.set(tags=testTags)
             '''Check if all the tags were correctly Added '''
             for tag in testTags:
-                self.assertTrue(self.client.findTag(tagName=tag[u'name']), \
+                self.assertTrue(self.client.findTag(tagname=tag[u'name']), \
                                 'Error: tag ' + tag[u'name'] + ' was not added')
         finally:
             '''delete the Tags '''
@@ -161,7 +161,7 @@ class OperationTagTest(unittest.TestCase):
                 self.clientTag.delete(tagName=tag[u'name'])
             '''Check all the tags were correctly removed '''
             for tag in testTags:
-                self.assertEqual(self.client.findTag(tagName='pyTag1'), None, \
+                self.assertEqual(self.client.findTag(tagname='pyTag1'), None, \
                                  'Error: tag ' + tag[u'name'] + ' was not removed')
 
     def testSetRemoveTag2Channel(self):
@@ -279,7 +279,7 @@ class OperationTagTest(unittest.TestCase):
                 self.client.delete(tagName=tag['name'])
             # Check all the tags were correctly removed
             for tag in testTags:
-                self.assertEqual(self.client.findTag(tagName=tag[u'name']), None, \
+                self.assertEqual(self.client.findTag(tagname=tag[u'name']), None, \
                                  'Error: property ' + tag[u'name'] + ' was not removed')
 
 #===============================================================================
@@ -432,7 +432,7 @@ class OperationPropertyTest(unittest.TestCase):
                 self.client.delete(propertyName=prop[u'name'])
             # Check all the tags were correctly removed
             for prop in testProps:
-                self.assertEqual(self.client.findProperty(propertyName=prop[u'name']), None, \
+                self.assertEqual(self.client.findProperty(propertyname=prop[u'name']), None, \
                                  'Error: property ' + prop[u'name'] + ' was not removed')
 #===============================================================================
 #
@@ -809,7 +809,7 @@ class UpdateOperationTest(unittest.TestCase):
         Update a single property using update(property=updatedProperty)
         Updates existing channels with new property owner, without altering original value.
         '''
-        prop = self.client.findProperty(propertyName=u'originalProp')
+        prop = self.client.findProperty(propertyname=u'originalProp')
         self.assertDictEqual(prop, {u'owner': self.propOwner,
                                     u'channels': [],
                                     u'name': u'originalProp',
@@ -819,7 +819,7 @@ class UpdateOperationTest(unittest.TestCase):
         updatedProperty[u'owner'] = u'newOwner'
         self.clientProp.update(property=updatedProperty)
         '''Check property owner'''
-        prop = self.client.findProperty(propertyName=u'originalProp')
+        prop = self.client.findProperty(propertyname=u'originalProp')
         self.assertDictEqual(prop, {u'owner': u'newOwner',
                                     u'channels': [],
                                     u'name': u'originalProp',
@@ -835,14 +835,14 @@ class UpdateOperationTest(unittest.TestCase):
         Update a single tag using update(tag=updatedTag)
         Updates owner in all associated channels.
         '''
-        tag = self.client.findTag(tagName=u'originalTag')
+        tag = self.client.findTag(tagname=u'originalTag')
         self.assertDictEqual(tag, {u'owner': self.tagOwner, u'channels': [], u'name': u'originalTag'})
 
         updatedTag = dict(tag)
         updatedTag[u'owner'] = u'newOwner'
         self.clientTag.update(tag=updatedTag)
         '''Check tag owner'''
-        tag = self.client.findTag(tagName=u'originalTag')
+        tag = self.client.findTag(tagname=u'originalTag')
         self.assertDictEqual(tag, {u'owner': u'newOwner', u'channels': [], u'name': u'originalTag'})
         '''Checks existing channel'''
         ch = self.client.find(name=u'originalChannelName')

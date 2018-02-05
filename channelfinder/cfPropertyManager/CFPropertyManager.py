@@ -12,7 +12,6 @@ from optparse import OptionParser
 from getpass import getpass
 
 from channelfinder import ChannelFinderClient
-from channelfinder._conf import _conf
 
 global username, client, exclusion_expression, password, SERVICE_URL, quiet, verbose
 
