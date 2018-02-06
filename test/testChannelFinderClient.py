@@ -419,9 +419,9 @@ class OperationPropertyTest(unittest.TestCase):
     def testGetAllPropperties(self):
         '''Test setting multiple properties and listing all tags'''
         testProps = []
-        testProps.append({u'name':u'pyTestProp1', u'owner':self.propOwner})
-        testProps.append({u'name':u'pyTestProp2', u'owner':self.propOwner})
-        testProps.append({u'name':u'pyTestProp3', u'owner':self.propOwner})
+        testProps.append({u'name': u'pyTestProp1', u'owner': self.propOwner})
+        testProps.append({u'name': u'pyTestProp2', u'owner': self.propOwner})
+        testProps.append({u'name': u'pyTestProp3', u'owner': self.propOwner})
         try:
             self.client.set(properties=testProps)
             allProperties = self.client.getAllProperties()

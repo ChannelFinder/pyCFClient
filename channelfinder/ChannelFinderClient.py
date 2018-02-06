@@ -75,6 +75,20 @@ class ChannelFinderClient(object):
         """
         method to allow various types of set operations on one or many channels, tags or properties
         The operation creates a new entry if none exists and destructively replaces existing entries.
+
+        It handles request to add data with one key as below:
+            - channel
+            - channels
+            - tag
+            - tags
+            - property
+            - properties
+
+        or key combinations as:
+            - tag and channelName
+            - tag and channelNames
+            - property and channels
+
         set(channel = Channel)
         >>> set(channel={'name':'channelName', 'owner':'channelOwner'})
         >>> set(channel={'name':'channelName',
