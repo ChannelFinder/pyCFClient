@@ -113,7 +113,7 @@ def channel_demo(channel):
 def tag_demo(channel):
     """
     Demo routine to operate tag.
-    
+
     :param channel:
     :return:
     """
