@@ -29,29 +29,29 @@ import urllib3
 urllib3.disable_warnings()
 
 
-def prop_demo(cf):
+def prop_demo(channel):
     """
     Demo routine to operate property
 
-    :param cf:
+    :param channel:
     :return:
     """
     # every property has to be added first before using it.
     properties = []
-    propDict = {'elem_type': 'cf-update', \
-                'elem_name': 'cf-update', \
-                'dev_name': 'cf-update', \
-                'length': 'cf-update', \
-                's_position': 'cf-update', \
-                'ordinal': 'cf-update', \
-                'system': 'cf-update', \
-                'cell': 'cf-update', \
-                'girder': 'cf-update', \
-                'handle': 'cf-update', \
+    propDict = {'elem_type': 'cf-update',
+                'elem_name': 'cf-update',
+                'dev_name': 'cf-update',
+                'length': 'cf-update',
+                's_position': 'cf-update',
+                'ordinal': 'cf-update',
+                'system': 'cf-update',
+                'cell': 'cf-update',
+                'girder': 'cf-update',
+                'handle': 'cf-update',
                 'symmetry': 'cf-update'
                 }
 
-    properties1 = cf.getAllProperties()
+    properties1 = channel.getAllProperties()
     print(properties1)
     for prop in properties1:
         try:
@@ -62,20 +62,20 @@ def prop_demo(cf):
         for k, v in propDict.items():
             properties.append({u'name': k, u'owner': v})
         if len(propDict) == 1:
-            cf.set(property=properties)
+            channel.set(property=properties)
         else:
-            cf.set(properties=properties)
-        properties2 = cf.getAllProperties()
+            channel.set(properties=properties)
+        properties2 = channel.getAllProperties()
         print(properties2)
     else:
         print('all properties are in database already.')
 
 
-def channel_demo(cf):
+def channel_demo(channel):
     """
     Demo routine to operate channel
 
-    :param cf:
+    :param channel:
     :return:
     """
     try:
@@ -105,42 +105,53 @@ def channel_demo(cf):
                 if results[2] != 'NULL':
                     props.append({'name': u'handle', 'value': u'setpoint'})
                     channels.append({u'name': results[2], u'owner': u'cf-update', u'properties': props})
-        cf.set(channels=channels)
+        channel.set(channels=channels)
     finally:
         f.close()
 
-    channels = cf.find(name='SR*')
-    print(len(channels))
-    for channel in channels:
-        print(channel)
 
-
-def tag_demo(cf):
+def tag_demo(channel):
     """
     Demo routine to operate tag
-    :param cf:
+    :param channel:
     :return:
     """
     # set one tag
     tag = {'name': 'example1', 'owner': 'cf-update'}
-    cf.set(tag=tag)
+    channel.set(tag=tag)
     
     # set a set of tags
     tags = [{'name': 'example2', 'owner': 'cf-update'},
             {'name': 'example3', 'owner': 'cf-update'},
             {'name': 'example4', 'owner': 'cf-update'},
             {'name': 'example5', 'owner': 'cf-update'}]
-    cf.set(tags=tags)
+    channel.set(tags=tags)
 
-    channels = cf.find(name='SR*')
+
+def addtag2channel_demo(channel):
+    tag = {'name': 'example1', 'owner': 'cf-update'}
+
+    # set a set of tags
+    tags = [{'name': 'example2', 'owner': 'cf-update'},
+            {'name': 'example3', 'owner': 'cf-update'},
+            {'name': 'example4', 'owner': 'cf-update'},
+            {'name': 'example5', 'owner': 'cf-update'}]
+
+    channels = channel.find(name='SR*')
     channelNames = [channel['name'] for channel in channels]
     
     # set a tag to many channels
-    cf.set(tag=tag, channelNames=channelNames)
+    channel.set(tag=tag, channelNames=channelNames)
     
     # set tags to many channels
     for tag in tags:
-        cf.set(tag=tag, channelNames=channelNames)
+        channel.set(tag=tag, channelNames=channelNames)
+
+def searchchannel_demo(channel):
+    channels = channel.find(name='SR*')
+    print(len(channels))
+    for channel in channels:
+        print(channel)
 
 
 if __name__ == '__main__':
@@ -151,3 +162,5 @@ if __name__ == '__main__':
     tag_demo(cf)
     prop_demo(cf)
     channel_demo(cf)
+    addtag2channel_demo(cf)
+    searchchannel_demo(cf)
