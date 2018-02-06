@@ -112,7 +112,8 @@ def channel_demo(channel):
 
 def tag_demo(channel):
     """
-    Demo routine to operate tag
+    Demo routine to operate tag.
+    
     :param channel:
     :return:
     """
@@ -138,7 +139,7 @@ def addtag2channel_demo(channel):
             {'name': 'example5', 'owner': 'cf-update'}]
 
     channels = channel.find(name='SR*')
-    channelNames = [channel['name'] for channel in channels]
+    channelNames = [ch['name'] for ch in channels]
     
     # set a tag to many channels
     channel.set(tag=tag, channelNames=channelNames)
@@ -147,7 +148,14 @@ def addtag2channel_demo(channel):
     for tag in tags:
         channel.set(tag=tag, channelNames=channelNames)
 
+
 def searchchannel_demo(channel):
+    """
+    Demo routine to search channel names in channel finder.
+
+    :param channel:
+    :return:
+    """
     channels = channel.find(name='SR*')
     print(len(channels))
     for channel in channels:
