@@ -48,11 +48,17 @@ def prop_demo(channel):
                 'cell': 'cf-update',
                 'girder': 'cf-update',
                 'handle': 'cf-update',
-                'symmetry': 'cf-update'
+                'symmetry': 'cf-update',
+                'hostName': 'cf-update',
+                'iocName': 'cf-update',
+                'pvStatus': 'cf-update',
+                'time': 'cf-update',
+                'ioctest': 'cf-update',
+                'iocid': 'cf-update',
+                'iocidtest': 'cf-update'
                 }
 
     properties1 = channel.getAllProperties()
-    print(properties1)
     for prop in properties1:
         try:
             del propDict[prop['name']]
@@ -62,11 +68,10 @@ def prop_demo(channel):
         for k, v in propDict.items():
             properties.append({u'name': k, u'owner': v})
         if len(propDict) == 1:
-            channel.set(property=properties)
+            channel.set(property=properties[0])
         else:
             channel.set(properties=properties)
-        properties2 = channel.getAllProperties()
-        print(properties2)
+        print(channel.getAllProperties())
     else:
         print('all properties are in database already.')
 
@@ -163,7 +168,8 @@ def searchchannel_demo(channel):
 
 
 if __name__ == '__main__':
-    cf = ChannelFinderClient(BaseURL='https://barkeria-vm:8181/ChannelFinder', username='channel', password='1234')
+    # cf = ChannelFinderClient(BaseURL='https://localhost:8181/ChannelFinder', username='channel', password='1234')
+    cf = ChannelFinderClient()
     # you can use browser to view results
     # http://localhost:8080/ChannelFinder/resources/channels?~name=SR*
 

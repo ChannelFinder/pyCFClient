@@ -25,13 +25,13 @@ else:
 
 
 def __loadConfig():
-    dflt={'BaseURL':'http://barkeria-vm:8080/ChannelFinder'
+    dflt={'BaseURL':'http://localhost:8080/ChannelFinder'
         }
     cf=ConfigParser(defaults=dflt)
 #    print os.path.normpath(os.path.expanduser('~/channelfinderapi.conf'))
     cf.read([
         '/etc/channelfinderapi.conf',
-        os.path.expanduser('~/channelfinderapi.conf'),
+        os.path.expanduser('~/.channelfinderapi.conf'),
         'channelfinderapi.conf'
     ])
     return cf

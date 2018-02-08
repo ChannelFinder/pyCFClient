@@ -66,7 +66,7 @@ class ChannelFinderClient(object):
         result = ref
         if ref is None:
             if sys.version_info > (3, 0):
-                result = basecfg['DEFAULT'].get('BaseURL', None)
+                result = basecfg['DEFAULT'].get(key, None)
             elif basecfg.has_option('DEFAULT', key):
                 result = basecfg.get('DEFAULT', key)
         return result
