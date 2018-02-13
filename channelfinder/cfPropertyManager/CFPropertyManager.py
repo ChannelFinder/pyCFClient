@@ -12,6 +12,7 @@ from optparse import OptionParser
 from getpass import getpass
 
 from channelfinder import ChannelFinderClient
+from channelfinder._conf import basecfg, PYTHON3
 
 global username, client, exclusion_expression, password, SERVICE_URL, quiet, verbose
 
@@ -115,7 +116,7 @@ def applyExpression():
             try:
                 client.update(channel = {u'name' : channel_name, u'owner':username,u'properties':prop_list })
             except Exception as e:
-                if (sys.version_info > (3, 0)):
+                if PYTHON3:
                     # Python 3 code in this block
                     print('Failed to update: ' + channel_name + " \n--Cause:" + str(e).strip())
                 else:
@@ -157,7 +158,7 @@ def __getDefaultConfig(arg, value):
     '''
     if value == None:
         try:
-            return _conf.get('DEFAULT', arg)
+            return basecfg.get('DEFAULT', arg)
         except:
             return None
     else:

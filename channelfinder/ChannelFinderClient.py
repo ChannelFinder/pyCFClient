@@ -8,7 +8,6 @@ Created on Feb 15, 2011
 
 """
 
-import sys
 import ssl
 import requests
 from requests import auth
@@ -21,8 +20,7 @@ try:
 except ImportError:
     from simplejson import JSONDecoder, JSONEncoder
 
-from ._conf import basecfg
-
+from ._conf import basecfg, PYTHON3
 
 class ChannelFinderClient(object):
     __jsonheader = {'content-type': 'application/json', 'accept': 'application/json'}
@@ -65,7 +63,7 @@ class ChannelFinderClient(object):
         """
         result = ref
         if ref is None:
-            if sys.version_info > (3, 0):
+            if PYTHON3:
                 result = basecfg['DEFAULT'].get(key, None)
             elif basecfg.has_option('DEFAULT', key):
                 result = basecfg.get('DEFAULT', key)
@@ -723,7 +721,7 @@ class Ssl3HttpAdapter(HTTPAdapter):
         "Transport adapter" that allows us to use SSLv3.
 
         """
-        if sys.version_info > (3, 0):
+        if PYTHON3:
             super().__init__()
         else:
             super(Ssl3HttpAdapter, self).__init__()

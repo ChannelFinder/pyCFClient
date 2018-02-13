@@ -9,9 +9,10 @@ Created on Feb 11, 2011
 @author: shroffk
 """
 
-import sys
 
-if sys.version_info > (3, 0):
+from ._conf import PYTHON3
+
+if PYTHON3:
     # cmp function is gone in Python 3.
     # Define for backward compatibility
     def cmp(a, b):
