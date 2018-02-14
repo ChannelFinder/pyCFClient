@@ -9,13 +9,17 @@ Created on Apr 1, 2011
 CFUpdateIOC provides a command like client to update channelfinder
 with a list of process variables (usually the output of the dbl command).
 '''
+
+from __future__ import print_function
+
 import os
 import re
 from optparse import OptionParser
 from getpass import getpass
-from channelfinder import ChannelFinderClient
 from glob import glob
-from channelfinder._conf import _conf
+
+from channelfinder import ChannelFinderClient
+from channelfinder._conf import basecfg
 
 def getArgsFromFilename(completeFilePath):
     fileName = os.path.split(os.path.normpath(completeFilePath))[1]
@@ -41,7 +45,7 @@ def getPVNames(completeFilePath, pattern=None):
         pvNames = filter(lambda x: len(x)>0, pvNames)
         if pattern:
             pvNames = [re.match(pattern, pvName).group() for pvName in pvNames if re.match(pattern, pvName)]
-        return pvNames
+        return list(pvNames)
     except IOError:
         return None
     finally:
@@ -65,12 +69,12 @@ def updateChannelFinder(pvNames, hostName, iocName, time, owner,
     password = channelfinder password
     '''
     if hostName == None or iocName == None:
-        raise Exception, 'missing hostName or iocName'
+        raise RuntimeError('missing hostName or iocName')
     channels = []
     try:
         client = ChannelFinderClient(BaseURL=service, username=username, password=password)
     except:
-        raise Exception, 'Unable to create a valid webResourceClient'
+        raise RuntimeError('Unable to create a valid webResourceClient')
     checkPropertiesExist(client, owner)
     previousChannelsList = client.findByArgs([(u'hostName', hostName), (u'iocName', iocName)])
     if previousChannelsList != None:
@@ -162,8 +166,8 @@ def checkPropertiesExist(client, propOwner):
             try:
                 client.set(property={u'name' : propName, u'owner' : propOwner})
             except Exception as e:
-                print 'Failed to create the property',propName
-                print 'CAUSE:',e.message
+                print('Failed to create the property',propName)
+                print('CAUSE:',e.message)
 
 def ifNoneReturnDefault(object, default):
     '''
@@ -209,9 +213,9 @@ def mainRun(opts, args):
                             password=__getDefaultConfig('password',opts.password))
             
 def __getDefaultConfig(arg, value):
-        if value == None:
+        if value is None:
             try:
-                return _conf.get('DEFAULT', arg)
+                return basecfg.get('DEFAULT', arg)
             except:
                 return None
         else:

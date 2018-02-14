@@ -11,11 +11,19 @@ BaseURL=http://localhost:8080/ChannelFinder
 username=MyUserName
 password=MyPassword
 """
+import os.path
+
+import sys
+if sys.version_info[0] < 3:
+    # Python 2 code in this block
+    from ConfigParser import SafeConfigParser as ConfigParser
+else:
+    # Python 3 code in this block
+    from configparser import ConfigParser
+
 
 def __loadConfig():
-    import os.path
-    import ConfigParser
-    dflt={'BaseURL':'https://localhost:8181/ChannelFinder',
+    dflt={'BaseURL':'https://barkeria-vm:8181/ChannelFinder',
           'username' : 'cf-update',
           'password' : '1234',
           'owner' : 'cf-update',
@@ -29,11 +37,12 @@ def __loadConfig():
           'tagUsername' : 'tag',
           'tagPassword' : '1234'
         }
-    cf=ConfigParser.SafeConfigParser(defaults=dflt)
+    cf=ConfigParser(defaults=dflt)
     cf.read([
         '/etc/channelfinderapi.conf',
         os.path.expanduser('~/channelfinderapi.conf'),
         'channelfinderapi.conf'
     ])
     return cf
+
 _testConf=__loadConfig()

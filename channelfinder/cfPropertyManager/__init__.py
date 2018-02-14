@@ -1,1 +1,1 @@
-from CFPropertyManager import *
+from .CFPropertyManager import *

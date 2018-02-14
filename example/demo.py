@@ -23,45 +23,158 @@ Created on Mar 14, 2011
 @author: G. Shen
 """
 
-from channelfinder.ChannelFinderClient import ChannelFinderClient
-from channelfinder.Channel import Tag
+from channelfinder import ChannelFinderClient
 
-if __name__ == '__main__':
-    cf = ChannelFinderClient(BaseURL = 'http://channelfinder.nsls2.bnl.gov:8080/ChannelFinder', username='boss', password='1234')
-    
+import urllib3
+urllib3.disable_warnings()
+
+
+def prop_demo(channel):
+    """
+    Demo routine to operate property
+
+    :param channel:
+    :return:
+    """
+    # every property has to be added first before using it.
+    properties = []
+    propDict = {'elem_type': 'cf-update',
+                'elem_name': 'cf-update',
+                'dev_name': 'cf-update',
+                'length': 'cf-update',
+                's_position': 'cf-update',
+                'ordinal': 'cf-update',
+                'system': 'cf-update',
+                'cell': 'cf-update',
+                'girder': 'cf-update',
+                'handle': 'cf-update',
+                'symmetry': 'cf-update',
+                'hostName': 'cf-update',
+                'iocName': 'cf-update',
+                'pvStatus': 'cf-update',
+                'time': 'cf-update',
+                'ioctest': 'cf-update',
+                'iocid': 'cf-update',
+                'iocidtest': 'cf-update'
+                }
+
+    properties1 = channel.getAllProperties()
+    for prop in properties1:
+        try:
+            del propDict[prop['name']]
+        except KeyError:
+            pass
+    if len(propDict) > 0:
+        for k, v in propDict.items():
+            properties.append({u'name': k, u'owner': v})
+        if len(propDict) == 1:
+            channel.set(property=properties[0])
+        else:
+            channel.set(properties=properties)
+        print(channel.getAllProperties())
+    else:
+        print('all properties are in database already.')
+
+
+def channel_demo(channel):
+    """
+    Demo routine to operate channel
+
+    :param channel:
+    :return:
+    """
+    try:
+        # the file has the following attributes:
+        # index, read back, set point, phys name, len[m], s[m], type
+        f = open('lat_conf_table.txt', 'r')
+        lines = f.readlines()
+        channels = []
+
+        for line in lines:
+            if not (line.startswith('#') or line.startswith('!') or not line.strip()):
+                results = line.split()
+                if len(results) < 7:
+                    # input file format problem
+                    raise
+                props = [{'name': u'elem_type', 'value': results[6]},
+                         {'name': u'elem_name', 'value': results[3]},
+                         {'name': u'length', 'value': results[4]},
+                         {'name': u's_position', 'value': results[5]},
+                         {'name': u'ordinal', 'value': results[0]},
+                         {'name': u'system', 'value': u'SR'}
+                         ]
+
+                if results[1] != 'NULL':
+                    props.append({'name': u'handle', 'value': u'readback'})
+                    channels.append({u'name': results[1], u'owner': u'cf-update', u'properties': props})
+                if results[2] != 'NULL':
+                    props.append({'name': u'handle', 'value': u'setpoint'})
+                    channels.append({u'name': results[2], u'owner': u'cf-update', u'properties': props})
+        channel.set(channels=channels)
+    finally:
+        f.close()
+
+
+def tag_demo(channel):
+    """
+    Demo routine to operate tag.
+
+    :param channel:
+    :return:
+    """
     # set one tag
-    tag = Tag('example1', 'vioc')
-    cf.set(tag=tag)
+    tag = {'name': 'example1', 'owner': 'cf-update'}
+    channel.set(tag=tag)
     
     # set a set of tags
-    tags = [Tag('example2', 'vioc'), Tag('example3', 'vioc'), Tag('example4', 'vioc'), Tag('example5', 'vioc')]
-    cf.set(tags=tags)
-    
-    channels = cf.find(name='SR*')
-    channelNames = [channel.Name for channel in channels]
+    tags = [{'name': 'example2', 'owner': 'cf-update'},
+            {'name': 'example3', 'owner': 'cf-update'},
+            {'name': 'example4', 'owner': 'cf-update'},
+            {'name': 'example5', 'owner': 'cf-update'}]
+    channel.set(tags=tags)
+
+
+def addtag2channel_demo(channel):
+    tag = {'name': 'example1', 'owner': 'cf-update'}
+
+    # set a set of tags
+    tags = [{'name': 'example2', 'owner': 'cf-update'},
+            {'name': 'example3', 'owner': 'cf-update'},
+            {'name': 'example4', 'owner': 'cf-update'},
+            {'name': 'example5', 'owner': 'cf-update'}]
+
+    channels = channel.find(name='SR*')
+    channelNames = [ch['name'] for ch in channels]
     
     # set a tag to many channels
-    cf.set(tag=tag, channelNames=channelNames)
+    channel.set(tag=tag, channelNames=channelNames)
     
     # set tags to many channels
     for tag in tags:
-        cf.set(tag=tag, channelNames=channelNames)
+        channel.set(tag=tag, channelNames=channelNames)
 
-    # retrieve channel, properties, and tags
-#    channels = cf.find(name='SR*')
-#    for channel in channels:
-#        print channel.Name
-#        # get tags for each channel
-#        tmp_tags = channel.getTags()
-#        if tmp_tags != None:
-#            for tmp_tag in tmp_tags:
-#                print tmp_tag
-        
-    # remove one tag
-#    cf.remove(tagName='example1')
-#    cf.remove(tagName='example2')
-#    cf.remove(tagName='example3')
-#    cf.remove(tagName='example4')
-#    cf.remove(tagName='example5')
-    
-#    print len(channels)
+
+def searchchannel_demo(channel):
+    """
+    Demo routine to search channel names in channel finder.
+
+    :param channel:
+    :return:
+    """
+    channels = channel.find(name='SR*')
+    print(len(channels))
+    for channel in channels:
+        print(channel)
+
+
+if __name__ == '__main__':
+    # cf = ChannelFinderClient(BaseURL='https://localhost:8181/ChannelFinder', username='channel', password='1234')
+    cf = ChannelFinderClient()
+    # you can use browser to view results
+    # http://localhost:8080/ChannelFinder/resources/channels?~name=SR*
+
+    tag_demo(cf)
+    prop_demo(cf)
+    channel_demo(cf)
+    addtag2channel_demo(cf)
+    searchchannel_demo(cf)

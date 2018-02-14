@@ -9,14 +9,18 @@ Created on Apr 5, 2011
 import unittest
 import os
 from channelfinder import ChannelFinderClient
-from _testConf import _testConf
 from channelfinder.cfUpdate.CFUpdateIOC import getPVNames, getArgsFromFilename, updateChannelFinder, ifNoneReturnDefault
 from time import time
 from tempfile import NamedTemporaryFile
 from copy import copy
 
+from _testConf import _testConf
+
+import urllib3
+urllib3.disable_warnings()
+
+
 class Test(unittest.TestCase):
-    
     def setUp(self):
         if _testConf.has_option('DEFAULT', 'BaseURL'):
             self.baseURL = _testConf.get('DEFAULT', 'BaseURL')
@@ -118,7 +122,7 @@ class Test(unittest.TestCase):
         hostName1 = 'update-test-hostname' + t1
         iocName1 = 'update-test-iocName' + t1
         # New Channels added
-        client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password);
+        client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password)
         client.set(channel={u'name':u'cf-update-pv1', u'owner':u'cf-update', u'properties':[unaffectedProperty]})
         updateChannelFinder(['cf-update-pv1', 'cf-update-pv2'], \
                             hostName1, \
@@ -391,11 +395,11 @@ class Test(unittest.TestCase):
         tempFile = NamedTemporaryFile(delete=False)
         publicPVs = ['publicPV1', 'publicPV2', 'publicPV3']
         privatePVS = ['_privatePV1', '_privatePV2']
-        allPVs = copy(publicPVs);
+        allPVs = copy(publicPVs)
         allPVs.extend(privatePVS)
         for pv in allPVs:
-            tempFile.write(pv + '\n')
-        tempFile.close();        
+            tempFile.write(str.encode(pv + '\n'))
+        tempFile.close()
         try:
             pvNames = getPVNames(tempFile.name)
             self.assertEqual(len(pvNames), len(allPVs), \
