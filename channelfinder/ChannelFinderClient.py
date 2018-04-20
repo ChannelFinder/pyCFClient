@@ -49,7 +49,7 @@ class ChannelFinderClient(object):
             else:
                 self.__auth = None
             self.__session = requests.Session()
-            self.__session.mount(self.__baseURL, Ssl3HttpAdapter())
+            self.__session.mount(self.__baseURL, HTTPAdapter())
         except:
             raise RuntimeError('Failed to create client to ' + self.__baseURL)
 
@@ -713,22 +713,3 @@ class ChannelFinderClient(object):
                                 auth=self.__auth).raise_for_status()
         else:
             raise RuntimeError('unknown keys')
-
-
-class Ssl3HttpAdapter(HTTPAdapter):
-    def __init__(self):
-        """
-        "Transport adapter" that allows us to use SSLv3.
-
-        """
-        if PYTHON3:
-            super().__init__()
-        else:
-            super(Ssl3HttpAdapter, self).__init__()
-        self.poolmanager = None
-
-    def init_poolmanager(self, connections, maxsize, block=False, **kwargs):
-        self.poolmanager = PoolManager(num_pools=connections,
-                                       maxsize=maxsize,
-                                       block=block,
-                                       ssl_version=ssl.PROTOCOL_SSLv23)
