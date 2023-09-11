@@ -529,6 +529,11 @@ class ChannelFinderClient(object):
         # updates the channel 'existingCh' with the new provided properties and tags
         # without affecting the other tags and properties of this channel
 
+        update(channels = channels)
+        >>> update(channels=[{'name':'existingCh','owner':'chOwner', 'tags':[...], 'properties':[...]}, {...}])
+        # updates the channels in batch given with the new provided properties and tags
+        # without affecting the other tags and properties of this channel
+
         update(property = Property, channelName = String)
         >>> update(property={'name':'propName', 'owner':'propOwner', 'value':'propValue'},
                                     channelName='ch1')
@@ -585,6 +590,7 @@ class ChannelFinderClient(object):
         Handle single update. It accepts key-value pair as parameters.
         The keys could be one of the following:
             - channel
+            - channels
             - property
             - tag
             - tags
@@ -595,6 +601,14 @@ class ChannelFinderClient(object):
             ch = kwds['channel']
             r = self.__session.post(self.__baseURL + self.__channelsResource + '/' + ch[u'name'],
                                     data=JSONEncoder().encode(ch),
+                                    headers=copy(self.__jsonheader),
+                                    verify=False,
+                                    auth=self.__auth)
+            r.raise_for_status()
+        elif 'channels' in kwds:
+            chs = kwds['channels']
+            r = self.__session.post(self.__baseURL + self.__channelsResource,
+                                    data=JSONEncoder().encode(chs),
                                     headers=copy(self.__jsonheader),
                                     verify=False,
                                     auth=self.__auth)
