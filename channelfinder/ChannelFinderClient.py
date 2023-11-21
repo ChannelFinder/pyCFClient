@@ -27,6 +27,7 @@ class ChannelFinderClient(object):
     __channelsResource = '/resources/channels'
     __propertiesResource = '/resources/properties'
     __tagsResource = '/resources/tags'
+    __scrollResource = '/resources/scroll'
 
     def __init__(self, BaseURL=None, username=None, password=None):
         """
@@ -240,6 +241,75 @@ class ChannelFinderClient(object):
                                auth=self.__auth).raise_for_status()
         else:
             raise RuntimeError('Incorrect Usage: unknown keys')
+        
+    def __generate_find_args(self, **kwds):
+        """ 
+        Generate find arguments for find and find by scroll functions. See find() docstring for examples. 
+
+        :param kwds:
+        """
+        if not self.__baseURL:
+            raise RuntimeError('Connection not created')
+        if not len(kwds) > 0:
+            raise RuntimeError('Incorrect usage: at least one parameter must be specified')
+        args = []
+        for key in kwds:
+            if key == 'name':
+                patterns = kwds[key].split(',')
+                for eachPattern in patterns:
+                    args.append(('~name', eachPattern.strip()))
+            elif key == 'tagName':
+                patterns = kwds[key].split(',')
+                for eachPattern in patterns:
+                    args.append(('~tag', eachPattern.strip()))
+            elif key == 'property':
+                for prop in kwds[key]:
+                    patterns = prop[1].split(',')
+                    for eachPattern in patterns:
+                        args.append((prop[0], eachPattern.strip()))
+            elif key == 'size':
+                args.append(('~size', '{0:d}'.format(int(kwds[key]))))
+            elif key == 'ifrom':
+                args.append(('~from', '{0:d}'.format(int(kwds[key]))))
+            else:
+                raise RuntimeError('unknown find argument ' + key)
+            
+        return args
+
+    def findAllByScroll(self, **kwds):       
+        """
+        Use scroll API to fetch complete list of results. 
+
+        See find() docstring for kwds examples. 
+
+        :param kwds: 
+        :returns: Result list of channels. 
+        """ 
+        scrollResults = [None] 
+        scrollId = None
+        results = [] 
+
+        while scrollResults: 
+            scrollResults = self.findByScroll(scrollid=scrollId, **kwds)
+            scrollId = scrollResults['id']
+            if scrollId:
+                results = results + scrollResults['channels']
+            else:
+                scrollResults = None
+        
+        return results
+
+    def findByScroll(self, scrollid=None, **kwds):
+        """
+        Use scroll API to fetch a single result set. 
+
+        See find() docstring for kwds examples. 
+
+        :param kwds: 
+        :returns: scroll object with a scoll id and list of channels. 
+        """
+        args = self.__generate_find_args(**kwds)
+        return self.scrollByArgs(args, scrollid=scrollid)
 
     def find(self, **kwds):
         """
@@ -293,32 +363,26 @@ class ChannelFinderClient(object):
 
         To query for the existance of a tag or property use findTag and findProperty.
         """
-        if not self.__baseURL:
-            raise RuntimeError('Connection not created')
-        if not len(kwds) > 0:
-            raise RuntimeError('Incorrect usage: at least one parameter must be specified')
-        args = []
-        for key in kwds:
-            if key == 'name':
-                patterns = kwds[key].split(',')
-                for eachPattern in patterns:
-                    args.append(('~name', eachPattern.strip()))
-            elif key == 'tagName':
-                patterns = kwds[key].split(',')
-                for eachPattern in patterns:
-                    args.append(('~tag', eachPattern.strip()))
-            elif key == 'property':
-                for prop in kwds[key]:
-                    patterns = prop[1].split(',')
-                    for eachPattern in patterns:
-                        args.append((prop[0], eachPattern.strip()))
-            elif key == 'size':
-                args.append(('~size', '{0:d}'.format(int(kwds[key]))))
-            elif key == 'ifrom':
-                args.append(('~from', '{0:d}'.format(int(kwds[key]))))
-            else:
-                raise RuntimeError('unknown find argument ' + key)
+        args = self.__generate_find_args(**kwds)
         return self.findByArgs(args)
+    
+    def scrollByArgs(self, args, scrollid=None): 
+        url = self.__baseURL + self.__scrollResource
+        if scrollid:
+            url = "%s/%s" % (url, scrollid)
+        r = self.__session.get(url,
+                               params=args,
+                               headers=copy(self.__jsonheader),
+                               verify=False,
+                               auth=self.__auth)
+        try:
+            r.raise_for_status()
+            return r.json()
+        except HTTPError:
+            if r.status_code == 404:
+                return None
+            else:
+                r.raise_for_status()
 
     def findByArgs(self, args):
         url = self.__baseURL + self.__channelsResource
