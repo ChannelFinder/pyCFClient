@@ -11,14 +11,14 @@ import unittest
 
 from channelfinder import ChannelFinderClient
 from channelfinder.util import ChannelUtil
-from _testConf import _testConf
+from _testConf import _testConf, ChannelFinderClientTestCase
 
 import urllib3
 
 urllib3.disable_warnings()
 
 
-class ConnectionTest(unittest.TestCase):
+class ConnectionTest(ChannelFinderClientTestCase):
     def testConnection(self):
         testUrl = getDefaultTestConfig("BaseURL")
         self.assertNotEqual(ChannelFinderClient(BaseURL=testUrl,
@@ -34,7 +34,7 @@ class ConnectionTest(unittest.TestCase):
 # Test JSON Parsing
 # ===============================================================================
 """
-class JSONparserTest(unittest.TestCase):
+class JSONparserTest(ChannelFinderClientTestCase):
     
     multiChannels = {u'channels': {u'channel': [{u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:0', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'0'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'19'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}, {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:1', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'1'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'22'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}, {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:2', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'2'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'38'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}, {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:3', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'3'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'65'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}, {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:4', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'4'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'78'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}, {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:5', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'5'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'79'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}, {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:6', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'6'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'90'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}, {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:7', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'7'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'5'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}, {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:8', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'8'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'64'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}, {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:9', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'9'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'85'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}]}}
     singleChannels = {u'channels': {u'channel': {u'@owner': u'shroffk', u'@name': u'Test_first:a<000>:0:2', u'properties': {u'property': [{u'@owner': u'shroffk', u'@name': u'Test_PropA', u'@value': u'2'}, {u'@owner': u'shroffk', u'@name': u'Test_PropB', u'@value': u'38'}, {u'@owner': u'shroffk', u'@name': u'Test_PropC', u'@value': u'ALL'}]}, u'tags': {u'tag': [{u'@owner': u'shroffk', u'@name': u'Test_TagA'}, {u'@owner': u'shroffk', u'@name': u'Test_TagB'}]}}}}
@@ -91,7 +91,7 @@ class JSONparserTest(unittest.TestCase):
 # ===============================================================================
 # Test all the tag operations
 # ===============================================================================
-class OperationTagTest(unittest.TestCase):
+class OperationTagTest(ChannelFinderClientTestCase):
     def setUp(self):
         """Default Owners"""
         self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
@@ -279,7 +279,7 @@ class OperationTagTest(unittest.TestCase):
 # Test all the property operations
 # ===============================================================================
 
-class OperationPropertyTest(unittest.TestCase):
+class OperationPropertyTest(ChannelFinderClientTestCase):
     def setUp(self):
         """Default Owners"""
         self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
@@ -431,7 +431,7 @@ class OperationPropertyTest(unittest.TestCase):
 # ===============================================================================
 #
 # ===============================================================================
-class OperationChannelTest(unittest.TestCase):
+class OperationChannelTest(ChannelFinderClientTestCase):
     def setUp(self):
         """Default Owners"""
         self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
@@ -653,7 +653,7 @@ class OperationChannelTest(unittest.TestCase):
 # Update Opertation Tests
 # ===============================================================================
 
-class UpdateOperationTest(unittest.TestCase):
+class UpdateOperationTest(ChannelFinderClientTestCase):
     def setUp(self):
         """Default set of Owners"""
         self.channelOwner = _testConf.get('DEFAULT', 'channelOwner')
@@ -865,7 +865,7 @@ class UpdateOperationTest(unittest.TestCase):
 """
 
 
-class UpdateAppendTest(unittest.TestCase):
+class UpdateAppendTest(ChannelFinderClientTestCase):
     def setUp(self):
         """Default Owners"""
         self.ChannelOwner = _testConf.get('DEFAULT', 'channelOwner')
@@ -1004,7 +1004,7 @@ class UpdateAppendTest(unittest.TestCase):
 # Query Tests
 # ===========================================================================
 
-class QueryTest(unittest.TestCase):
+class QueryTest(ChannelFinderClientTestCase):
     def setUp(self):
         """Default Owners"""
         self.ChannelOwner = _testConf.get('DEFAULT', 'channelOwner')
@@ -1111,7 +1111,7 @@ class QueryTest(unittest.TestCase):
 # ===============================================================================
 #  ERROR tests
 # ===============================================================================
-class ErrorTest(unittest.TestCase):
+class ErrorTest(ChannelFinderClientTestCase):
     def setUp(self):
         """Default Owners"""
         self.ChannelOwner = _testConf.get('DEFAULT', 'channelOwner')
