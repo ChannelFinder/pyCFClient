@@ -167,6 +167,9 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         client.set(channel={u'name':u'cf-update-pv1', u'owner':u'cf-update', u'properties':[unaffectedProperty], u'tags':[unaffectedTag]})
         client.set(channel={u'name':u'cf-update-pv2', u'owner':u'cf-update', u'properties':[unaffectedProperty], u'tags':[unaffectedTag]})
         
+        unaffectedProperty['channels'] = []
+        unaffectedTag['channels'] = []
+
         # Case1:
         hostName = 'initialHost'
         iocName = 'initialIoc'
