@@ -1043,7 +1043,7 @@ class QueryTest(ChannelFinderClientTestCase):
         """
         find for non existing entities should return None instead of a 404
         """
-        self.assertEquals(len(self.client.find(name=u'NonExistingChannelName')), 0,
+        self.assertEqual(len(self.client.find(name=u'NonExistingChannelName')), 0,
                           'Failed to return None when searching for a non existing channel')
 
     def MultiValueQuery(self):
