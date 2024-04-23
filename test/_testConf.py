@@ -24,7 +24,7 @@ else:
     from configparser import ConfigParser
 
 def channelFinderDocker():
-    return DockerCompose("test", compose_file_name="docker-compose.yml", pull=True)
+    return DockerCompose("test", compose_file_name="docker-compose.yml")
 
 class ChannelFinderClientTestCase(unittest.TestCase):
     channelFinderCompose = None

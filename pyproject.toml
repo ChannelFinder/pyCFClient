@@ -22,7 +22,7 @@ dependencies = [
     "urllib3>=1.22"
     ]
 [project.optional-dependencies]
-test = ["pytest", "testcontainers"]
+test = ["pytest", "testcontainers==3.7.1"]
 
 [project.urls]
 Homepage = "https://github.com/ChannelFinderService/pyCFClient"
