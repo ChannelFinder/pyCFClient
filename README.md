@@ -1,6 +1,6 @@
 # pyCFClient
 
-A python client library for ChannelFinder. Requires python >= 3.8.
+A python client library for ChannelFinder.
 
 ## Configuration
 
