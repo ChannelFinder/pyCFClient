@@ -14,7 +14,7 @@ import urllib3
 urllib3.disable_warnings()
 
 
-class Test(unittest.TestCase):
+class ChannelUtilTest(unittest.TestCase):
 
 
     def setUp(self):

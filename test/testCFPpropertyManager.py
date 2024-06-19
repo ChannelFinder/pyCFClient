@@ -5,13 +5,13 @@ from channelfinder.cfPropertyManager import CFPropertyManager
 import re
 import os
 
-from _testConf import _testConf
+from _testConf import _testConf, ChannelFinderClientTestCase
 
 import urllib3
 urllib3.disable_warnings()
 
 
-class CFPropertyManagerTest(unittest.TestCase):
+class CFPropertyManagerTest(ChannelFinderClientTestCase):
 
     cfglines = []
 

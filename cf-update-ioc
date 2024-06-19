@@ -1,3 +1,0 @@
-#!/usr/bin/python
-from channelfinder.cfUpdate.CFUpdateIOC import main
-main()

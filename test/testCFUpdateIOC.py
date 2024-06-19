@@ -14,13 +14,13 @@ from time import time
 from tempfile import NamedTemporaryFile
 from copy import copy
 
-from _testConf import _testConf
+from _testConf import _testConf, ChannelFinderClientTestCase
 
 import urllib3
 urllib3.disable_warnings()
 
 
-class Test(unittest.TestCase):
+class UpdateIOCTest(ChannelFinderClientTestCase):
     def setUp(self):
         if _testConf.has_option('DEFAULT', 'BaseURL'):
             self.baseURL = _testConf.get('DEFAULT', 'BaseURL')
@@ -167,6 +167,9 @@ class Test(unittest.TestCase):
         client.set(channel={u'name':u'cf-update-pv1', u'owner':u'cf-update', u'properties':[unaffectedProperty], u'tags':[unaffectedTag]})
         client.set(channel={u'name':u'cf-update-pv2', u'owner':u'cf-update', u'properties':[unaffectedProperty], u'tags':[unaffectedTag]})
         
+        unaffectedProperty['channels'] = []
+        unaffectedTag['channels'] = []
+
         # Case1:
         hostName = 'initialHost'
         iocName = 'initialIoc'

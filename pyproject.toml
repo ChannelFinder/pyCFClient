@@ -1,0 +1,33 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "channelfinder"
+version = "3.0.0"
+authors = [
+  { name="Kunal Shroff", email="shroffk@bnl.gov" },
+]
+description = "Python ChannelFinder Client Lib"
+readme = "README.md"
+requires-python = ">=3.6"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "requests>=2.15.0",
+    "simplejson>=3.10.0",
+    "urllib3>=1.22"
+    ]
+[project.optional-dependencies]
+test = ["pytest", "testcontainers>=3.7.0,<4"]
+
+[project.urls]
+Homepage = "https://github.com/ChannelFinderService/pyCFClient"
+Issues = "https://github.com/ChannelFinderService/pyCFClient/issues"
+
+[project.scripts]
+cf-update-ioc = "channelfinder.cfUpdate.CFUpdateIOC:main"
+cf-monitor-test = "channelfinder.cfMonitorTest:main"
