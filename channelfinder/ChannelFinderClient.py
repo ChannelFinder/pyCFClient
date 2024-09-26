@@ -291,6 +291,12 @@ class ChannelFinderClient(object):
         (n >= 1, m >= 0)
         >>> assert find(size=n, ifrom=m) == find(size=n+m)[-n:]
 
+        >>> find(search_after='channelName')
+        will return channels that are sorted after the specified name. This is useful
+        when dealing with queries that may return more channels than are allowed by
+        the max result window. By specifying the name of the last channel from
+        the previous query, one can retrieve the next page of channels.
+
         To query for the existance of a tag or property use findTag and findProperty.
         """
         if not self.__baseURL:
@@ -316,6 +322,8 @@ class ChannelFinderClient(object):
                 args.append(('~size', '{0:d}'.format(int(kwds[key]))))
             elif key == 'ifrom':
                 args.append(('~from', '{0:d}'.format(int(kwds[key]))))
+            elif key == 'search_after':
+                args.append(('~search_after', kwds[key]))
             else:
                 raise RuntimeError('unknown find argument ' + key)
         return self.findByArgs(args)
