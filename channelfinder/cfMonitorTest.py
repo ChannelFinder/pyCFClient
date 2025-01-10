@@ -86,10 +86,7 @@ def mainRun(opts, args):
 
 
 def check(pvNames, hostName, iocName):
-    try:
-        client = ChannelFinderClient()
-    except:
-        raise RuntimeError("Unable to create a valid webResourceClient")
+    client = ChannelFinderClient()
     channels = client.find(property=[("hostName", hostName), ("iocName", iocName)])
     if channels and len(pvNames) == len(channels):
         for channel in channels:

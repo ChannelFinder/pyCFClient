@@ -12,6 +12,7 @@ with a list of process variables (usually the output of the dbl command).
 
 from __future__ import print_function
 
+from configparser import NoSectionError
 import os
 import re
 from optparse import OptionParser
@@ -79,12 +80,7 @@ def updateChannelFinder(
     if hostName is None or iocName is None:
         raise RuntimeError("missing hostName or iocName")
     channels = []
-    try:
-        client = ChannelFinderClient(
-            BaseURL=service, username=username, password=password
-        )
-    except:
-        raise RuntimeError("Unable to create a valid webResourceClient")
+    client = ChannelFinderClient(BaseURL=service, username=username, password=password)
     checkPropertiesExist(client, owner)
     previousChannelsList = client.findByArgs(
         [("hostName", hostName), ("iocName", iocName)]
@@ -278,7 +274,7 @@ def __getDefaultConfig(arg, value):
     if value is None:
         try:
             return basecfg.get("DEFAULT", arg)
-        except:
+        except (KeyError, NoSectionError):
             return None
     else:
         return value
