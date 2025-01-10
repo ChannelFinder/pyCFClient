@@ -1,1 +1,3 @@
-from .CFPropertyManager import *
+from .CFPropertyManager import CFPropertyManager
+
+__all__ = ["CFPropertyManager"]
