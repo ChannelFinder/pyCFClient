@@ -436,7 +436,7 @@ class OperationPropertyTest(ChannelFinderClientTestCase):
             "channels": [ch],
         }
         try:
-            result = self.clientProp.set(property=testProperty)
+            _ = self.clientProp.set(property=testProperty)
             foundProperty = self.client.findProperty(testProperty["name"])
             self.assertIsNotNone(foundProperty, "failed to create a test property")
             self.assertTrue(

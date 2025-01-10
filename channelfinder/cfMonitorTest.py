@@ -31,7 +31,6 @@ SEVR = {0: "OK     ", 1: "Minor  ", 2: "Major  "}
 
 
 def main():
-    requiredOpts = ["initial-file", "final-file"]
     usage = "usage: %prog -i initial-file -f final-file directory "
     parser = OptionParser(usage=usage)
     parser.add_option(

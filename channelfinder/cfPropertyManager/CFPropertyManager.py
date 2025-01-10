@@ -30,12 +30,6 @@ client = None
 exclusion_expression = ""
 
 
-def test_mode():
-    test = True
-    verbose = True
-    quiet = False
-
-
 def readDBL(path):
     """
     reads and stores .dbl file for processing
