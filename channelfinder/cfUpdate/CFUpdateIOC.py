@@ -76,7 +76,7 @@ def updateChannelFinder(
     username = channelfinder username
     password = channelfinder password
     """
-    if hostName == None or iocName == None:
+    if hostName is None or iocName is None:
         raise RuntimeError("missing hostName or iocName")
     channels = []
     try:
@@ -89,9 +89,9 @@ def updateChannelFinder(
     previousChannelsList = client.findByArgs(
         [("hostName", hostName), ("iocName", iocName)]
     )
-    if previousChannelsList != None:
+    if previousChannelsList is not None:
         for ch in previousChannelsList:
-            if pvNames != None and ch["name"] in pvNames:
+            if pvNames is not None and ch["name"] in pvNames:
                 """"""
                 channels.append(
                     updateChannel(
@@ -104,7 +104,7 @@ def updateChannelFinder(
                     )
                 )
                 pvNames.remove(ch["name"])
-            elif pvNames == None or ch["name"] not in pvNames:
+            elif pvNames is None or ch["name"] not in pvNames:
                 """Orphan the channel : mark as inactive, keep the old hostName and iocName"""
                 oldHostName = [
                     prop["value"]
@@ -141,7 +141,7 @@ def updateChannelFinder(
                     time=time,
                 )
             )
-        elif ch[0] != None:
+        elif ch[0] is not None:
             """update existing channel: exists but with a different hostName and/or iocName"""
             channels.append(
                 updateChannel(
@@ -174,9 +174,9 @@ def updateChannel(
         ]
     else:
         properties = []
-    if hostName != None:
+    if hostName is not None:
         properties.append({"name": "hostName", "owner": owner, "value": hostName})
-    if iocName != None:
+    if iocName is not None:
         properties.append({"name": "iocName", "owner": owner, "value": iocName})
     if pvStatus:
         properties.append({"name": "pvStatus", "owner": owner, "value": pvStatus})
@@ -193,11 +193,11 @@ def createChannel(
     Helper to create a channel object with the required properties
     """
     ch = {"name": chName, "owner": chOwner, "properties": []}
-    if hostName != None:
+    if hostName is not None:
         ch["properties"].append(
             {"name": "hostName", "owner": chOwner, "value": hostName}
         )
-    if iocName != None:
+    if iocName is not None:
         ch["properties"].append({"name": "iocName", "owner": chOwner, "value": iocName})
     if pvStatus:
         ch["properties"].append(
@@ -214,7 +214,7 @@ def checkPropertiesExist(client, propOwner):
     """
     requiredProperties = ["hostName", "iocName", "pvStatus", "time"]
     for propName in requiredProperties:
-        if client.findProperty(propName) == None:
+        if client.findProperty(propName) is None:
             try:
                 client.set(property={"name": propName, "owner": propOwner})
             except Exception as e:
@@ -226,10 +226,9 @@ def ifNoneReturnDefault(object, default):
     """
     if the object is None or empty string then this function returns the default value
     """
-    if object == None and object != "":
-        return default
-    else:
+    if object:
         return object
+    return default
 
 
 def mainRun(opts, args):
@@ -348,7 +347,7 @@ def main():
         help="prompt user for password",
     )
     opts, args = parser.parse_args()
-    if len(args) == 0 or args == None:
+    if not args:
         parser.error("Please specify a file")
     mainRun(opts, args)
 

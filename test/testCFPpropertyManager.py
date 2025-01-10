@@ -80,7 +80,7 @@ class CFPropertyManagerTest(ChannelFinderClientTestCase):
             print(properties[0] + " = " + properties[1])
             try:
                 expression = re.compile(properties[1])
-                self.assertTrue(expression != None)
+                self.assertTrue(expression is not None)
 
             except Exception as e:
                 print("Invalid regular expression: ", properties[1])

@@ -62,7 +62,7 @@ def readConfiguration(path):
             print("IGNORE " + properties[1])
             exclusion_expression = re.compile(properties[1])
         else:
-            if client.findProperty(properties[0]) != None:
+            if client.findProperty(properties[0]) is not None:
                 try:
                     expression = re.compile(properties[1])
                     expression_list.append([expression, properties[0]])
@@ -88,13 +88,13 @@ def applyExpression():
         exclusion_expression = "[^_]+"
     for channel_name in dbllines:
         prop_list = []
-        if exclusion_expression.search(channel_name) != None:
+        if exclusion_expression.search(channel_name) is not None:
             if verbose:
                 print("EXCLUDE: " + channel_name)
         else:
             for expression in expression_list:
                 result = expression[0].search(channel_name)
-                if result != None:
+                if result is not None:
                     value = clean(result.group())
                     if verbose:
                         print("FOUND: " + value + " in " + channel_name)
@@ -156,7 +156,7 @@ def __getDefaultConfig(arg, value):
     """
     Clean reception of command line configurations for default assignment.
     """
-    if value == None:
+    if value is None:
         try:
             return basecfg.get("DEFAULT", arg)
         except:
@@ -211,7 +211,7 @@ def main():
         help="prompt user for password",
     )
     opts, args = parser.parse_args()
-    if len(args) == 0 or args == None:
+    if not args:
         parser.error("Please specify a file")
     mainRun(opts, args)
 
@@ -227,11 +227,11 @@ def mainRun(opts, args):
     password = __getDefaultConfig("password", opts.password)
     SERVICE_URL = __getDefaultConfig("serviceURL", opts.serviceURL)
     verbose = __getDefaultConfig("verbose", opts.verbose)
-    if username == None:
+    if username is None:
         username = "cf-update"  # CURRENT DEFAULT
-    if password == None:
+    if password is None:
         password = "1234"  # CURRENT DEFAULT
-    if SERVICE_URL == None:
+    if SERVICE_URL is None:
         SERVICE_URL = "https://localhost:8181/ChannelFinder"  # CURRENT DEFAULT
     startClient()
     run(args[0], args[1])

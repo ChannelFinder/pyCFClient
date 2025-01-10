@@ -840,9 +840,9 @@ class OperationChannelTest(ChannelFinderClientTestCase):
                 "failed to delete channel with special char",
             )
             self.client.delete(tagName=spTag["name"])
-            self.assertTrue(self.client.findTag(spTag["name"]) == None)
+            self.assertTrue(self.client.findTag(spTag["name"]) is None)
             self.client.delete(propertyName=spProperty["name"])
-            self.assertTrue(self.client.findProperty(spProperty["name"]) == None)
+            self.assertTrue(self.client.findProperty(spProperty["name"]) is None)
 
     def testQuotes(self):
         spChannel = {"name": "'\"Name", "owner": self.channelOwner}
@@ -1700,7 +1700,7 @@ class ErrorTest(ChannelFinderClientTestCase):
                 },
             )
             print("client: " + str(self.client.find(name="channelName")[0]))
-            # should this/ be if client.find... == None ???
+            # should this/ be if client.find... is None ???
             self.assertFalse(
                 "existingProperty"
                 in self.client.find(name="channelName")[0]["properties"],
@@ -1802,7 +1802,7 @@ def checkTagOnChannel(client, channelName, tag):
     utility method which return true is channelName contains tag
     """
     ch = client.find(name=channelName)[0]
-    if ch["tags"] != None and checkTagInList(ch["tags"], [tag]):
+    if ch["tags"] is not None and checkTagInList(ch["tags"], [tag]):
         return True
     else:
         return False
@@ -1813,7 +1813,7 @@ def checkPropertyOnChannel(client, channelName, property):
     utility method which return true is channelName contains property
     """
     ch = client.find(name=channelName)[0]
-    if ch["properties"] != None and checkPropInList(ch["properties"], [property]):
+    if ch["properties"] is not None and checkPropInList(ch["properties"], [property]):
         return True
     else:
         return False

@@ -50,7 +50,7 @@ def main():
         help="the --final-file",
     )
     opts, args = parser.parse_args()
-    if args == None or len(args) == 0:
+    if not args:
         parser.error("Please specify a directory")
     if not opts.initialFile:
         parser.error("Please specify a initial test files")
