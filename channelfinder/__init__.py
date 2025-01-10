@@ -1,2 +1,2 @@
-from .CFDataTypes import *
-from .ChannelFinderClient import *
+from .CFDataTypes import Channel, Property, Tag
+from .ChannelFinderClient import ChannelFinderClient
