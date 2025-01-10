@@ -63,7 +63,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         # parse file which does not fit the format
         hostname, iocname = getArgsFromFilename("complete/path/to/file/somefilename")
         self.assertTrue(
-            hostname == None and iocname == None,
+            hostname is None and iocname is None,
             "failed to parse the file path correctly",
         )
         # file with only hostName
@@ -71,7 +71,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
             "complete/path/to/file/aaa.somefilename"
         )
         self.assertTrue(
-            hostname == "aaa" and iocname == None, "failed to parse the file correctly"
+            hostname == "aaa" and iocname is None, "failed to parse the file correctly"
         )
         # parse the hostname/iocname from 1st and 2nd positions seperated by .
         hostname, iocname = getArgsFromFilename("complete/path/to/file/aaa.bbb.ccc.ddd")
@@ -96,7 +96,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
             property=[("hostName", hostName1), ("iocName", iocName1)]
         )
         self.assertTrue(
-            channels == None or len(channels) == 0, "channels already present"
+            not channels, "channels already present"
         )
         # New Channels added
         updateChannelFinder(
@@ -427,7 +427,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
     def testNoneCheck(self):
         self.assertTrue(ifNoneReturnDefault("Value", "default") == "Value")
         self.assertTrue(ifNoneReturnDefault(None, "default") == "default")
-        self.assertTrue(ifNoneReturnDefault(None, None) == None)
+        self.assertTrue(ifNoneReturnDefault(None, None) is None)
         self.assertTrue(ifNoneReturnDefault("", "default") == "")
 
     def testPVUpdate(self):
