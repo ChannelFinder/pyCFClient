@@ -26,6 +26,7 @@ Created on Mar 14, 2011
 from channelfinder import ChannelFinderClient
 
 import urllib3
+
 urllib3.disable_warnings()
 
 
@@ -38,42 +39,43 @@ def prop_demo(channel):
     """
     # every property has to be added first before using it.
     properties = []
-    propDict = {'elem_type': 'cf-update',
-                'elem_name': 'cf-update',
-                'dev_name': 'cf-update',
-                'length': 'cf-update',
-                's_position': 'cf-update',
-                'ordinal': 'cf-update',
-                'system': 'cf-update',
-                'cell': 'cf-update',
-                'girder': 'cf-update',
-                'handle': 'cf-update',
-                'symmetry': 'cf-update',
-                'hostName': 'cf-update',
-                'iocName': 'cf-update',
-                'pvStatus': 'cf-update',
-                'time': 'cf-update',
-                'ioctest': 'cf-update',
-                'iocid': 'cf-update',
-                'iocidtest': 'cf-update'
-                }
+    propDict = {
+        "elem_type": "cf-update",
+        "elem_name": "cf-update",
+        "dev_name": "cf-update",
+        "length": "cf-update",
+        "s_position": "cf-update",
+        "ordinal": "cf-update",
+        "system": "cf-update",
+        "cell": "cf-update",
+        "girder": "cf-update",
+        "handle": "cf-update",
+        "symmetry": "cf-update",
+        "hostName": "cf-update",
+        "iocName": "cf-update",
+        "pvStatus": "cf-update",
+        "time": "cf-update",
+        "ioctest": "cf-update",
+        "iocid": "cf-update",
+        "iocidtest": "cf-update",
+    }
 
     properties1 = channel.getAllProperties()
     for prop in properties1:
         try:
-            del propDict[prop['name']]
+            del propDict[prop["name"]]
         except KeyError:
             pass
     if len(propDict) > 0:
         for k, v in propDict.items():
-            properties.append({u'name': k, u'owner': v})
+            properties.append({"name": k, "owner": v})
         if len(propDict) == 1:
             channel.set(property=properties[0])
         else:
             channel.set(properties=properties)
         print(channel.getAllProperties())
     else:
-        print('all properties are in database already.')
+        print("all properties are in database already.")
 
 
 def channel_demo(channel):
@@ -86,30 +88,35 @@ def channel_demo(channel):
     try:
         # the file has the following attributes:
         # index, read back, set point, phys name, len[m], s[m], type
-        f = open('lat_conf_table.txt', 'r')
+        f = open("lat_conf_table.txt", "r")
         lines = f.readlines()
         channels = []
 
         for line in lines:
-            if not (line.startswith('#') or line.startswith('!') or not line.strip()):
+            if not (line.startswith("#") or line.startswith("!") or not line.strip()):
                 results = line.split()
                 if len(results) < 7:
                     # input file format problem
                     raise
-                props = [{'name': u'elem_type', 'value': results[6]},
-                         {'name': u'elem_name', 'value': results[3]},
-                         {'name': u'length', 'value': results[4]},
-                         {'name': u's_position', 'value': results[5]},
-                         {'name': u'ordinal', 'value': results[0]},
-                         {'name': u'system', 'value': u'SR'}
-                         ]
+                props = [
+                    {"name": "elem_type", "value": results[6]},
+                    {"name": "elem_name", "value": results[3]},
+                    {"name": "length", "value": results[4]},
+                    {"name": "s_position", "value": results[5]},
+                    {"name": "ordinal", "value": results[0]},
+                    {"name": "system", "value": "SR"},
+                ]
 
-                if results[1] != 'NULL':
-                    props.append({'name': u'handle', 'value': u'readback'})
-                    channels.append({u'name': results[1], u'owner': u'cf-update', u'properties': props})
-                if results[2] != 'NULL':
-                    props.append({'name': u'handle', 'value': u'setpoint'})
-                    channels.append({u'name': results[2], u'owner': u'cf-update', u'properties': props})
+                if results[1] != "NULL":
+                    props.append({"name": "handle", "value": "readback"})
+                    channels.append(
+                        {"name": results[1], "owner": "cf-update", "properties": props}
+                    )
+                if results[2] != "NULL":
+                    props.append({"name": "handle", "value": "setpoint"})
+                    channels.append(
+                        {"name": results[2], "owner": "cf-update", "properties": props}
+                    )
         channel.set(channels=channels)
     finally:
         f.close()
@@ -123,28 +130,32 @@ def tag_demo(channel):
     :return:
     """
     # set one tag
-    tag = {'name': 'example1', 'owner': 'cf-update'}
+    tag = {"name": "example1", "owner": "cf-update"}
     channel.set(tag=tag)
 
     # set a set of tags
-    tags = [{'name': 'example2', 'owner': 'cf-update'},
-            {'name': 'example3', 'owner': 'cf-update'},
-            {'name': 'example4', 'owner': 'cf-update'},
-            {'name': 'example5', 'owner': 'cf-update'}]
+    tags = [
+        {"name": "example2", "owner": "cf-update"},
+        {"name": "example3", "owner": "cf-update"},
+        {"name": "example4", "owner": "cf-update"},
+        {"name": "example5", "owner": "cf-update"},
+    ]
     channel.set(tags=tags)
 
 
 def addtag2channel_demo(channel):
-    tag = {'name': 'example1', 'owner': 'cf-update'}
+    tag = {"name": "example1", "owner": "cf-update"}
 
     # set a set of tags
-    tags = [{'name': 'example2', 'owner': 'cf-update'},
-            {'name': 'example3', 'owner': 'cf-update'},
-            {'name': 'example4', 'owner': 'cf-update'},
-            {'name': 'example5', 'owner': 'cf-update'}]
+    tags = [
+        {"name": "example2", "owner": "cf-update"},
+        {"name": "example3", "owner": "cf-update"},
+        {"name": "example4", "owner": "cf-update"},
+        {"name": "example5", "owner": "cf-update"},
+    ]
 
-    channels = channel.find(name='SR*')
-    channelNames = [ch['name'] for ch in channels]
+    channels = channel.find(name="SR*")
+    channelNames = [ch["name"] for ch in channels]
 
     # set a tag to many channels
     channel.set(tag=tag, channelNames=channelNames)
@@ -161,13 +172,13 @@ def searchchannel_demo(channel):
     :param channel:
     :return:
     """
-    channels = channel.find(name='SR*')
+    channels = channel.find(name="SR*")
     print(len(channels))
     for channel in channels:
         print(channel)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # cf = ChannelFinderClient(BaseURL='https://localhost:8181/ChannelFinder', username='channel', password='1234')
     cf = ChannelFinderClient()
     # you can use browser to view results

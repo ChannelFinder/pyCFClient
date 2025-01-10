@@ -9,7 +9,6 @@ Created on Feb 11, 2011
 @author: shroffk
 """
 
-
 from ._conf import PYTHON3
 
 if PYTHON3:

@@ -9,6 +9,7 @@ Created on May 11, 2011
 
 from .Validators import PropertyValidator, TagValidator
 
+
 class ChannelUtil(object):
     """
     Utiltity class
@@ -60,7 +61,11 @@ class ChannelUtil(object):
         ret = []
         for ch in channels:
             if ch.Properties:
-                match = [property for property in ch.Properties if property.Name == propertyName]
+                match = [
+                    property
+                    for property in ch.Properties
+                    if property.Name == propertyName
+                ]
                 ret.append(match[0].Value)
         return sorted(ret, key=key)
 
@@ -86,7 +91,6 @@ class ChannelUtil(object):
         property length with value 0.3
         """
         return cls.channelsValidityCheck(channels, PropertyValidator(prop))
-
 
     @classmethod
     def channelsValidityCheck(cls, channels, validator):

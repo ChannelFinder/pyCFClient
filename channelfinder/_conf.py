@@ -12,7 +12,6 @@ username=MyUserName
 password=MyPassword
 """
 
-
 import sys
 import os.path
 
@@ -26,15 +25,19 @@ else:
     # Python 3 code in this block
     from configparser import ConfigParser
 
+
 def __loadConfig():
-    dflt={'BaseURL':'http://localhost:8080/ChannelFinder'
-        }
-    cf=ConfigParser(defaults=dflt)
-#    print os.path.normpath(os.path.expanduser('~/channelfinderapi.conf'))
-    cf.read([
-        '/etc/channelfinderapi.conf',
-        os.path.expanduser('~/.channelfinderapi.conf'),
-        'channelfinderapi.conf'
-    ])
+    dflt = {"BaseURL": "http://localhost:8080/ChannelFinder"}
+    cf = ConfigParser(defaults=dflt)
+    #    print os.path.normpath(os.path.expanduser('~/channelfinderapi.conf'))
+    cf.read(
+        [
+            "/etc/channelfinderapi.conf",
+            os.path.expanduser("~/.channelfinderapi.conf"),
+            "channelfinderapi.conf",
+        ]
+    )
     return cf
-basecfg=__loadConfig()
+
+
+basecfg = __loadConfig()
