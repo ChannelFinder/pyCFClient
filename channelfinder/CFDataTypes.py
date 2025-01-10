@@ -9,13 +9,9 @@ Created on Feb 11, 2011
 @author: shroffk
 """
 
-from ._conf import PYTHON3
 
-if PYTHON3:
-    # cmp function is gone in Python 3.
-    # Define for backward compatibility
-    def cmp(a, b):
-        return (a > b) - (a < b)
+def cmp(a, b):
+    return (a > b) - (a < b)
 
 
 class Channel(object):

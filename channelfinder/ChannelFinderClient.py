@@ -15,11 +15,11 @@ from requests.exceptions import HTTPError
 from copy import copy
 
 try:
-    from json import JSONDecoder, JSONEncoder
+    from json import JSONEncoder
 except ImportError:
     from simplejson import JSONEncoder
 
-from ._conf import basecfg, PYTHON3
+from ._conf import basecfg
 
 
 class ChannelFinderClient(object):
@@ -63,10 +63,7 @@ class ChannelFinderClient(object):
         """
         result = ref
         if ref is None:
-            if PYTHON3:
-                result = basecfg["DEFAULT"].get(key, None)
-            elif basecfg.has_option("DEFAULT", key):
-                result = basecfg.get("DEFAULT", key)
+            result = basecfg["DEFAULT"].get(key, None)
         return result
 
     def set(self, **kwds):

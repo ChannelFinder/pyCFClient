@@ -12,18 +12,9 @@ username=MyUserName
 password=MyPassword
 """
 
-import sys
 import os.path
 
-
-if sys.version_info[0] < 3:
-    PYTHON3 = False
-    # Python 2 code in this block
-    from ConfigParser import SafeConfigParser as ConfigParser
-else:
-    PYTHON3 = True
-    # Python 3 code in this block
-    from configparser import ConfigParser
+from configparser import ConfigParser
 
 
 def __loadConfig():

@@ -10,7 +10,7 @@ from optparse import OptionParser
 from getpass import getpass
 
 from channelfinder import ChannelFinderClient
-from channelfinder._conf import basecfg, PYTHON3
+from channelfinder._conf import basecfg
 
 global username, client, exclusion_expression, password, SERVICE_URL, quiet, verbose
 
@@ -122,19 +122,9 @@ def applyExpression():
                     }
                 )
             except Exception as e:
-                if PYTHON3:
-                    # Python 3 code in this block
-                    print(
-                        "Failed to update: "
-                        + channel_name
-                        + " \n--Cause:"
-                        + str(e).strip()
-                    )
-                else:
-                    # Python 2 code in this block
-                    print(
-                        "Failed to update: " + channel_name + " \n--Cause:" + e.message
-                    )
+                print(
+                    "Failed to update: " + channel_name + " \n--Cause:" + str(e).strip()
+                )
 
 
 def updateProperty(result, property_name, channel_name):
