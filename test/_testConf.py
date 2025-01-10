@@ -34,13 +34,13 @@ class ChannelFinderClientTestCase(unittest.TestCase):
         cls.channelFinderCompose.start()
         cls.channelFinderCompose.wait_for(_testConf.get('DEFAULT', 'BaseURL') + "/ChannelFinder")
         return super().setUpClass()
-    
+
     @classmethod
     def tearDownClass(cls) -> None:
         if cls.channelFinderCompose is not None:
             cls.channelFinderCompose.stop()
         return super().tearDownClass()
-    
+
 
 def __loadConfig():
 
@@ -50,7 +50,7 @@ def __loadConfig():
         'owner' : 'cf-update',
         'channelOwner' : 'cf-channels',
         'channelUsername' : 'admin',
-        'channelPassword' : 'adminPass',          
+        'channelPassword' : 'adminPass',
         'propOwner' : 'cf-properties',
         'propUsername' : 'admin',
         'propPassword' : 'adminPass',

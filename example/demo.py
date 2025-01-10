@@ -1,7 +1,7 @@
 """
 This module is a demo which provides a interface to access channel finder service to get channel information.
 The Channel Finder service uses a web service, and http protocol to provide EPICS channel name, and its related
-properties, tags. The properties supported so far are, which is developed against NSLS II storage ring.: 
+properties, tags. The properties supported so far are, which is developed against NSLS II storage ring.:
     'elem_type':   element type
     'elem_name':   element name
     'length':      element length
@@ -12,8 +12,8 @@ properties, tags. The properties supported so far are, which is developed agains
     'girder':      girder information
     'handle':      handle, either setpoint or readback
     'symmetry':    symmetry (A or B for NSLS II storage ring, following the naming convention)
-    
-  
+
+
 
 Created on Mar 14, 2011
          National Synchrotron Radiation Facility II
@@ -125,7 +125,7 @@ def tag_demo(channel):
     # set one tag
     tag = {'name': 'example1', 'owner': 'cf-update'}
     channel.set(tag=tag)
-    
+
     # set a set of tags
     tags = [{'name': 'example2', 'owner': 'cf-update'},
             {'name': 'example3', 'owner': 'cf-update'},
@@ -145,10 +145,10 @@ def addtag2channel_demo(channel):
 
     channels = channel.find(name='SR*')
     channelNames = [ch['name'] for ch in channels]
-    
+
     # set a tag to many channels
     channel.set(tag=tag, channelNames=channelNames)
-    
+
     # set tags to many channels
     for tag in tags:
         channel.set(tag=tag, channelNames=channelNames)

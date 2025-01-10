@@ -30,7 +30,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
             self.password = _testConf.get('DEFAULT', 'password')
         if _testConf.has_option('DEFAULT', 'owner'):
             self.owner = _testConf.get('DEFAULT', 'owner')
-            
+
         pass
 
 
@@ -40,7 +40,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
     def testParameterParsing(self):
 #        scrap.mainRun(mockOpt('mockhostname', 'mockiocname'), [])
         pass
-    
+
     def testGetArgsFromFilename(self):
         #parse just file name
         hostname, iocname = getArgsFromFilename('aaa.bbb.ccc')
@@ -66,7 +66,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         self.assertRaises(Exception, updateChannelFinder, [[], 'hostName', None])
         # create default client
         client = ChannelFinderClient()
-        
+
         # add new pv's
         t1 = str(time())
         hostName1 = 'update-test-hostname' + t1
@@ -96,7 +96,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
                             service=self.baseURL , \
                             username=self.username, \
                             password=self.password)
-        # no channels should have the old proerty values 
+        # no channels should have the old proerty values
         self.assertTrue(not client.find(property=[('hostName', hostName1), ('iocName', iocName1), ('time', t1)]), \
                         'failed to update the channels with appropriate properties, old values found')
         # channels should be updated to the new values
@@ -107,7 +107,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         client.delete(channelName='cf-update-pv1')
         client.delete(channelName='cf-update-pv2')
         pass
-    
+
     def testAddUpdateChannelsWithProperties(self):
         '''
         This is to check that existing properties of channels are not affected.
@@ -116,7 +116,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         # create default client
         client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password)
         client.set(property=unaffectedProperty)
-        
+
         # add new pv's
         t1 = str(time())
         hostName1 = 'update-test-hostname' + t1
@@ -155,7 +155,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         both hostName and iocName are changed
         Case5:
         the channel is removed
-        in all cases the existing unaffected* property and tag should remain with the channel               
+        in all cases the existing unaffected* property and tag should remain with the channel
         '''
         unaffectedProperty = {u'name':u'unaffectedProperty', u'owner':self.owner, u'value':u'unchanged'}
         unaffectedTag = {u'name':u'unaffectedTag', u'owner':self.owner}
@@ -163,10 +163,10 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         client = ChannelFinderClient(BaseURL=self.baseURL, username=self.username, password=self.password)
         client.set(property=unaffectedProperty)
         client.set(tag=unaffectedTag)
-        
+
         client.set(channel={u'name':u'cf-update-pv1', u'owner':u'cf-update', u'properties':[unaffectedProperty], u'tags':[unaffectedTag]})
         client.set(channel={u'name':u'cf-update-pv2', u'owner':u'cf-update', u'properties':[unaffectedProperty], u'tags':[unaffectedTag]})
-        
+
         unaffectedProperty['channels'] = []
         unaffectedTag['channels'] = []
 
@@ -184,8 +184,8 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         channels = client.find(name='cf-update-pv*')
         for channel in channels:
             self.assertTrue(unaffectedProperty in channel['properties'] and unaffectedTag in channel['tags'])
-            self.assertTrue(self.__check4properties({u'name':u'hostName', u'value':hostName}, channel['properties']) and 
-                            self.__check4properties({u'name':u'iocName', u'value':iocName}, channel['properties']) and 
+            self.assertTrue(self.__check4properties({u'name':u'hostName', u'value':hostName}, channel['properties']) and
+                            self.__check4properties({u'name':u'iocName', u'value':iocName}, channel['properties']) and
                             self.__check4properties({u'name':u'pvStatus', u'value':u'Active'}, channel['properties']),
                             'Failed to update channels with the correct hostName and/or iocName')
         # Case2:
@@ -201,8 +201,8 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         channels = client.find(name='cf-update-pv*')
         for channel in channels:
             self.assertTrue(unaffectedProperty in channel['properties'] and unaffectedTag in channel['tags'])
-            self.assertTrue(self.__check4properties({u'name':u'hostName', u'value':hostName}, channel['properties']) and 
-                            self.__check4properties({u'name':u'iocName', u'value':iocName}, channel['properties']) and 
+            self.assertTrue(self.__check4properties({u'name':u'hostName', u'value':hostName}, channel['properties']) and
+                            self.__check4properties({u'name':u'iocName', u'value':iocName}, channel['properties']) and
                             self.__check4properties({u'name':u'pvStatus', u'value':u'Active'}, channel['properties']),
                             'Failed to update channels with the correct hostName and/or iocName')
         self.assertTrue(not client.find(property=[('hostName', 'initialHost')]), 'Failed to cleanup old property')
@@ -219,8 +219,8 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         channels = client.find(name='cf-update-pv*')
         for channel in channels:
             self.assertTrue(unaffectedProperty in channel['properties'] and unaffectedTag in channel['tags'])
-            self.assertTrue(self.__check4properties({u'name':u'hostName', u'value':hostName}, channel['properties']) and 
-                            self.__check4properties({u'name':u'iocName', u'value':iocName}, channel['properties']) and 
+            self.assertTrue(self.__check4properties({u'name':u'hostName', u'value':hostName}, channel['properties']) and
+                            self.__check4properties({u'name':u'iocName', u'value':iocName}, channel['properties']) and
                             self.__check4properties({u'name':u'pvStatus', u'value':u'Active'}, channel['properties']),
                             'Failed to update channels with the correct hostName and/or iocName')
         self.assertTrue(not client.find(property=[('hostName', 'initialHost')]), 'Failed to cleanup old property')
@@ -237,17 +237,17 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         channels = client.find(name='cf-update-pv*')
         for channel in channels:
             self.assertTrue(unaffectedProperty in channel['properties'] and unaffectedTag in channel['tags'])
-            self.assertTrue(self.__check4properties({u'name':u'hostName', u'value':hostName}, channel['properties']) and 
-                            self.__check4properties({u'name':u'iocName', u'value':iocName}, channel['properties']) and 
+            self.assertTrue(self.__check4properties({u'name':u'hostName', u'value':hostName}, channel['properties']) and
+                            self.__check4properties({u'name':u'iocName', u'value':iocName}, channel['properties']) and
                             self.__check4properties({u'name':u'pvStatus', u'value':u'Inactive'}, channel['properties']),
                             'Failed to update channels with the correct hostName and/or iocName')
         self.assertTrue(not client.find(property=[('hostName', 'initialHost')]), 'Failed to cleanup old property')
         self.assertTrue(not client.find(property=[('iocName', 'initialIoc')]), 'Failed to cleanup old property')
-        
+
         # Cleanup
         '''
         TODO this cleanup code should not be contingent to the successful completion of all checks...
-        This could pollute CF 
+        This could pollute CF
         '''
         client.delete(channelName='cf-update-pv1')
         client.delete(channelName='cf-update-pv2')
@@ -257,7 +257,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
     def __check4properties(self, prop, properties):
         '''
         check if property existing in a list of properties
-        The equality test will be based on the name and the value while ignoring the owner 
+        The equality test will be based on the name and the value while ignoring the owner
         '''
         foundProp = [ p for p in properties if p[u'name'] == prop[u'name'] ]
         if len(foundProp) == 1 and foundProp[0][u'value'] == prop[u'value']:
@@ -270,10 +270,10 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         self.assertTrue(ifNoneReturnDefault(None, 'default') == 'default')
         self.assertTrue(ifNoneReturnDefault(None, None) == None)
         self.assertTrue(ifNoneReturnDefault('', 'default') == '')
-        
+
     def testPVUpdate(self):
         '''
-        Test condition 
+        Test condition
         IOC turned on with ch1, ch2
         IOC turned on with ch1 only
         IOC turned on with ch1, ch2
@@ -314,7 +314,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         finally:
             client.delete(channelName='ch1')
             client.delete(channelName='ch2')
-    
+
     def testPVMove(self):
         '''
         ch1, ch2 on host1, ioc1
@@ -361,7 +361,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
                                 owner=self.owner, service=self.baseURL, \
                                 username=self.username, password=self.password)
             self.assertEqual(len(client.find(property=[('hostName', 'host1'), ('iocName', 'ioc1')])), 2, \
-                             'Failed to reset the channels')            
+                             'Failed to reset the channels')
             '''CASE2'''
             updateChannelFinder(['ch1'], \
                                 'host1', \
@@ -393,7 +393,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         finally:
             client.delete(channelName='ch1')
             client.delete(channelName='ch2')
-    
+
     def testRegularExperssion(self):
         tempFile = NamedTemporaryFile(delete=False)
         publicPVs = ['publicPV1', 'publicPV2', 'publicPV3']
@@ -413,21 +413,21 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
             self.assertTrue(frozenset(pvNames).issuperset(frozenset(publicPVs)), \
                             'resulting pvNames contains invalid non public pvs')
             self.assertTrue(frozenset(pvNames).isdisjoint(frozenset(privatePVS)), \
-                            'result pvNames contains invalid private pvs')            
+                            'result pvNames contains invalid private pvs')
             pass
         finally:
             os.remove(tempFile.name)
         pass
-        
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
-    
-    
+
+
 class mockOpt():
     def __init__(self, hostname, iocname, service=None):
         self.hostname = hostname
         self.iocname = iocname
         self.service = service
-    
+

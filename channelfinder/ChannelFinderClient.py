@@ -97,39 +97,39 @@ class ChannelFinderClient(object):
         set(channels = [Channel])
         >>> set(channels=[{'name':'chName1','owner':'chOwner'},{'name':'chName2','owner':'chOwner'}])
         >>> set(channels=[{'name':'chName1','owner':'chOwner', 'tags':[...], 'properties':[...]}, {...}])
-        
+
         set(tag = Tag)
         >>> set(tag={'name':'tagName','owner':'tagOwner'})
-        
+
         set(tags = [Tag])
         >>> set(tags=[{'name':'tag1','tagOwner'},{'name':'tag2','owner':'tagOwner'}])
-        
+
         set(property = Property )
         >>> set(property={'name':'propertyName','owner':'propertyOwner'})
-        
+
         set(properties = [Property])
-        >>> set(properties=[{'name':'prop1','owner':'propOwner'},'prop2','propOwner']) 
-                   
+        >>> set(properties=[{'name':'prop1','owner':'propOwner'},'prop2','propOwner'])
+
         *** IMP NOTE: Following operation are destructive ***
         *** if you simply want to append a tag or property use the update operation***
-        
+
         set(tag=Tag, channelName=String)
         >>> set(tag={'name':'tagName','owner':'tagOwner'}, channelName='chName')
         # will create/replace specified Tag
         # and add it to the channel with the name = channelName
-        
+
         set(tag=Tag, channelNames=[String])
         >>> set (tag={'name':'tagName','owner':'tagOwner'}, channelNames=['ch1','ch2','ch3'])
-        # will create/replace the specified Tag 
+        # will create/replace the specified Tag
         # and add it to the channels with the names specified in channelNames
         # and delete it from all other channels
-        
+
         set(property=Property, channelNames=[String])
         >>> set(property={'name':'propName','owner':'propOwner','value':'propValue'}, channels=[...])
         # will create/replace the specified Property
         # and add it to the channels with the names specified in channels
         # and delete it from all other channels
-        
+
         """
         if len(kwds) == 1:
             self.__handleSingleAddParameter(**kwds)

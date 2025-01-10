@@ -241,7 +241,3 @@ if __name__ == "__main__":
         print("IOError: " + e.message)
     else:
         startClient()
-
-
-
-

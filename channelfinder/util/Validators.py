@@ -30,7 +30,7 @@ class PropertyValidator(object):
         Constructor
         '''
         self.property = prop
-    
+
     def validate(self, channel):
         props = [p.Name for p in channel.Properties]
         # for p in channel.Properties:

@@ -6,20 +6,20 @@ A python client library for ChannelFinder.
 
 The python channelfinder client library can be configured by setting up a `channelfinderapi.conf` file in the following locations
 
-`/etc/channelfinderapi.conf`    
-`~/.channelfinderapi.conf`   
-`channelfinderapi.conf`  
+`/etc/channelfinderapi.conf`
+`~/.channelfinderapi.conf`
+`channelfinderapi.conf`
 
-The example preferences:  
+The example preferences:
 
 ```
-cat ~/channelfinderapi.conf  
-[DEFAULT]  
-BaseURL=http://localhost:8080/ChannelFinder  
-username=MyUserName  
-password=MyPassword  
+cat ~/channelfinderapi.conf
+[DEFAULT]
+BaseURL=http://localhost:8080/ChannelFinder
+username=MyUserName
+password=MyPassword
 ```
- 
+
 ## Development
 
 To install with dependancies for testing.

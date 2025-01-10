@@ -13,12 +13,12 @@ class ChannelUtil(object):
     """
     Utiltity class
     """
-    
+
     def __init__(self):
         """
         Constructor
         """
-    
+
     @classmethod
     def getAllTags(cls, channels):
         """
@@ -34,13 +34,13 @@ class ChannelUtil(object):
             return list(uniqueNames)
         else:
             return None
-        
+
     @classmethod
     def getAllProperties(cls, channels):
         """
         getAllProperties([Channel]) -> [String]
         returns a list of the propertyNames of all the properties on the set of channels
-        """      
+        """
         if isinstance(channels, list):
             allProperties = []
             for channel in channels:
@@ -51,8 +51,8 @@ class ChannelUtil(object):
             return list(uniqueNames)
         else:
             return None
-    
-    @classmethod 
+
+    @classmethod
     def getAllPropValues(cls, channels, propertyName, key=None):
         """
         given the list of channels return a list of all values
@@ -62,8 +62,8 @@ class ChannelUtil(object):
             if ch.Properties:
                 match = [property for property in ch.Properties if property.Name == propertyName]
                 ret.append(match[0].Value)
-        return sorted(ret, key=key)     
-    
+        return sorted(ret, key=key)
+
     @classmethod
     def validateChannelsWithTag(cls, channels, tag):
         """
@@ -74,20 +74,20 @@ class ChannelUtil(object):
         and false if anyone channel does not have that tag
         """
         return cls.channelsValidityCheck(channels, TagValidator(tag))
-        
+
     @classmethod
     def validateChannelWithProperty(cls, channels, prop):
         """
         Utility method to validate a group of channels to ensure they all have the property 'prop'
         e.g.
         ChannelUtil.validateChannelWithProperty(client.find(ElemName='The Magnet'), Property('length','propOwner','0.3'))
-        
-        This will return True if all channels with property ElemName with value 'The Magnet' also have the 
+
+        This will return True if all channels with property ElemName with value 'The Magnet' also have the
         property length with value 0.3
         """
         return cls.channelsValidityCheck(channels, PropertyValidator(prop))
-    
-    
+
+
     @classmethod
     def channelsValidityCheck(cls, channels, validator):
         """
@@ -96,5 +96,5 @@ class ChannelUtil(object):
         """
         for ch in channels:
             if not validator.validate(ch):
-                return False            
+                return False
         return True

@@ -31,7 +31,7 @@ SEVR = {0:'OK     ',
         2:'Major  '}
 
 
-def main():    
+def main():
     requiredOpts = ['initial-file', 'final-file']
     usage = "usage: %prog -i initial-file -f final-file directory "
     parser = OptionParser(usage=usage)
@@ -54,7 +54,7 @@ def main():
 def mainRun(opts, args):
     for directory in args:
         initialFile = os.path.normpath(directory + '/' + opts.initialFile)
-        iHostName, iIocName = getArgsFromFilename(initialFile)  
+        iHostName, iIocName = getArgsFromFilename(initialFile)
         finalFile = os.path.normpath(directory + '/' + opts.finalFile)
         fHostName, fIocName = getArgsFromFilename(finalFile)
         if getPVNames(initialFile) != getPVNames(finalFile):
@@ -66,7 +66,7 @@ def mainRun(opts, args):
         Touch the initial file and check channelfinder
         '''
         touch(initialFile)
-        sleep(2)        
+        sleep(2)
         check(pvNames, iHostName, iIocName)
         '''
         Touch the final file and check channelfinder
@@ -110,7 +110,7 @@ def getArgsFromFilename(completeFilePath):
         iocName = match.group(1)
     else:
         iocName = None
-    return hostName, iocName    
+    return hostName, iocName
 
 def getPVNames(completeFilePath, pattern=None):
     try:
@@ -125,7 +125,7 @@ def getPVNames(completeFilePath, pattern=None):
         return None
     finally:
         f.close()
-            
+
 if __name__ == '__main__':
-    main()   
+    main()
     pass

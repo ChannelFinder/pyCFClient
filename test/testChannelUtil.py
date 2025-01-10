@@ -41,9 +41,9 @@ class ChannelUtilTest(unittest.TestCase):
         allPropertyNames = ChannelUtil.getAllProperties(channels)
         self.assertTrue(len(allPropertyNames) == 3, \
                         'expected 3 unique properties but found ' + str(len(allPropertyNames)))
-       
+
         pass
-    
+
     def testGetAllPropValues(self):
         ch1 = Channel('ch1', 'chOwner',
                           properties=[Property('location', 'propOwner', '234'),
@@ -63,8 +63,8 @@ class ChannelUtilTest(unittest.TestCase):
         self.assertTrue('SR:234' in values, \
                         'Failed to find property(location), value SR:234 for ch3')
         pass
-    
-    def testValidateWithTag(self):   
+
+    def testValidateWithTag(self):
         ch1 = Channel('chName1', 'chOwner',
                           properties=[Property('location', 'propOwner', 'propVal'),
                                       Property('prop1', 'propOwner', 'propVal')],
@@ -77,9 +77,9 @@ class ChannelUtilTest(unittest.TestCase):
         self.assertTrue(ChannelUtil.validateChannelsWithTag([ch1, ch2], Tag('myTag', 'someOwner')), \
                         'Failed to validate channels based on TagValidator')
         self.assertFalse(ChannelUtil.validateChannelsWithTag([ch1, ch2], Tag('goldenOrbit', 'someOwner')), \
-                         'Failed to correctly validate channels based on a TagValidator')  
+                         'Failed to correctly validate channels based on a TagValidator')
         pass
-    
+
     def testValidateWithProperty(self):
         ch1 = Channel('ch1', 'chOwner',
                           properties=[Property('location', 'propOwner', '234'),

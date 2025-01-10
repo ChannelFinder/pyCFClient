@@ -55,14 +55,14 @@ def getPVNames(completeFilePath, pattern=None):
 def updateChannelFinder(pvNames, hostName, iocName, time, owner,
                         service=None, username=None, password=None):
     '''
-    pvNames = list of pvNames 
+    pvNames = list of pvNames
     ([] permitted will effectively remove the hostname, iocname from all channels)
     hostName = pv hostName (None not permitted)
     iocName = pv iocName (None not permitted)
     owner = the owner of the channels and properties being added, this can be different from the user
     e.g. user = abc might create a channel with owner = group-abc
     time = the time at which these channels are being created/modified
-    [optional] if not specified the default values are used by the 
+    [optional] if not specified the default values are used by the
     channelfinderapi lib
     service = channelfinder service URL
     username = channelfinder username
@@ -123,7 +123,7 @@ def updateChannel(channel, owner, hostName=None, iocName=None, pvStatus='Inactiv
     '''
     Helper to update a channel object so as to not affect the existing properties
     '''
-    
+
     # properties list devoid of hostName and iocName properties
     if channel[u'properties']:
         properties = [property for property in channel[u'properties']
@@ -137,7 +137,7 @@ def updateChannel(channel, owner, hostName=None, iocName=None, pvStatus='Inactiv
     if pvStatus:
         properties.append({u'name' : u'pvStatus', u'owner':owner, u'value' : pvStatus})
     if time:
-        properties.append({u'name' : u'time', u'owner':owner, u'value' : time}) 
+        properties.append({u'name' : u'time', u'owner':owner, u'value' : time})
     channel[u'properties'] = properties
     return channel
 
@@ -153,7 +153,7 @@ def createChannel(chName, chOwner, hostName=None, iocName=None, pvStatus=u'Inact
     if pvStatus:
         ch[u'properties'].append({u'name' : u'pvStatus', u'owner':chOwner, u'value' : pvStatus})
     if time:
-        ch[u'properties'].append({u'name' : u'time', u'owner':chOwner, u'value' : time}) 
+        ch[u'properties'].append({u'name' : u'time', u'owner':chOwner, u'value' : time})
     return ch
 
 def checkPropertiesExist(client, propOwner):
@@ -211,7 +211,7 @@ def mainRun(opts, args):
                             service=__getDefaultConfig('BaseURL',opts.serviceURL),
                             username=__getDefaultConfig('username',opts.username),
                             password=__getDefaultConfig('password',opts.password))
-            
+
 def __getDefaultConfig(arg, value):
         if value is None:
             try:
@@ -220,7 +220,7 @@ def __getDefaultConfig(arg, value):
                 return None
         else:
             return value
-        
+
 def main():
     usage = "usage: %prog [options] filename"
     parser = OptionParser(usage=usage)
@@ -259,8 +259,8 @@ def getPassword(option, opt_str, value, parser):
     Simple method to prompt user for password
     TODO do not show the password.
     '''
-    parser.values.password = getpass()        
-            
+    parser.values.password = getpass()
+
 if __name__ == '__main__':
     main()
     pass
