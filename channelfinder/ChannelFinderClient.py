@@ -40,18 +40,15 @@ class ChannelFinderClient(object):
         :param username: user name authorized by channel finder service
         :param password: password for the authorized user
         """
-        try:
-            self.__baseURL = self.__getDefaultConfig("BaseURL", BaseURL)
-            self.__userName = self.__getDefaultConfig("username", username)
-            self.__password = self.__getDefaultConfig("password", password)
-            if self.__userName and self.__password:
-                self.__auth = auth.HTTPBasicAuth(self.__userName, self.__password)
-            else:
-                self.__auth = None
-            self.__session = requests.Session()
-            self.__session.mount(self.__baseURL, HTTPAdapter())
-        except:
-            raise RuntimeError("Failed to create client to " + self.__baseURL)
+        self.__baseURL = self.__getDefaultConfig("BaseURL", BaseURL)
+        self.__userName = self.__getDefaultConfig("username", username)
+        self.__password = self.__getDefaultConfig("password", password)
+        if self.__userName and self.__password:
+            self.__auth = auth.HTTPBasicAuth(self.__userName, self.__password)
+        else:
+            self.__auth = None
+        self.__session = requests.Session()
+        self.__session.mount(self.__baseURL, HTTPAdapter())
 
     def __getDefaultConfig(self, key, ref):
         """

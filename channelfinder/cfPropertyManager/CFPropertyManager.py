@@ -5,6 +5,7 @@ SEE cf-property-manager.cfg for example configuration file
 """
 
 from __future__ import print_function
+from configparser import NoSectionError
 import re
 from optparse import OptionParser
 from getpass import getpass
@@ -159,7 +160,9 @@ def __getDefaultConfig(arg, value):
     if value is None:
         try:
             return basecfg.get("DEFAULT", arg)
-        except:
+        except KeyError:
+            return None
+        except NoSectionError:
             return None
     else:
         return value

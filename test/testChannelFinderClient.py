@@ -150,7 +150,7 @@ class OperationTagTest(ChannelFinderClientTestCase):
             "channels": [self.testChannels[0]],
         }
         try:
-            result = self.clientTag.set(tag=testTag)
+            _ = self.clientTag.set(tag=testTag)
             foundtag = self.client.findTag(testTag["name"])
             self.assertIsNotNone(foundtag, "failed to create a test tag")
             self.assertTrue(
@@ -410,7 +410,7 @@ class OperationPropertyTest(ChannelFinderClientTestCase):
         """
         testProperty = {"name": "setTestProp", "owner": self.propOwner}
         try:
-            result = self.clientProp.set(property=testProperty)
+            _ = self.clientProp.set(property=testProperty)
             foundProperty = self.client.findProperty(testProperty["name"])
             self.assertIsNotNone(foundProperty, "failed to create a test property")
             self.assertTrue(
