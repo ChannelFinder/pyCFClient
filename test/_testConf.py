@@ -16,14 +16,7 @@ import os.path
 import unittest
 from testcontainers.compose import DockerCompose
 
-import sys
-
-if sys.version_info[0] < 3:
-    # Python 2 code in this block
-    from ConfigParser import SafeConfigParser as ConfigParser
-else:
-    # Python 3 code in this block
-    from configparser import ConfigParser
+from configparser import ConfigParser
 
 
 def channelFinderDocker():
