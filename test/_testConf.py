@@ -30,9 +30,7 @@ class ChannelFinderClientTestCase(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.channelFinderCompose = channelFinderDocker()
         cls.channelFinderCompose.start()
-        cls.channelFinderCompose.wait_for(
-            _testConf.get("DEFAULT", "BaseURL") + "/ChannelFinder"
-        )
+        cls.channelFinderCompose.wait_for(_testConf.get("DEFAULT", "BaseURL"))
         return super().setUpClass()
 
     @classmethod
