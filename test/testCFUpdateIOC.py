@@ -95,9 +95,7 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
         channels = client.find(
             property=[("hostName", hostName1), ("iocName", iocName1)]
         )
-        self.assertTrue(
-            not channels, "channels already present"
-        )
+        self.assertTrue(not channels, "channels already present")
         # New Channels added
         updateChannelFinder(
             ["cf-update-pv1", "cf-update-pv2"],
@@ -690,7 +688,6 @@ class UpdateIOCTest(ChannelFinderClientTestCase):
 
 
 if __name__ == "__main__":
-    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
 
 
