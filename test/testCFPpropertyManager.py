@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 import unittest
-from channelfinder.cfPropertyManager import CFPropertyManager
 import re
 import os
 
@@ -9,12 +8,12 @@ from _testConf import _testConf, ChannelFinderClientTestCase
 
 import urllib3
 
+from channelfinder.cfPropertyManager import CFPropertyManager
+
 urllib3.disable_warnings()
 
 
 class CFPropertyManagerTest(ChannelFinderClientTestCase):
-    cfglines = []
-
     def setUp(self):
         print("\n---------------------------------------------------------------\n")
 
