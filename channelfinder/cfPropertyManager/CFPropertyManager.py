@@ -160,9 +160,7 @@ def __getDefaultConfig(arg, value):
     if value is None:
         try:
             return basecfg.get("DEFAULT", arg)
-        except KeyError:
-            return None
-        except NoSectionError:
+        except (KeyError, NoSectionError):
             return None
     else:
         return value
