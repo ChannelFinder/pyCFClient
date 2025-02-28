@@ -10,19 +10,14 @@ Created on Feb 11, 2011
 """
 
 
-from ._conf import PYTHON3
-
-if PYTHON3:
-    # cmp function is gone in Python 3.
-    # Define for backward compatibility
-    def cmp(a, b):
-        return (a > b) - (a < b)
+def cmp(a, b):
+    return (a > b) - (a < b)
 
 
 class Channel(object):
     # TODO
     # updated the properties data structure by splitting it into 2 dict
-    
+
     # All the attributes are private and read only in an attempt to make the channel object immutable
     Name = property(lambda self: self.__Name)
     Owner = property(lambda self: self.__Owner)
@@ -42,7 +37,7 @@ class Channel(object):
         self.__Owner = str(owner).strip()
         self.Properties = properties
         self.Tags = tags
-    
+
     ## TODO don't recreate the dictionary with every get
     def getProperties(self):
         """
@@ -85,10 +80,10 @@ class Property(object):
         self.Value = value
         if self.Value:
             str(value).strip()
-    
-    def __cmp__(self, *arg, **kwargs):  
+
+    def __cmp__(self, *arg, **kwargs):
         if arg[0] is None:
-            return 1      
+            return 1
         return cmp((self.Name, self.Value), (arg[0].Name, arg[0].Value))
 
 
@@ -99,7 +94,7 @@ class Tag(object):
         """
         self.Name = str(name).strip()
         self.Owner = str(owner).strip()
-    
+
     def __cmp__(self, *arg, **kwargs):
         if arg[0] is None:
             return 1
