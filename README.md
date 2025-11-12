@@ -20,6 +20,14 @@ username=MyUserName
 password=MyPassword
 ```
 
+If you are using an `https://` URL and want to disable certificate
+verification, you can add:
+
+```
+verify=false
+```
+
+
 ## Development
 
 To install with dependancies for testing.
