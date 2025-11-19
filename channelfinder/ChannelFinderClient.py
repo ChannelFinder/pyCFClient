@@ -14,6 +14,7 @@ from requests.adapters import HTTPAdapter
 from requests.exceptions import HTTPError
 import urllib3
 from copy import copy
+from typing import Optional
 
 try:
     from json import JSONEncoder
@@ -49,7 +50,7 @@ class ChannelFinderClient(object):
             self.__baseURL = self.__getDefaultConfig("BaseURL", BaseURL)
             self.__userName = self.__getDefaultConfig("username", username)
             self.__password = self.__getDefaultConfig("password", password)
-            self.__verify_ssl = self.__getDefaultConfig("verify_ssl", verify_ssl)
+            self.__verify_ssl = self._get_boolean_config("verify_ssl", verify_ssl)
             if self.__userName and self.__password:
                 self.__auth = auth.HTTPBasicAuth(self.__userName, self.__password)
             else:
@@ -75,6 +76,20 @@ class ChannelFinderClient(object):
         if override is None:
             result = basecfg["DEFAULT"].get(key, None)
         return result
+
+    def _get_boolean_config(self, key: str, override: Optional[bool]) -> bool:
+        """
+        Get boolean configuration for given name and section.
+
+        :param key: key word
+        :param override: override value
+        :return: ``override`` if not ``None``, else the configuration value
+            associated with ``key`` if present, otherwise ``None``.
+        """
+        result = override
+        if override is None:
+            result = basecfg["DEFAULT"].getboolean(key, None)
+        return bool(result)
 
     def set(self, **kwds):
         """
