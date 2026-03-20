@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "channelfinder"
-version = "3.0.0"
+version = "3.2.0"
 authors = [
   { name="Kunal Shroff", email="shroffk@bnl.gov" },
 ]
