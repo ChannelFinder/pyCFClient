@@ -12,6 +12,7 @@ import requests
 from requests import auth
 from requests.adapters import HTTPAdapter
 from requests.exceptions import HTTPError
+import urllib3
 from copy import copy
 
 try:
@@ -52,6 +53,8 @@ class ChannelFinderClient(object):
             self.__session = requests.Session()
             self.__session.mount(self.__baseURL, HTTPAdapter())
             self.__session.verify = self.__verify_ssl
+            if not self.__session.verify:
+                urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         except Exception as e:
             raise RuntimeError("Error creating ChannelFinderClient: " + str(e))
 
