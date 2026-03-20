@@ -22,10 +22,6 @@ from copy import copy
 
 from _testConf import _testConf, ChannelFinderClientTestCase
 
-import urllib3
-
-urllib3.disable_warnings()
-
 
 class UpdateIOCTest(ChannelFinderClientTestCase):
     def setUp(self):

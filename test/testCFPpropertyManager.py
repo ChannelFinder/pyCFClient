@@ -6,11 +6,7 @@ import os
 
 from _testConf import _testConf, ChannelFinderClientTestCase
 
-import urllib3
-
 from channelfinder.cfPropertyManager import CFPropertyManager
-
-urllib3.disable_warnings()
 
 
 class CFPropertyManagerTest(ChannelFinderClientTestCase):
