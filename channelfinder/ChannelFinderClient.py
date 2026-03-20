@@ -12,6 +12,7 @@ import requests
 from requests import auth
 from requests.adapters import HTTPAdapter
 from requests.exceptions import HTTPError
+import urllib3
 from copy import copy
 
 try:
@@ -28,7 +29,7 @@ class ChannelFinderClient(object):
     __propertiesResource = "/resources/properties"
     __tagsResource = "/resources/tags"
 
-    def __init__(self, BaseURL=None, username=None, password=None):
+    def __init__(self, BaseURL=None, username=None, password=None, verify_ssl=True):
         """
         Channel finder client object. It provides a connection object to perform the following operations:
             - find:     find all channels satisfying given searching criteria
@@ -40,15 +41,22 @@ class ChannelFinderClient(object):
         :param username: user name authorized by channel finder service
         :param password: password for the authorized user
         """
-        self.__baseURL = self.__getDefaultConfig("BaseURL", BaseURL)
-        self.__userName = self.__getDefaultConfig("username", username)
-        self.__password = self.__getDefaultConfig("password", password)
-        if self.__userName and self.__password:
-            self.__auth = auth.HTTPBasicAuth(self.__userName, self.__password)
-        else:
-            self.__auth = None
-        self.__session = requests.Session()
-        self.__session.mount(self.__baseURL, HTTPAdapter())
+        try:
+            self.__baseURL = self.__getDefaultConfig("BaseURL", BaseURL)
+            self.__userName = self.__getDefaultConfig("username", username)
+            self.__password = self.__getDefaultConfig("password", password)
+            self.__verify_ssl = self.__getDefaultConfig("verify_ssl", verify_ssl)
+            if self.__userName and self.__password:
+                self.__auth = auth.HTTPBasicAuth(self.__userName, self.__password)
+            else:
+                self.__auth = None
+            self.__session = requests.Session()
+            self.__session.mount(self.__baseURL, HTTPAdapter())
+            self.__session.verify = self.__verify_ssl
+            if not self.__session.verify:
+                urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        except Exception as e:
+            raise RuntimeError("Error creating ChannelFinderClient: " + str(e))
 
     def __getDefaultConfig(self, key, ref):
         """
