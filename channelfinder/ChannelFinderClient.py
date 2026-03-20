@@ -30,7 +30,7 @@ class ChannelFinderClient(object):
     __propertiesResource = "/resources/properties"
     __tagsResource = "/resources/tags"
 
-    def __init__(self, BaseURL=None, username=None, password=None, verify_ssl=True):
+    def __init__(self, BaseURL=None, username=None, password=None, verify_ssl=None):
         """
         Channel finder client object. It provides a connection object to perform the following operations:
             - find:     find all channels satisfying given searching criteria
@@ -44,7 +44,7 @@ class ChannelFinderClient(object):
         :param BaseURL: the url of the channel finder service
         :param username: user name authorized by channel finder service
         :param password: password for the authorized user
-        :param verify: verify the peer TLS certificate
+        :param verify_ssl: verify the peer TLS certificate
         """
         try:
             self.__baseURL = self.__getDefaultConfig("BaseURL", BaseURL)
