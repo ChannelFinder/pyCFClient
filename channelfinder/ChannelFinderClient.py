@@ -14,6 +14,7 @@ from requests.adapters import HTTPAdapter
 from requests.exceptions import HTTPError
 import urllib3
 from copy import copy
+from typing import Optional
 
 try:
     from json import JSONEncoder
@@ -29,7 +30,7 @@ class ChannelFinderClient(object):
     __propertiesResource = "/resources/properties"
     __tagsResource = "/resources/tags"
 
-    def __init__(self, BaseURL=None, username=None, password=None, verify_ssl=True):
+    def __init__(self, BaseURL=None, username=None, password=None, verify_ssl=None):
         """
         Channel finder client object. It provides a connection object to perform the following operations:
             - find:     find all channels satisfying given searching criteria
@@ -37,15 +38,19 @@ class ChannelFinderClient(object):
             - update:   update channel information
             - delete:   delete channel from service
 
+        If any of the arguments is ``None``, the respective value from the
+        configuration file is used.
+
         :param BaseURL: the url of the channel finder service
         :param username: user name authorized by channel finder service
         :param password: password for the authorized user
+        :param verify_ssl: verify the peer TLS certificate
         """
         try:
             self.__baseURL = self.__getDefaultConfig("BaseURL", BaseURL)
             self.__userName = self.__getDefaultConfig("username", username)
             self.__password = self.__getDefaultConfig("password", password)
-            self.__verify_ssl = self.__getDefaultConfig("verify_ssl", verify_ssl)
+            self.__verify_ssl = self._get_boolean_config("verify_ssl", verify_ssl)
             if self.__userName and self.__password:
                 self.__auth = auth.HTTPBasicAuth(self.__userName, self.__password)
             else:
@@ -58,18 +63,33 @@ class ChannelFinderClient(object):
         except Exception as e:
             raise RuntimeError("Error creating ChannelFinderClient: " + str(e))
 
-    def __getDefaultConfig(self, key, ref):
+    def __getDefaultConfig(self, key, override):
         """
         Get default configuration for given name and section.
 
         :param key: key word
-        :param ref: reference value
-        :return: result if key word is configured or ref is not None, otherwise None
+        :param override: override value
+        :return: ``override`` if not ``None``, else the configuration value
+            associated with ``key`` if present, otherwise ``None``.
         """
-        result = ref
-        if ref is None:
+        result = override
+        if override is None:
             result = basecfg["DEFAULT"].get(key, None)
         return result
+
+    def _get_boolean_config(self, key: str, override: Optional[bool]) -> bool:
+        """
+        Get boolean configuration for given name and section.
+
+        :param key: key word
+        :param override: override value
+        :return: ``override`` if not ``None``, else the configuration value
+            associated with ``key`` if present, otherwise ``None``.
+        """
+        result = override
+        if override is None:
+            result = basecfg["DEFAULT"].getboolean(key, None)
+        return bool(result)
 
     def set(self, **kwds):
         """
@@ -161,7 +181,6 @@ class ChannelFinderClient(object):
                 + kwds["channel"]["name"],
                 data=JSONEncoder().encode(kwds["channel"]),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             )
             r.raise_for_status()
@@ -170,7 +189,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__channelsResource,
                 data=JSONEncoder().encode(kwds["channels"]),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             )
             r.raise_for_status()
@@ -179,7 +197,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__tagsResource + "/" + kwds["tag"]["name"],
                 data=JSONEncoder().encode(kwds["tag"]),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             )
             r.raise_for_status()
@@ -189,7 +206,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__tagsResource,
                 data=data,
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             )
             r.raise_for_status()
@@ -201,7 +217,6 @@ class ChannelFinderClient(object):
                 + kwds["property"]["name"],
                 data=JSONEncoder().encode(kwds["property"]),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             )
             r.raise_for_status()
@@ -212,7 +227,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__propertiesResource,
                 data=data,
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             )
             r.raise_for_status()
@@ -238,7 +252,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__tagsResource + "/" + kwds["tag"]["name"],
                 data=JSONEncoder().encode(data),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             ).raise_for_status()
         elif "tag" in kwds and "channelNames" in kwds:
@@ -251,7 +264,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__tagsResource + "/" + kwds["tag"]["name"],
                 data=JSONEncoder().encode(data),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             ).raise_for_status()
         elif "property" in kwds and "channels" in kwds:
@@ -264,7 +276,6 @@ class ChannelFinderClient(object):
                 + kwds["property"]["name"],
                 data=JSONEncoder().encode(data),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             ).raise_for_status()
         else:
@@ -365,7 +376,6 @@ class ChannelFinderClient(object):
             url,
             params=args,
             headers=copy(self.__jsonheader),
-            verify=False,
             auth=self.__auth,
         )
         try:
@@ -385,9 +395,7 @@ class ChannelFinderClient(object):
         :return: Tag object if found, otherwise None
         """
         url = self.__baseURL + self.__tagsResource + "/" + tagname
-        r = self.__session.get(
-            url, headers=copy(self.__jsonheader), verify=False, auth=self.__auth
-        )
+        r = self.__session.get(url, headers=copy(self.__jsonheader), auth=self.__auth)
         try:
             r.raise_for_status()
             return r.json()
@@ -405,7 +413,7 @@ class ChannelFinderClient(object):
         :return: Property object if found, otherwise None
         """
         url = self.__baseURL + self.__propertiesResource + "/" + propertyname
-        r = self.__session.get(url, headers=copy(self.__jsonheader), verify=False)
+        r = self.__session.get(url, headers=copy(self.__jsonheader))
         try:
             r.raise_for_status()
             return r.json()
@@ -422,7 +430,7 @@ class ChannelFinderClient(object):
         :return: list of all the Tag objects present, otherwise None.
         """
         url = self.__baseURL + self.__tagsResource
-        r = self.__session.get(url, headers=copy(self.__jsonheader), verify=False)
+        r = self.__session.get(url, headers=copy(self.__jsonheader))
         try:
             r.raise_for_status()
             return r.json()
@@ -439,7 +447,7 @@ class ChannelFinderClient(object):
         :return: list of the Property objects present, otherwise None
         """
         url = self.__baseURL + self.__propertiesResource
-        r = self.__session.get(url, headers=copy(self.__jsonheader), verify=False)
+        r = self.__session.get(url, headers=copy(self.__jsonheader))
         try:
             r.raise_for_status()
             return r.json()
@@ -504,12 +512,12 @@ class ChannelFinderClient(object):
                 + kwds["channelName"].strip()
             )
             self.__session.delete(
-                url, headers=copy(self.__jsonheader), verify=False, auth=self.__auth
+                url, headers=copy(self.__jsonheader), auth=self.__auth
             ).raise_for_status()
         elif "tagName" in kwds:
             url = self.__baseURL + self.__tagsResource + "/" + kwds["tagName"].strip()
             self.__session.delete(
-                url, verify=False, headers=copy(self.__jsonheader), auth=self.__auth
+                url, headers=copy(self.__jsonheader), auth=self.__auth
             ).raise_for_status()
         elif "propertyName" in kwds:
             url = (
@@ -519,7 +527,7 @@ class ChannelFinderClient(object):
                 + kwds["propertyName"].strip()
             )
             self.__session.delete(
-                url, headers=copy(self.__jsonheader), verify=False, auth=self.__auth
+                url, headers=copy(self.__jsonheader), auth=self.__auth
             ).raise_for_status()
         else:
             raise RuntimeError(
@@ -545,7 +553,6 @@ class ChannelFinderClient(object):
                 + "/"
                 + kwds["channelName"].strip(),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             ).raise_for_status()
         elif "tag" in kwds and "channelNames" in kwds:
@@ -568,7 +575,6 @@ class ChannelFinderClient(object):
                 + "/"
                 + kwds["channelName"],
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             ).raise_for_status()
         elif "property" in kwds and "channelNames" in kwds:
@@ -674,7 +680,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__channelsResource + "/" + ch["name"],
                 data=JSONEncoder().encode(ch),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             )
             r.raise_for_status()
@@ -684,7 +689,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__channelsResource,
                 data=JSONEncoder().encode(chs),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             )
             r.raise_for_status()
@@ -694,7 +698,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__propertiesResource + "/" + property["name"],
                 data=JSONEncoder().encode(property),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             )
             r.raise_for_status()
@@ -704,7 +707,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__tagsResource + "/" + tag["name"],
                 data=JSONEncoder().encode(tag),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             )
             r.raise_for_status()
@@ -713,7 +715,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__tagsResource,
                 data=JSONEncoder().encode(kwds["tags"]),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             )
             r.raise_for_status()
@@ -750,7 +751,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__tagsResource + "/" + tag["name"],
                 data=JSONEncoder().encode(tag),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             ).raise_for_status()
         elif "tag" in kwds and "channelNames" in kwds:
@@ -767,7 +767,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__tagsResource + "/" + tag["name"],
                 data=JSONEncoder().encode(tag),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             ).raise_for_status()
         elif "property" in kwds and "channelName" in kwds:
@@ -786,7 +785,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__propertiesResource + "/" + property["name"],
                 data=JSONEncoder().encode(property),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             ).raise_for_status()
         elif "property" in kwds and "channelNames" in kwds:
@@ -807,7 +805,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__propertiesResource + "/" + property["name"],
                 data=JSONEncoder().encode(property),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             ).raise_for_status()
         elif "originalChannelName" in kwds and "channel" in kwds:
@@ -817,7 +814,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__channelsResource + "/" + channelName,
                 data=JSONEncoder().encode(ch),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             ).raise_for_status()
         elif "originalPropertyName" in kwds and "property" in kwds:
@@ -827,7 +823,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__propertiesResource + "/" + propName,
                 data=JSONEncoder().encode(prop),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             ).raise_for_status()
         elif "originalTagName" in kwds and "tag" in kwds:
@@ -837,7 +832,6 @@ class ChannelFinderClient(object):
                 self.__baseURL + self.__tagsResource + "/" + tagName,
                 data=JSONEncoder().encode(tag),
                 headers=copy(self.__jsonheader),
-                verify=False,
                 auth=self.__auth,
             ).raise_for_status()
         else:

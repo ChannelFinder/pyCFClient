@@ -13,10 +13,6 @@ from channelfinder import ChannelFinderClient
 from channelfinder.util import ChannelUtil
 from _testConf import _testConf, ChannelFinderClientTestCase
 
-import urllib3
-
-urllib3.disable_warnings()
-
 
 class ConnectionTest(ChannelFinderClientTestCase):
     def testConnection(self):

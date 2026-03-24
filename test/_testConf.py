@@ -46,6 +46,7 @@ def __loadConfig():
         "username": "admin",
         "password": "adminPass",
         "owner": "cf-update",
+        "verify_ssl": "False",
         "channelOwner": "cf-channels",
         "channelUsername": "admin",
         "channelPassword": "adminPass",
