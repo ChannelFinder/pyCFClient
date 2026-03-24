@@ -19,7 +19,7 @@
 version: "3.7"
 services:
   channelfinder:
-    image: ghcr.io/channelfinder/channelfinderservice:master
+    image: ghcr.io/channelfinder/channelfinderservice:ChannelFinder-4.7.3
     hostname: channelfinder
     networks:
       - channelfinder-net
